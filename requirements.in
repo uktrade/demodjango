@@ -1,0 +1,7 @@
+django==3.2.15
+requests
+whitenoise
+gunicorn
+pysqlite3
+django-environ
+python-dotenv
