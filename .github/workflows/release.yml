@@ -1,0 +1,16 @@
+name: push-image
+on: [push]
+jobs:
+  deploy-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        uses: uktrade/ci-buildpacks-action@main
+        with:
+          image: 'demodjango'
+          tag: '1.0.0'
+          ##path: 'path/to/foo-app/'
+          builder: 'paketobuildpacks/builder:base'
+          registry: 'gcr.io/sre-docker-registry'
