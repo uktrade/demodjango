@@ -1,3 +1,3 @@
 # demodjango
 
-Empty django app for testing.
+Empty django app for testing..
