@@ -30,7 +30,7 @@ env = environ.Env()
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True if (os.getenv("DEBUG") == "True") else False
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
@@ -78,23 +78,19 @@ TEMPLATES = [
 WSGI_APPLICATION = 'demodjango.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/4.0/ref/settings/#databases
+DATABASE_URL = os.getenv("DATABASE_URL","")
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': os.getenv('PGDATABASE'),
-#         'USER': os.getenv('PGUSER'),
-#         'PASSWORD': os.getenv('PGPASSWORD'),
-#         'HOST': os.getenv('PGHOST'),
-#         'PORT': os.getenv('PGPORT')
-#     }
-# }
-
-DATABASES = {
-    'default': dj_database_url.config()
-}
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.config()
+    }
+else:
+    DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -137,3 +133,9 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 RESTRICT_ADMIN = env.bool("RESTRICT_ADMIN", True)
+
+REDIS_HOST = os.getenv("REDIS_HOST","")
+REDIS_PORT = os.getenv("REDIS_PORT")
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY_ID")
+S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME","")

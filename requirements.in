@@ -6,3 +6,5 @@ gunicorn
 django-environ
 python-dotenv
 psycopg2-binary
+redis
+boto3
