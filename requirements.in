@@ -1,7 +1,10 @@
-django==3.2.15
+django==3.2.16
+dj-database-url
 requests
 whitenoise
 gunicorn
-pysqlite3
 django-environ
 python-dotenv
+psycopg2-binary
+redis
+boto3
