@@ -1,12 +1,12 @@
 import redis
 import boto3
 import logging
-from botocore.exceptions import ClientError
 import os
 
-
+from botocore.exceptions import ClientError
+from datetime import datetime
+from elasticsearch import Elasticsearch
 from django.core.management.base import BaseCommand
-
 from django.conf import settings
 from app.models import SampleTable
 
@@ -29,3 +29,14 @@ class Command(BaseCommand):
                 response = s3_client.upload_file(object_name, settings.S3_BUCKET_NAME, object_name)
             except ClientError as e:
                 logging.error(e)
+
+        if settings.OS_ENDPOINT:
+            es = Elasticsearch(f'{settings.OS_ENDPOINT}', http_auth=(f'{settings.OS_USERNAME}', f'{settings.OS_PASSWORD}'))
+
+            doc = {
+                'author': 'author_name',
+                'text': 'some content read from OpenSearch.',
+                'timestamp': datetime.now(),
+            }
+            resp = es.index(index="test-index", id=1, body=doc)
+            print(resp['result'])

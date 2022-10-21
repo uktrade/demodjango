@@ -35,3 +35,12 @@ AWS_SECRET_ACCESS_KEY = ""
 AWS_REGION = "eu-west-2"
 S3_BUCKET_NAME = ""
 ```
+
+## OpenSearch
+
+To connect to OpenSearch set the following env var
+```
+OS_ENDPOINT="https://{domain_url}:443"
+OS_USERNAME=""
+OS_PASSWORD=""
+```

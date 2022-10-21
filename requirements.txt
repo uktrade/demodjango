@@ -8,14 +8,16 @@ asgiref==3.5.2
     # via django
 async-timeout==4.0.2
     # via redis
-boto3==1.24.93
+boto3==1.24.95
     # via -r requirements.in
-botocore==1.27.93
+botocore==1.27.95
     # via
     #   boto3
     #   s3transfer
 certifi==2022.9.24
-    # via requests
+    # via
+    #   elasticsearch
+    #   requests
 charset-normalizer==2.1.1
     # via requests
 deprecated==1.2.13
@@ -28,6 +30,8 @@ django==3.2.16
     #   dj-database-url
 django-environ==0.9.0
     # via -r requirements.in
+elasticsearch==7.10.1
+    # via -r requirements.in
 gunicorn==20.1.0
     # via -r requirements.in
 idna==3.4
@@ -38,7 +42,7 @@ jmespath==1.0.1
     #   botocore
 packaging==21.3
     # via redis
-psycopg2-binary==2.9.3
+psycopg2-binary==2.9.4
     # via -r requirements.in
 pyparsing==3.0.9
     # via packaging
@@ -46,7 +50,7 @@ python-dateutil==2.8.2
     # via botocore
 python-dotenv==0.21.0
     # via -r requirements.in
-pytz==2022.4
+pytz==2022.5
     # via django
 redis==4.3.4
     # via -r requirements.in
@@ -61,6 +65,7 @@ sqlparse==0.4.3
 urllib3==1.26.12
     # via
     #   botocore
+    #   elasticsearch
     #   requests
 whitenoise==6.2.0
     # via -r requirements.in
