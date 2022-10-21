@@ -17,9 +17,10 @@ class Command(BaseCommand):
         # Load single row to db
         SampleTable.objects.update_or_create(sampleid=1, sample_name="DB is connected")
 
+        breakpoint()
         # Load data into redis
         if settings.REDIS_HOST:
-            r = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=1)
+            r = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0, ssl=True)
             r.set('Using', 'Redis')
 
         if settings.S3_BUCKET_NAME:

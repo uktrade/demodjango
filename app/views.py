@@ -18,7 +18,7 @@ def index(request):
     http_page = f"We have a working site<br>{db_status} using a {DB_TYPE} database<br>"
 
     if settings.REDIS_HOST:
-        r = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=1)
+        r = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0, ssl=True)
         http_page = http_page + f"Cache using {r.get('Using').decode()}<br>"
 
     if settings.S3_BUCKET_NAME:
