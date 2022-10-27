@@ -1,6 +1,6 @@
 # demodjango
 
-Empty django app for testing.
+Sample basic django app for testing.
 
 Minimum Vars required
 
