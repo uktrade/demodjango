@@ -9,3 +9,4 @@ psycopg2-binary
 redis
 boto3
 elasticsearch==7.10.1
+pysqlite3
