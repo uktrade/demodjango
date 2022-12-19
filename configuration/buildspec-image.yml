@@ -22,7 +22,7 @@ phases:
   build:
     commands:
         - /work/build.sh
-        - codebuild-breakpoint
+        #- codebuild-breakpoint
 #       #- aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${DOCKERREG}
 #       - |
 #         if [ -f "runtime.txt" ]; then
