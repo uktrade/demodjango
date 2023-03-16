@@ -29,10 +29,13 @@ network:
 
 # storage:
   # readonly_fs: true       # Limit to read-only access to mounted root filesystems.
- 
+
 # Optional fields for more advanced use-cases.
 #
-#variables:                    # Pass environment variables as key value pairs.
+variables:                    # Pass environment variables as key value pairs.
+  PORT: 8080
+  SECRET_KEY: testing-secret-key
+  ALLOWED_HOSTS: '*'
 #  LOG_LEVEL: info
 
 #secrets:                      # Pass secrets from AWS Systems Manager (SSM) Parameter Store.
