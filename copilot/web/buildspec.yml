@@ -1,6 +1,10 @@
 version: 0.2
 
-# env:
+env:
+  parameter-store:
+    SLACK_WORKSPACE_ID: "/codebuild/slack_workspace_id"
+    SLACK_CHANNEL_ID: "/codebuild/slack_channel_id"
+    SLACK_TOKEN: "/codebuild/slack_api_token"
 #   variables:
 #     VERSION:  v0.27.0
 #     INPUT_BUILDER: paketobuildpacks/builder:0.2.263-full
@@ -13,22 +17,9 @@ version: 0.2
 phases:
 #   install:
 #     commands:
-#       - curl -LO https://github.com/buildpacks/pack/releases/download/${VERSION}/pack-${VERSION}-linux.tgz
-#       - tar xfz pack-${VERSION}-linux.tgz
-#       - mv pack /usr/bin/
-#       # - codebuild-breakpoint
+#        - codebuild-breakpoint
 #
   build:
     commands:
         - /work/build.sh
         #- codebuild-breakpoint
-#       #- aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin ${DOCKERREG}
-#       - |
-#         if [ -f "runtime.txt" ]; then
-#           export PYTHON_VERSION=`cat runtime.txt |awk -F - '{print $2}'`
-#           pack build ${APP_NAME}:${TAG} --builder ${INPUT_BUILDER} --env BP_LOG_LEVEL=${LOG_LEVEL} --env BP_CPYTHON_VERSION=${PYTHON_VERSION}
-#         else
-#           pack build ${APP_NAME}:${TAG} --builder ${INPUT_BUILDER} --env BP_LOG_LEVEL=${LOG_LEVEL}
-#         fi
-      #- docker tag ${APP_NAME}:${TAG} ${DOCKERREG}/uktrade/${APP_NAME}:${TAG}
-      #- docker push ${DOCKERREG}/uktrade/${APP_NAME}:${TAG}
