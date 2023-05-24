@@ -78,14 +78,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'demodjango.wsgi.application'
 
 
-DB_CONFIG_KEY = env("DB_CONFIG_KEY", default="DEMODJANGOCLUSTER_SECRET")
+DB_CONFIG = env.json("DB_CONFIG", default=None)
 
 # DB_CONFIG_KEY env var points to the copilot RDS secret env var
 # If the key is set, then we overwrite the DATABASE_URL env var
 # so that dj-database-url picks up the correct connection details
-if DB_CONFIG_KEY:
-    db_config = env.json(DB_CONFIG_KEY)
-    db_url = "{engine}://{username}:{password}@{host}:{port}/{dbname}".format(**db_config)
+if DB_CONFIG:
+    db_url = "{engine}://{username}:{password}@{host}:{port}/{dbname}".format(**DB_CONFIG)
     os.environ["DATABASE_URL"] = db_url
 
 
