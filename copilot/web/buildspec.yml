@@ -5,8 +5,8 @@ env:
     SLACK_WORKSPACE_ID: "/codebuild/slack_workspace_id"
     SLACK_CHANNEL_ID: "/codebuild/slack_channel_id"
     SLACK_TOKEN: "/codebuild/slack_api_token"
-#   variables:
-#     VERSION:  v0.27.0
+  variables:
+    ECR_VISIBILITY: PUBLIC
 #     INPUT_BUILDER: paketobuildpacks/builder:0.2.263-full
 #     TAG: latest
 #     APP_NAME: demodjango
