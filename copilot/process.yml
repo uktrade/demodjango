@@ -1,4 +1,4 @@
 application:
   name: demodjango
   process:
-    - web
+    - False
