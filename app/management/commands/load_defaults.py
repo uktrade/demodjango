@@ -21,8 +21,8 @@ class Command(BaseCommand):
         # breakpoint()
 
         # Load data into redis
-        if settings.REDIS_HOST:
-            r = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0, ssl=True)
+        if settings.REDIS_ENDPOINT:
+            r = redis.Redis.from_url(settings.REDIS_ENDPOINT, db=0, ssl=True)
             r.set('Using', 'Redis')
 
         if settings.S3_BUCKET_NAME:
@@ -33,8 +33,8 @@ class Command(BaseCommand):
             except ClientError as e:
                 logging.error(e)
 
-        if settings.OS_ENDPOINT:
-            es = Elasticsearch(f'{settings.OS_ENDPOINT}', http_auth=(f'{settings.OS_USERNAME}', f'{settings.OS_PASSWORD}'))
+        if settings.OPENSEARCH_ENDPOINT and settings.OPENSEARCH_CREDENTIALS:
+            es = Elasticsearch(f'{settings.OPENSEARCH_ENDPOINT}', http_auth=(f'{settings.OPENSEARCH_USERNAME}', f'{settings.OPENSEARCH_PASSWORD}'))
 
             doc = {
                 'author': 'author_name',

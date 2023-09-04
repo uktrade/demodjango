@@ -17,8 +17,8 @@ def index(request):
 
     http_page = f"We have a working site<br>{db_status} using a {DB_TYPE} database<br>"
 
-    if settings.REDIS_HOST:
-        r = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=0, ssl=True)
+    if settings.REDIS_ENDPOINT:
+        r = redis.Redis.from_url(settings.REDIS_ENDPOINT, db=0, ssl=True)
         http_page = http_page + f"Cache using {r.get('Using').decode()}<br>"
 
     if settings.S3_BUCKET_NAME:
@@ -27,8 +27,8 @@ def index(request):
         body = bucket.Object('sample_file.txt')
         http_page = http_page + f"This is {body.get()['Body'].read().decode()}<br>"
 
-    if settings.OS_ENDPOINT:
-        es = Elasticsearch(f'{settings.OS_ENDPOINT}', http_auth=(f'{settings.OS_USERNAME}', f'{settings.OS_PASSWORD}'))
+    if settings.OPENEARCH_ENDPOINT and settings.OPENSEARCH_CREDENTIALS:
+        es = Elasticsearch(f'{settings.OPENEARCH_ENDPOINT}', http_auth=(f'{settings.OPENSEARCH_USERNAME}', f'{settings.OPENSEARCH_PASSWORD}'))
 
         res = es.get(index="test-index", id=1)
         http_page = http_page + f"Here is {res['_source']['text']}<br>"

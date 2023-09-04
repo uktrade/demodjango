@@ -10,11 +10,14 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+import json
 import os
 from pathlib import Path
 import dj_database_url
 import environ
 from dotenv import load_dotenv
+
+from dbt_copilot_python.database import database_url_from_env
 
 load_dotenv()
 
@@ -78,11 +81,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'demodjango.wsgi.application'
 
 
-DATABASE_URL = os.getenv("DATABASE_URL","")
+DATABASE_CREDENTIALS = os.getenv("DATABASE_CREDENTIALS","")
 
-if DATABASE_URL:
+if DATABASE_CREDENTIALS:
     DATABASES = {
-        'default': dj_database_url.config()
+        'default': dj_database_url.config(default=database_url_from_env("DATABASE_CREDENTIALS"))
     }
 else:
     DATABASES = {
@@ -91,6 +94,11 @@ else:
         'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+    
+RDS_DATABASE_CREDENTIALS = os.getenv("RDS_DATABASE_CREDENTIALS","")
+
+if RDS_DATABASE_CREDENTIALS:
+    DATABASES["rds"] = dj_database_url.config(default=database_url_from_env("RDS_DATABASE_CREDENTIALS"))
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -134,11 +142,11 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 RESTRICT_ADMIN = env.bool("RESTRICT_ADMIN", True)
 
-REDIS_HOST = os.getenv("REDIS_HOST","")
-REDIS_PORT = os.getenv("REDIS_PORT")
-AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.getenv("AWS_ACCESS_KEY_ID")
+REDIS_ENDPOINT = os.getenv("REDIS_ENDPOINT")
 S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME","")
-OS_ENDPOINT = os.getenv("OS_ENDPOINT","")
-OS_USERNAME = os.getenv("OS_USERNAME")
-OS_PASSWORD = os.getenv("OS_PASSWORD")
+OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT","")
+OPENSEARCH_CREDENTIALS = os.getenv("OPENSEARCH_CREDENTIALS")
+if OPENSEARCH_CREDENTIALS:
+    opensearch_secret_data = json.loads(OPENSEARCH_CREDENTIALS)
+    OPENSEARCH_USERNAME = opensearch_secret_data.get("username")
+    OPENSEARCH_PASSWORD = opensearch_secret_data.get("password")
