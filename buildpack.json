@@ -1,0 +1,10 @@
+{
+  "buildpacks": [
+    {
+      "paketo-buildpacks": "python"
+    },
+    {
+      "fagiani": "apt"
+    }
+  ]
+}
