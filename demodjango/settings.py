@@ -81,7 +81,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'demodjango.wsgi.application'
 
 
-DATABASE_CREDENTIALS = os.getenv("DATABASE_CREDENTIALS","")
+DATABASE_CREDENTIALS = os.getenv("DATABASE_CREDENTIALS", "")
 
 if DATABASE_CREDENTIALS:
     DATABASES = {
@@ -89,13 +89,13 @@ if DATABASE_CREDENTIALS:
     }
 else:
     DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
     
-RDS_DATABASE_CREDENTIALS = os.getenv("RDS_DATABASE_CREDENTIALS","")
+RDS_DATABASE_CREDENTIALS = os.getenv("RDS_DATABASE_CREDENTIALS", "")
 
 if RDS_DATABASE_CREDENTIALS:
     DATABASES["rds"] = dj_database_url.config(default=database_url_from_env("RDS_DATABASE_CREDENTIALS"))
@@ -143,8 +143,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 RESTRICT_ADMIN = env.bool("RESTRICT_ADMIN", True)
 
 REDIS_ENDPOINT = os.getenv("REDIS_ENDPOINT")
-S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME","")
-OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT","")
+S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "")
+OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT", "")
 OPENSEARCH_CREDENTIALS = os.getenv("OPENSEARCH_CREDENTIALS")
 if OPENSEARCH_CREDENTIALS:
     opensearch_secret_data = json.loads(OPENSEARCH_CREDENTIALS)
