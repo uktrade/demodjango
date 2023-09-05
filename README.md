@@ -11,36 +11,38 @@ ALLOWED_HOSTS="hostname"
 
 By default it will use sqlite for the backend DB.  The app will work fine as is, if you want to use Redis, Postgres or S3, just set the env vars as below.
 
-## Postgres
+## Aurora Postgres
 
-To connect to PG set the following env var
+To connect to an Aurora Postgres instance set the following env var
 ```
-DATABASE_URL=PG_URL
+DATABASE_CREDENTIALS=DATABASE_CREDENTIALS_STRING
+```
+
+## RDS Postgres
+
+To connect to an RDS Postgres instance set the following env var
+```
+RDS_DATABASE_CREDENTIALS="{"db_credential_key": "db_credential_value"}"
 ```
 
 ## Redis
 
 To connect to Redis set the following env var
 ```
-REDIS_HOST="redis_host"
-REDIS_PORT=6379
+REDIS_ENDPOINT="rediss://example_endpoint.amazonaws.com:6379"
 ```
 
 ## S3
 
 To connect to S3 set the following env var
 ```
-AWS_ACCESS_KEY_ID = ""
-AWS_SECRET_ACCESS_KEY = ""
-AWS_REGION = "eu-west-2"
-S3_BUCKET_NAME = ""
+S3_BUCKET_NAME = "my-s3-bucket-name"
 ```
 
 ## OpenSearch
 
 To connect to OpenSearch set the following env var
 ```
-OS_ENDPOINT="https://{domain_url}:443"
-OS_USERNAME=""
-OS_PASSWORD=""
+OPENSEARCH_ENDPOINT="https://{domain_url}:443"
+OPENSEARCH_CREDENTIALS="{"username":"username", "password": "password"}"
 ```
