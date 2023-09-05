@@ -16,7 +16,7 @@ botocore==1.27.95
     #   s3transfer
 build==0.10.0
     # via pip-tools
-certifi==2022.9.24
+certifi==2023.7.22
     # via
     #   elasticsearch
     #   requests
@@ -26,8 +26,6 @@ click==8.1.7
     # via pip-tools
 dbt-copilot-python==0.1.2
     # via -r requirements.in
-deprecated==1.2.13
-    # via redis
 dj-database-url==1.0.0
     # via -r requirements.in
 django==3.2.20
@@ -47,9 +45,7 @@ jmespath==1.0.1
     #   boto3
     #   botocore
 packaging==21.3
-    # via
-    #   build
-    #   redis
+    # via build
 pip-tools==7.3.0
     # via -r requirements.in
 psycopg2-binary==2.9.4
@@ -78,6 +74,11 @@ six==1.16.0
     # via python-dateutil
 sqlparse==0.4.4
     # via django
+tomli==2.0.1
+    # via
+    #   build
+    #   pip-tools
+    #   pyproject-hooks
 urllib3==1.26.12
     # via
     #   botocore
@@ -87,8 +88,6 @@ wheel==0.41.2
     # via pip-tools
 whitenoise==6.2.0
     # via -r requirements.in
-wrapt==1.14.1
-    # via deprecated
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
