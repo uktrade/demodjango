@@ -7,19 +7,10 @@ env:
     SLACK_TOKEN: "/codebuild/slack_api_token"
   variables:
     ECR_VISIBILITY: PUBLIC
-#     INPUT_BUILDER: paketobuildpacks/builder:0.2.263-full
-#     TAG: latest
-#     APP_NAME: demodjango
-#     LOG_LEVEL: DEBUG
-
-
+    PAKETO_BUILDER_VERSION: 0.2.326-full
+    LIFECYCLE_VERSION: 0.16.0
 
 phases:
-#   install:
-#     commands:
-#        - codebuild-breakpoint
-#
   build:
     commands:
         - /work/build.sh
-        #- codebuild-breakpoint
