@@ -80,25 +80,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'demodjango.wsgi.application'
 
-
-DATABASE_CREDENTIALS = os.getenv("DATABASE_CREDENTIALS", "")
-
-if DATABASE_CREDENTIALS:
-    DATABASES = {
-        'default': dj_database_url.config(default=database_url_from_env("DATABASE_CREDENTIALS"))
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+}
     
 RDS_DATABASE_CREDENTIALS = os.getenv("RDS_DATABASE_CREDENTIALS", "")
 
 if RDS_DATABASE_CREDENTIALS:
     DATABASES["rds"] = dj_database_url.config(default=database_url_from_env("RDS_DATABASE_CREDENTIALS"))
+
+DATABASE_CREDENTIALS = os.getenv("DATABASE_CREDENTIALS", "")
+
+if DATABASE_CREDENTIALS:
+    DATABASES['aurora']: dj_database_url.config(default=database_url_from_env("DATABASE_CREDENTIALS"))
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -145,8 +142,3 @@ RESTRICT_ADMIN = env.bool("RESTRICT_ADMIN", True)
 REDIS_ENDPOINT = os.getenv("REDIS_ENDPOINT")
 S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "")
 OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT", "")
-OPENSEARCH_CREDENTIALS = os.getenv("OPENSEARCH_CREDENTIALS")
-if OPENSEARCH_CREDENTIALS:
-    opensearch_secret_data = json.loads(OPENSEARCH_CREDENTIALS)
-    OPENSEARCH_USERNAME = opensearch_secret_data.get("username")
-    OPENSEARCH_PASSWORD = opensearch_secret_data.get("password")
