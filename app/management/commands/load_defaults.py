@@ -22,7 +22,7 @@ class Command(BaseCommand):
 
         # Load data into redis
         if settings.REDIS_ENDPOINT:
-            r = redis.Redis.from_url(settings.REDIS_ENDPOINT, db=0, ssl=True)
+            r = redis.Redis.from_url(f'{settings.REDIS_ENDPOINT}/0')
             r.set('Using', 'Redis')
 
         if settings.S3_BUCKET_NAME:
