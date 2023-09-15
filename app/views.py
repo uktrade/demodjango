@@ -33,7 +33,7 @@ def index(request):
         status_output += render_connection_info('SQLite3', False, str(e))
 
     try:
-        r = redis.Redis.from_url(settings.REDIS_ENDPOINT, db=0, ssl=True)
+        r = redis.Redis.from_url(f'{settings.REDIS_ENDPOINT}/0')
         status_output += render_connection_info('Redis', True, r.get('Using').decode())
     except Exception as e:
         status_output += render_connection_info('Redis', False, str(e))
