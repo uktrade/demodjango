@@ -33,8 +33,8 @@ class Command(BaseCommand):
             except ClientError as e:
                 logging.error(e)
 
-        if settings.OPENSEARCH_ENDPOINT and settings.OPENSEARCH_CREDENTIALS:
-            es = Elasticsearch(f'{settings.OPENSEARCH_ENDPOINT}', http_auth=(f'{settings.OPENSEARCH_USERNAME}', f'{settings.OPENSEARCH_PASSWORD}'))
+        if settings.OPENSEARCH_ENDPOINT:
+            es = Elasticsearch(f'{settings.OPENSEARCH_ENDPOINT}')
 
             doc = {
                 'author': 'author_name',
