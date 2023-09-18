@@ -95,7 +95,7 @@ if RDS_DATABASE_CREDENTIALS:
 DATABASE_CREDENTIALS = os.getenv("DATABASE_CREDENTIALS", "")
 
 if DATABASE_CREDENTIALS:
-    DATABASES['aurora']: dj_database_url.config(default=database_url_from_env("DATABASE_CREDENTIALS"))
+    DATABASES['aurora'] = dj_database_url.config(default=database_url_from_env("DATABASE_CREDENTIALS"))
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
