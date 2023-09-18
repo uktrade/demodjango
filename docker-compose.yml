@@ -1,0 +1,42 @@
+version: '3.8'
+services:
+  django:
+    build:
+      context: .
+    environment:
+      ALLOWED_HOSTS: '*'
+      AWS_ENDPOINT_URL: 'http://s3:9090'
+      REDIS_ENDPOINT: 'redis://redis:6379'
+      SECRET_KEY: super-secret-test-key
+      S3_BUCKET_NAME: test-bucket
+      OPENSEARCH_ENDPOINT: 'http://opensearch:9200'
+      RDS_DATABASE_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
+      DATABASE_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-aurora","username":"postgres"}'
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./:/app
+    links:
+      - postgres-rds
+      - postgres-aurora
+      - redis
+      - s3
+      - opensearch
+  postgres-rds:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: pgSecretPassword
+  postgres-aurora:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: pgSecretPassword
+  redis:
+    image: redis
+  s3:
+    image: adobe/s3mock
+    environment:
+      initialBucket: test-bucket
+  opensearch:
+    image: opensearchproject/opensearch
+    environment:
+      'discovery.type': single-node
