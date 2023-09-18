@@ -14,21 +14,21 @@ def index(request):
     try:
         with connections['rds'].cursor() as c:
             c.execute('SELECT version()')
-            status_output += render_connection_info('PostgreSQL RDS', True, c.fetchone())
+            status_output += render_connection_info('PostgreSQL (RDS)', True, c.fetchone()[0])
     except Exception as e:
         status_output += render_connection_info('PostgreSQL (RDS)', False, str(e))
 
     try:
         with connections['aurora'].cursor() as c:
             c.execute('SELECT version()')
-            status_output += render_connection_info('PostgreSQL Aurora', True, c.fetchone())
+            status_output += render_connection_info('PostgreSQL (Aurora)', True, c.fetchone()[0])
     except Exception as e:
         status_output += render_connection_info('PostgreSQL (Aurora)', False, str(e))
 
     try:
         with connections['default'].cursor() as c:
             c.execute('SELECT SQLITE_VERSION()')
-            status_output += render_connection_info('SQLite3', True, c.fetchone())
+            status_output += render_connection_info('SQLite3', True, c.fetchone()[0])
     except Exception as e:
         status_output += render_connection_info('SQLite3', False, str(e))
 
@@ -47,7 +47,7 @@ def index(request):
         status_output += render_connection_info('S3 Bucket', False, str(e))
 
     try:
-        es = Elasticsearch(f'{settings.OPENEARCH_ENDPOINT}')
+        es = Elasticsearch(f'{settings.OPENSEARCH_ENDPOINT}')
         res = es.get(index="test-index", id=1)
         status_output += render_connection_info('OpenSearch', True, res['_source']['text'])
     except Exception as e:
