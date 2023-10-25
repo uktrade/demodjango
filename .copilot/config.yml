@@ -4,4 +4,3 @@ builder:
   version: 0.4.240
 packages:
   - libpq-dev
-  - jq
