@@ -4,4 +4,4 @@ builder:
   version: 0.4.240
 packages:
   - libpq-dev
-  - sqlite3-dev
+  - libsqlite3-dev
