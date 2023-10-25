@@ -25,7 +25,7 @@ phases:
         if [ -f .copilot/phases/build.sh ]; then
           bash .copilot/phases/build.sh
         fi
-      - /work/cli build --publish
+      - python /work/cli build --publish
 
   post_build:
     commands:
