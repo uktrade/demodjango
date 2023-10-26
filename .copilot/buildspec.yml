@@ -33,4 +33,3 @@ phases:
         if [ -f .copilot/phases/post_build.sh ]; then
           bash .copilot/phases/post_build.sh
         fi
-
