@@ -1,7 +1,7 @@
 repository: demodjango/application
 builder:
   name: paketobuildpacks/builder-jammy-base
-  version: 0.4.240
+  version: 0.4.266
 packages:
   - libpq-dev
   - libsqlite3-dev
