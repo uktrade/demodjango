@@ -1,8 +1,8 @@
 version: 0.2
 env:
   parameter-store:
-    SLACK_CHANNEL_ID: "/codebuild/slack_channel_id_temp"
-    SLACK_TOKEN: "/codebuild/slack_api_token_temp"
+    SLACK_CHANNEL_ID: "/codebuild/slack_channel_id"
+    SLACK_TOKEN: "/codebuild/slack_api_token"
 
 phases:
   install:
