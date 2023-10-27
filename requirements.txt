@@ -79,7 +79,7 @@ tomli==2.0.1
     #   build
     #   pip-tools
     #   pyproject-hooks
-urllib3==1.26.12
+urllib3==1.26.18
     # via
     #   botocore
     #   elasticsearch
