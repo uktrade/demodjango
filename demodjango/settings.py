@@ -80,10 +80,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'demodjango.wsgi.application'
 
+copilot_application = os.getenv('COPILOT_APPLICATION_NAME', '')
+sqlite_db_path = '/tmp/db.sqlite3' if copilot_application else BASE_DIR / 'db.sqlite3'
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': sqlite_db_path,
     }
 }
     
