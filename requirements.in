@@ -1,4 +1,4 @@
-django==3.2.20
+django==3.2.23
 dj-database-url
 requests
 whitenoise

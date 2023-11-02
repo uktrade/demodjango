@@ -28,7 +28,7 @@ dbt-copilot-python==0.1.2
     # via -r requirements.in
 dj-database-url==1.0.0
     # via -r requirements.in
-django==3.2.20
+django==3.2.23
     # via
     #   -r requirements.in
     #   dj-database-url
@@ -74,11 +74,6 @@ six==1.16.0
     # via python-dateutil
 sqlparse==0.4.4
     # via django
-tomli==2.0.1
-    # via
-    #   build
-    #   pip-tools
-    #   pyproject-hooks
 urllib3==1.26.18
     # via
     #   botocore
