@@ -1,15 +1,15 @@
+import redis
+import boto3
 from .util import render_connection_info
+from datetime import datetime
 from django.http import HttpResponse
 from django.conf import settings
 from django.db import connections
 from elasticsearch import Elasticsearch
 
-import redis
-import boto3
-
 
 def index(request):
-    status_output = ""
+    status_output = render_connection_info('Server Time', True, str(datetime.now()))
 
     try:
         with connections['rds'].cursor() as c:
