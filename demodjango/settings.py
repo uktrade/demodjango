@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 import json
 import os
+import tempfile
 from pathlib import Path
 import dj_database_url
 import environ
@@ -80,13 +81,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'demodjango.wsgi.application'
 
-copilot_application = os.getenv('COPILOT_APPLICATION_NAME', '')
-sqlite_db_path = '/tmp/db.sqlite3' if copilot_application else BASE_DIR / 'db.sqlite3'
+sqlite_db_root = tempfile.gettempdir() if os.getenv('COPILOT_APPLICATION_NAME', False) else BASE_DIR
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': sqlite_db_path,
+        'NAME': sqlite_db_root / "demodjango.sqlite3",
     }
 }
     
