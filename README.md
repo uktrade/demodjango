@@ -5,7 +5,7 @@ Sample basic Django app for testing purposes.
 Minimum variables required:
 
 ```
-SECRET_KEY = ""
+SECRET_KEY = "changeMe"
 ALLOWED_HOSTS = "hostname"
 ```
 
