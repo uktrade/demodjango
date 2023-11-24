@@ -11,7 +11,8 @@ from elasticsearch import Elasticsearch
 
 
 def index(request):
-    logging.getLogger("django.request").info("Rendering landing page")
+    # Todo: Not sure if we should be using "django.request" here, but it blows up if we do
+    logging.getLogger("django").info("Rendering landing page")
 
     status_output = render_connection_info('Server Time', True, str(datetime.now()))
 
