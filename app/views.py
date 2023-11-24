@@ -1,3 +1,5 @@
+import logging
+
 import redis
 import boto3
 from .util import render_connection_info
