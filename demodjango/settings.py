@@ -40,6 +40,8 @@ DEBUG = True if (os.getenv("DEBUG") == "True") else False
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
+DLFA_INCLUDE_RAW_LOG = True
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
