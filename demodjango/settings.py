@@ -12,10 +12,12 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 import json
 import os
+import sys
 import tempfile
 from pathlib import Path
 import dj_database_url
 import environ
+from django_log_formatter_asim import ASIMFormatter
 from dotenv import load_dotenv
 
 from dbt_copilot_python.database import database_url_from_env
@@ -38,6 +40,49 @@ DEBUG = True if (os.getenv("DEBUG") == "True") else False
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
+DLFA_INCLUDE_RAW_LOG = True
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "asim_formatter": {
+            "()": ASIMFormatter,
+        },
+    },
+    "handlers": {
+        "asim": {
+            "class": "logging.StreamHandler",
+            "formatter": "asim_formatter",
+        },
+        "stdout": {
+            "class": "logging.StreamHandler",
+            "stream": sys.stdout,
+        },
+    },
+    "root": {
+        "handlers": ["stdout"],
+        "level": "DEBUG",
+    },
+    "loggers": {
+        "django": {
+            "handlers": [
+                "asim",
+                "stdout",
+            ],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+        "django.request": {
+            "handlers": [
+                "asim",
+                "stdout",
+            ],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
+}
 
 # Application definition
 
@@ -89,7 +134,7 @@ DATABASES = {
         'NAME': sqlite_db_root / "demodjango.sqlite3",
     }
 }
-    
+
 RDS_DATABASE_CREDENTIALS = os.getenv("RDS_DATABASE_CREDENTIALS", "")
 
 if RDS_DATABASE_CREDENTIALS:

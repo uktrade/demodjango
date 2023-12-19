@@ -1,3 +1,5 @@
+import logging
+
 import redis
 import boto3
 from .util import render_connection_info
@@ -9,6 +11,8 @@ from elasticsearch import Elasticsearch
 
 
 def index(request):
+    logging.getLogger("django").info("Rendering landing page")
+
     status_output = render_connection_info('Server Time', True, str(datetime.now()))
 
     try:
