@@ -12,3 +12,4 @@ elasticsearch==7.10.1
 dbt-copilot-python
 pip-tools
 django-log-formatter-asim
+celery
