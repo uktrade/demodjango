@@ -17,6 +17,7 @@ import tempfile
 from pathlib import Path
 import dj_database_url
 import environ
+from dbt_copilot_python.network import setup_allowed_hosts
 from django_log_formatter_asim import ASIMFormatter
 from dotenv import load_dotenv
 
@@ -38,7 +39,7 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if (os.getenv("DEBUG") == "True") else False
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
+ALLOWED_HOSTS = setup_allowed_hosts(["*"])
 
 DLFA_INCLUDE_RAW_LOG = True
 
