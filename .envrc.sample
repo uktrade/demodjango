@@ -1,5 +1,3 @@
 export AWS_PROFILE=platform-sandbox
 export AWS_REGION=eu-west-2
 export AWS_DEFAULT_REGION=eu-west-2
-
-export DJANGO_SECRET_KEY=this_is_an_example_use_a_proper_key_in_production

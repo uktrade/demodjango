@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
-import json
 import os
 import sys
 import tempfile
@@ -125,8 +124,7 @@ TEMPLATES = [
     },
 ]
 
-# Todo: Is this relevant...
-# WSGI_APPLICATION = 'config.wsgi.application'
+WSGI_APPLICATION = 'config.wsgi.application'
 
 sqlite_db_root = Path(tempfile.gettempdir()) if os.getenv('COPILOT_APPLICATION_NAME', False) else BASE_DIR
 
@@ -192,3 +190,9 @@ RESTRICT_ADMIN = env.bool("RESTRICT_ADMIN", True)
 REDIS_ENDPOINT = os.getenv("REDIS_ENDPOINT")
 S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "")
 OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT", "")
+
+# Celery
+CELERY_BROKER_URL = (os.getenv("CELERY_BROKER_URL", "") + "?ssl_cert_reqs=required")
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_RESULT_SERIALIZER = "json"
