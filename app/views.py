@@ -30,7 +30,7 @@ def index(request):
         "<!doctype html><html><head><title>DemoDjango</title></head><body>"
         f"{status_output}"
         "</body></html>"
-        )
+    )
 
 
 def server_time_check():
