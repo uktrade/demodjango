@@ -1,4 +1,5 @@
 version: '3.8'
+
 services:
   django:
     build:
@@ -22,20 +23,35 @@ services:
       - redis
       - s3
       - opensearch
+
+  celery:
+    image: 563763463626.dkr.ecr.eu-west-2.amazonaws.com/demodjango/application:latest
+    command: celery -A config.celery worker -l INFO
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings
+
   postgres-rds:
     image: postgres
     environment:
       POSTGRES_PASSWORD: pgSecretPassword
+
   postgres-aurora:
     image: postgres
     environment:
       POSTGRES_PASSWORD: pgSecretPassword
+
   redis:
     image: redis
+
   s3:
     image: adobe/s3mock
     environment:
       initialBucket: test-bucket
+
   opensearch:
     image: opensearchproject/opensearch
     environment:
