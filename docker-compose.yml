@@ -1,17 +1,21 @@
 version: '3.8'
+
 services:
   django:
     build:
       context: .
+      cache_from:
+        - demodjango/application:latest
+    image: demodjango/application:latest
     environment:
       ALLOWED_HOSTS: '*'
       AWS_ENDPOINT_URL: 'http://s3:9090'
-      REDIS_ENDPOINT: 'redis://redis:6379'
-      SECRET_KEY: super-secret-test-key
-      S3_BUCKET_NAME: test-bucket
+      DATABASE_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-aurora","username":"postgres"}'
+      DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
       OPENSEARCH_ENDPOINT: 'http://opensearch:9200'
       RDS_DATABASE_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
-      DATABASE_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-aurora","username":"postgres"}'
+      REDIS_ENDPOINT: 'redis://redis:6379'
+      S3_BUCKET_NAME: test-bucket
     ports:
       - "8080:8080"
     volumes:
@@ -22,20 +26,38 @@ services:
       - redis
       - s3
       - opensearch
+
+  celery:
+    image: demodjango/application:latest
+    command: celery --app config.celery worker -l INFO
+    entrypoint: ''
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+    environment:
+      CELERY_BROKER_URL: 'rediss://redis:6379'
+      DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
+      DJANGO_SETTINGS_MODULE: config.settings
+
   postgres-rds:
     image: postgres
     environment:
       POSTGRES_PASSWORD: pgSecretPassword
+
   postgres-aurora:
     image: postgres
     environment:
       POSTGRES_PASSWORD: pgSecretPassword
+
   redis:
     image: redis
+
   s3:
     image: adobe/s3mock
     environment:
       initialBucket: test-bucket
+
   opensearch:
     image: opensearchproject/opensearch
     environment:

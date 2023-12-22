@@ -10,13 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
-import json
 import os
 import sys
 import tempfile
 from pathlib import Path
 import dj_database_url
 import environ
+from dbt_copilot_python.network import setup_allowed_hosts
 from django_log_formatter_asim import ASIMFormatter
 from dotenv import load_dotenv
 
@@ -33,12 +33,12 @@ env = environ.Env()
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True if (os.getenv("DEBUG") == "True") else False
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
+ALLOWED_HOSTS = setup_allowed_hosts(["*"])
 
 DLFA_INCLUDE_RAW_LOG = True
 
@@ -106,7 +106,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'demodjango.urls'
+ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
     {
@@ -124,7 +124,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'demodjango.wsgi.application'
+WSGI_APPLICATION = 'config.wsgi.application'
 
 sqlite_db_root = Path(tempfile.gettempdir()) if os.getenv('COPILOT_APPLICATION_NAME', False) else BASE_DIR
 
@@ -190,3 +190,9 @@ RESTRICT_ADMIN = env.bool("RESTRICT_ADMIN", True)
 REDIS_ENDPOINT = os.getenv("REDIS_ENDPOINT")
 S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "")
 OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT", "")
+
+# Celery
+CELERY_BROKER_URL = (os.getenv("CELERY_BROKER_URL", "") + "?ssl_cert_reqs=required")
+CELERY_RESULT_BACKEND = CELERY_BROKER_URL
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_RESULT_SERIALIZER = "json"
