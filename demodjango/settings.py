@@ -106,7 +106,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'config.urls'
+ROOT_URLCONF = 'demodjango.urls'
 
 TEMPLATES = [
     {
@@ -124,7 +124,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'config.wsgi.application'
+WSGI_APPLICATION = 'demodjango.wsgi.application'
 
 sqlite_db_root = Path(tempfile.gettempdir()) if os.getenv('COPILOT_APPLICATION_NAME', False) else BASE_DIR
 

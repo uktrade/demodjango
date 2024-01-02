@@ -98,4 +98,4 @@ def celery_worker_check():
         'Celery Worker',
         False,
         "Todo: Part of DBTP-576 Redis disaster recovery"
-    )
+    )z
