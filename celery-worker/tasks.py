@@ -1,4 +1,4 @@
-from config.celery import celery_app
+from demodjango.celery import celery_app
 
 
 @celery_app.task(bind=True)
