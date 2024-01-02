@@ -29,7 +29,7 @@ services:
 
   celery:
     image: demodjango/application:latest
-    command: celery --app config.celery worker -l INFO
+    command: celery --app demodjango.celery worker -l INFO
     entrypoint: ''
     volumes:
       - .:/app
@@ -38,7 +38,7 @@ services:
     environment:
       CELERY_BROKER_URL: 'rediss://redis:6379'
       DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
-      DJANGO_SETTINGS_MODULE: config.settings
+      DJANGO_SETTINGS_MODULE: demodjango.settings
 
   postgres-rds:
     image: postgres
