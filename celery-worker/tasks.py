@@ -1,6 +1,6 @@
-from config.celery import celery_app
+from celery import shared_task
 
 
-@celery_app.task(bind=True)
+@shared_task
 def debug_task(self):
     print("Request: {0!r}".format(self.request))
