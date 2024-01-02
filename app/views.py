@@ -38,59 +38,65 @@ def server_time_check():
 
 
 def postgres_rds_check():
+    addon_type = 'PostgreSQL (RDS)'
     try:
         with connections['rds'].cursor() as c:
             c.execute('SELECT version()')
-            return render_connection_info('PostgreSQL (RDS)', True, c.fetchone()[0])
+            return render_connection_info(addon_type, True, c.fetchone()[0])
     except Exception as e:
-        return render_connection_info('PostgreSQL (RDS)', False, str(e))
+        return render_connection_info(addon_type, False, str(e))
 
 
 def postgres_aurora_check():
+    addon_type = 'PostgreSQL (Aurora)'
     try:
         with connections['aurora'].cursor() as c:
             c.execute('SELECT version()')
-            return render_connection_info('PostgreSQL (Aurora)', True, c.fetchone()[0])
+            return render_connection_info(addon_type, True, c.fetchone()[0])
     except Exception as e:
-        return render_connection_info('PostgreSQL (Aurora)', False, str(e))
+        return render_connection_info(addon_type, False, str(e))
 
 
 def sqlite_check():
+    addon_type = 'SQLite3'
     try:
         with connections['default'].cursor() as c:
             c.execute('SELECT SQLITE_VERSION()')
-            return render_connection_info('SQLite3', True, c.fetchone()[0])
+            return render_connection_info(addon_type, True, c.fetchone()[0])
     except Exception as e:
-        return render_connection_info('SQLite3', False, str(e))
+        return render_connection_info(addon_type, False, str(e))
 
 
 def redis_check():
+    addon_type = 'Redis'
     try:
         r = redis.Redis.from_url(f'{settings.REDIS_ENDPOINT}/0')
-        return render_connection_info('Redis', True, r.get('Using').decode())
+        return render_connection_info(addon_type, True, r.get('Using').decode())
     except Exception as e:
-        return render_connection_info('Redis', False, str(e))
+        return render_connection_info(addon_type, False, str(e))
 
 
 def s3_bucket_check():
+    addon_type = 'S3 Bucket'
     try:
         s3 = boto3.resource('s3')
         bucket = s3.Bucket(settings.S3_BUCKET_NAME)
         body = bucket.Object('sample_file.txt')
         return render_connection_info(
-            'S3 Bucket', True, body.get()['Body'].read().decode()
+            addon_type, True, body.get()['Body'].read().decode()
         )
     except Exception as e:
-        return render_connection_info('S3 Bucket', False, str(e))
+        return render_connection_info(addon_type, False, str(e))
 
 
 def opensearch_check():
+    addon_type = 'OpenSearch'
     try:
         es = Elasticsearch(f'{settings.OPENSEARCH_ENDPOINT}')
         res = es.get(index="test-index", id=1)
-        return render_connection_info('OpenSearch', True, res['_source']['text'])
+        return render_connection_info(addon_type, True, res['_source']['text'])
     except Exception as e:
-        return render_connection_info('OpenSearch', False, str(e))
+        return render_connection_info(addon_type, False, str(e))
 
 
 def celery_worker_check():
@@ -98,4 +104,4 @@ def celery_worker_check():
         'Celery Worker',
         False,
         "Todo: Part of DBTP-576 Redis disaster recovery"
-    )z
+    )
