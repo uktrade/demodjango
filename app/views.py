@@ -15,8 +15,10 @@ from django.db import connections
 from elasticsearch import Elasticsearch
 
 
+logger = logging.getLogger("django")
+
 def index(request):
-    logging.getLogger("django").info("Rendering landing page")
+    logger.info("Rendering landing page")
 
     status_output = "".join(
         [
@@ -107,18 +109,18 @@ def opensearch_check():
 def celery_worker_check():
     addon_type = 'Celery Worker'
     try:
-        logging.getLogger("django").info("Adding debug task to Celery queue")
-        logging.getLogger("django").debug(f"DJANGO_SETTINGS_MODULE: {os.environ.get('DJANGO_SETTINGS_MODULE')}")
-        logging.getLogger("django").debug(f"CELERY_BROKER_URL: {settings.CELERY_BROKER_URL}")
+        logger.info("Adding debug task to Celery queue")
+        logger.debug(f"DJANGO_SETTINGS_MODULE: {os.environ.get('DJANGO_SETTINGS_MODULE')}")
+        logger.debug(f"CELERY_BROKER_URL: {settings.CELERY_BROKER_URL}")
         timestamp = datetime.now()
-        logging.getLogger("django").debug(f"timestamp: {timestamp}")
-        demodjango_task(timestamp)
-        demodjango_task.delay(timestamp)
+        logger.debug(f"timestamp: {timestamp}")
+        # demodjango_task(timestamp)
+        demodjango_task.delay(f"{timestamp} delayed")
         return render_connection_info(
             addon_type,
             True,
             "Todo: Part of DBTP-576 Redis disaster recovery"
         )
     except Exception as e:
-        logging.getLogger("django").info(e)
+        logger.info(e)
         return render_connection_info(addon_type, False, str(e))

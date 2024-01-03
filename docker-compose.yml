@@ -38,7 +38,7 @@ services:
     depends_on:
       - redis
     environment:
-      CELERY_BROKER_URL: rediss://redis:6379?ssl_cert_reqs=CERT_NONE
+      REDIS_ENDPOINT: redis://redis:6379
       DEBUG: true
       DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
       DJANGO_SETTINGS_MODULE: demodjango.settings
