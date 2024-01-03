@@ -108,9 +108,10 @@ def celery_worker_check():
     addon_type = 'Celery Worker'
     try:
         logging.getLogger("django").info("Adding debug task to Celery queue")
-        logging.getLogger("django").info(f"DJANGO_SETTINGS_MODULE: {os.environ.get('DJANGO_SETTINGS_MODULE')}")
-        logging.getLogger("django").info(f"CELERY_BROKER_URL: {settings.CELERY_BROKER_URL}")
+        logging.getLogger("django").debug(f"DJANGO_SETTINGS_MODULE: {os.environ.get('DJANGO_SETTINGS_MODULE')}")
+        logging.getLogger("django").debug(f"CELERY_BROKER_URL: {settings.CELERY_BROKER_URL}")
         timestamp = datetime.now()
+        logging.getLogger("django").debug(f"timestamp: {timestamp}")
         demodjango_task(timestamp)
         demodjango_task.delay(timestamp)
         return render_connection_info(
