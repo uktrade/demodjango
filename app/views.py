@@ -112,7 +112,7 @@ def celery_worker_check():
         timestamp = datetime.now()
         logger.info("Adding debug task to Celery queue")
         task_id = str(demodjango_task.delay(f"{timestamp}"))
-        # Todo: Add retries instead of sleep...
+        # Todo: Add retries/timeout instead of sleep...
         sleep(2)
         logger.info("Getting result from Celery backend")
         backend_result = json.loads(celery_app.backend.get(f"celery-task-meta-{task_id}"))
