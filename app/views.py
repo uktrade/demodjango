@@ -1,7 +1,12 @@
 import logging
 
+import datetime
+import os
+
 import redis
 import boto3
+
+from celery_worker.tasks import demodjango_task
 from .util import render_connection_info
 from datetime import datetime
 from django.http import HttpResponse
@@ -15,13 +20,13 @@ def index(request):
 
     status_output = "".join(
         [
-            server_time_check(),
-            postgres_rds_check(),
-            postgres_aurora_check(),
+            # server_time_check(),
+            # postgres_rds_check(),
+            # postgres_aurora_check(),
             sqlite_check(),
-            redis_check(),
-            s3_bucket_check(),
-            opensearch_check(),
+            # redis_check(),
+            # s3_bucket_check(),
+            # opensearch_check(),
             celery_worker_check()
         ]
     )
@@ -100,8 +105,19 @@ def opensearch_check():
 
 
 def celery_worker_check():
-    return render_connection_info(
-        'Celery Worker',
-        False,
-        "Todo: Part of DBTP-576 Redis disaster recovery"
-    )
+    addon_type = 'Celery Worker'
+    try:
+        logging.getLogger("django").info("Adding debug task to Celery queue")
+        logging.getLogger("django").info(f"DJANGO_SETTINGS_MODULE: {os.environ.get('DJANGO_SETTINGS_MODULE')}")
+        logging.getLogger("django").info(f"CELERY_BROKER_URL: {settings.CELERY_BROKER_URL}")
+        timestamp = datetime.now()
+        demodjango_task(timestamp)
+        demodjango_task.delay(timestamp)
+        return render_connection_info(
+            addon_type,
+            True,
+            "Todo: Part of DBTP-576 Redis disaster recovery"
+        )
+    except Exception as e:
+        logging.getLogger("django").info(e)
+        return render_connection_info(addon_type, False, str(e))

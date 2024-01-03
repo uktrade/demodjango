@@ -68,7 +68,6 @@ LOGGING = {
         "django": {
             "handlers": [
                 "asim",
-                "stdout",
             ],
             "level": "DEBUG",
             "propagate": True,
@@ -76,7 +75,6 @@ LOGGING = {
         "django.request": {
             "handlers": [
                 "asim",
-                "stdout",
             ],
             "level": "DEBUG",
             "propagate": True,
@@ -192,7 +190,8 @@ S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "")
 OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT", "")
 
 # Celery
-CELERY_BROKER_URL = (os.getenv("CELERY_BROKER_URL", "") + "?ssl_cert_reqs=required")
+CELERY_BROKER_URL = os.getenv("REDIS_ENDPOINT", "")
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_RESULT_SERIALIZER = "json"
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
