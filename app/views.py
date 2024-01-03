@@ -1,12 +1,16 @@
+import json
 import logging
 
 import datetime
 import os
+from time import sleep
 
 import redis
 import boto3
+from celery.backends.redis import RedisBackend
 
 from celery_worker.tasks import demodjango_task
+from demodjango import celery_app
 from .util import render_connection_info
 from datetime import datetime
 from django.http import HttpResponse
@@ -109,17 +113,18 @@ def opensearch_check():
 def celery_worker_check():
     addon_type = 'Celery Worker'
     try:
-        logger.info("Adding debug task to Celery queue")
-        logger.debug(f"DJANGO_SETTINGS_MODULE: {os.environ.get('DJANGO_SETTINGS_MODULE')}")
-        logger.debug(f"CELERY_BROKER_URL: {settings.CELERY_BROKER_URL}")
         timestamp = datetime.now()
-        logger.debug(f"timestamp: {timestamp}")
-        # demodjango_task(timestamp)
-        demodjango_task.delay(f"{timestamp} delayed")
+        logger.info("Adding debug task to Celery queue")
+        task_id = str(demodjango_task.delay(f"{timestamp}"))
+        # Todo: Add retries instead of sleep...
+        sleep(2)
+        logger.info("Getting result from Celery backend")
+        backend_result = json.loads(celery_app.backend.get(f"celery-task-meta-{task_id}"))
+        connection_info = f"{backend_result['result']} with task_id {task_id} was processed at {backend_result['date_done']} with status {backend_result['status']}"
         return render_connection_info(
             addon_type,
             True,
-            "Todo: Part of DBTP-576 Redis disaster recovery"
+            connection_info
         )
     except Exception as e:
         logger.info(e)
