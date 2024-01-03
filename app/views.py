@@ -117,11 +117,7 @@ def celery_worker_check():
         logger.info("Getting result from Celery backend")
         backend_result = json.loads(celery_app.backend.get(f"celery-task-meta-{task_id}"))
         connection_info = f"{backend_result['result']} with task_id {task_id} was processed at {backend_result['date_done']} with status {backend_result['status']}"
-        return render_connection_info(
-            addon_type,
-            True,
-            connection_info
-        )
+        return render_connection_info(addon_type, True, connection_info)
     except Exception as e:
         logger.info(e)
         return render_connection_info(addon_type, False, str(e))
