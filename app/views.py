@@ -1,23 +1,19 @@
+import datetime
 import json
 import logging
-
-import datetime
-import os
+from datetime import datetime
 from time import sleep
 
-import redis
 import boto3
-from celery.backends.redis import RedisBackend
+import redis
+from django.conf import settings
+from django.db import connections
+from django.http import HttpResponse
+from elasticsearch import Elasticsearch
 
 from celery_worker.tasks import demodjango_task
 from demodjango import celery_app
 from .util import render_connection_info
-from datetime import datetime
-from django.http import HttpResponse
-from django.conf import settings
-from django.db import connections
-from elasticsearch import Elasticsearch
-
 
 logger = logging.getLogger("django")
 

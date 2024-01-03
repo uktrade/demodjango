@@ -55,6 +55,7 @@ services:
 
   redis:
     image: redis
+    # Expose port so we can query it for debugging
     ports:
       - "6379:6379"
 
