@@ -2,7 +2,6 @@ import datetime
 import json
 import logging
 from datetime import datetime
-from time import sleep
 
 import boto3
 import redis
@@ -10,6 +9,7 @@ from django.conf import settings
 from django.db import connections
 from django.http import HttpResponse
 from elasticsearch import Elasticsearch
+from tenacity import retry, stop_after_delay, RetryError
 
 from celery_worker.tasks import demodjango_task
 from demodjango import celery_app
@@ -107,17 +107,32 @@ def opensearch_check():
 
 
 def celery_worker_check():
+    get_result_timeout = 2
+
+    @retry(stop=stop_after_delay(get_result_timeout))
+    def get_result_from_celery_cackend():
+        logger.info("Getting result from Celery backend")
+        backend_result = json.loads(celery_app.backend.get(f"celery-task-meta-{task_id}"))
+        logger.debug("backend_result")
+        logger.debug(backend_result)
+        logger.debug("backend_result['status']")
+        logger.debug(backend_result['status'])
+        if backend_result['status'] != "SUCCESS":
+            raise Exception
+        return backend_result
+
     addon_type = 'Celery Worker'
     try:
         timestamp = datetime.now()
         logger.info("Adding debug task to Celery queue")
         task_id = str(demodjango_task.delay(f"{timestamp}"))
-        # Todo: Add retries/timeout instead of sleep...
-        sleep(2)
-        logger.info("Getting result from Celery backend")
-        backend_result = json.loads(celery_app.backend.get(f"celery-task-meta-{task_id}"))
+        backend_result = get_result_from_celery_cackend()
         connection_info = f"{backend_result['result']} with task_id {task_id} was processed at {backend_result['date_done']} with status {backend_result['status']}"
         return render_connection_info(addon_type, True, connection_info)
+    except RetryError:
+        connection_info = f"task_id {task_id} was not processed within {get_result_timeout} seconds"
+        logger.error(connection_info)
+        return render_connection_info(addon_type, False, connection_info)
     except Exception as e:
-        logger.info(e)
+        logger.error(e)
         return render_connection_info(addon_type, False, str(e))
