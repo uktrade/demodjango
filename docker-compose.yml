@@ -30,7 +30,7 @@ services:
 
   celery-worker:
     image: demodjango/application:latest
-    command: celery --app demodjango.celery worker -E -l INFO
+    command: celery --app demodjango.celery worker --task-events, --loglevel INFO
     entrypoint: ''
     volumes:
       - .:/app
