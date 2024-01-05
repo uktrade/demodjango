@@ -107,6 +107,7 @@ def opensearch_check():
 
 
 def celery_worker_check():
+    addon_type = 'Celery Worker'
     get_result_timeout = 2
 
     @retry(stop=stop_after_delay(get_result_timeout))
@@ -119,7 +120,6 @@ def celery_worker_check():
             raise Exception
         return backend_result
 
-    addon_type = 'Celery Worker'
     try:
         timestamp = datetime.now()
         logger.info("Adding debug task to Celery queue")

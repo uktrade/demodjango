@@ -124,7 +124,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'demodjango.wsgi.application'
 
-sqlite_db_root = Path(tempfile.gettempdir()) if os.getenv('COPILOT_APPLICATION_NAME', False) else BASE_DIR
+if os.getenv('COPILOT_APPLICATION_NAME', False):
+    sqlite_db_root = Path(tempfile.gettempdir())
+else:
+    sqlite_db_root = BASE_DIR
 
 DATABASES = {
     'default': {
@@ -136,12 +139,16 @@ DATABASES = {
 RDS_DATABASE_CREDENTIALS = os.getenv("RDS_DATABASE_CREDENTIALS", "")
 
 if RDS_DATABASE_CREDENTIALS:
-    DATABASES["rds"] = dj_database_url.config(default=database_url_from_env("RDS_DATABASE_CREDENTIALS"))
+    DATABASES["rds"] = dj_database_url.config(
+        default=database_url_from_env("RDS_DATABASE_CREDENTIALS")
+    )
 
 DATABASE_CREDENTIALS = os.getenv("DATABASE_CREDENTIALS", "")
 
 if DATABASE_CREDENTIALS:
-    DATABASES['aurora'] = dj_database_url.config(default=database_url_from_env("DATABASE_CREDENTIALS"))
+    DATABASES['aurora'] = dj_database_url.config(
+        default=database_url_from_env("DATABASE_CREDENTIALS")
+    )
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
