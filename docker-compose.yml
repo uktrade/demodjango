@@ -30,8 +30,7 @@ services:
 
   celery-worker:
     image: demodjango/application:latest
-    # Todo: Change log level to INFO
-    command: celery --app demodjango.celery worker -E -l DEBUG
+    command: celery --app demodjango.celery worker -E -l INFO
     entrypoint: ''
     volumes:
       - .:/app

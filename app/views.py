@@ -115,8 +115,6 @@ def celery_worker_check():
         backend_result = json.loads(celery_app.backend.get(f"celery-task-meta-{task_id}"))
         logger.debug("backend_result")
         logger.debug(backend_result)
-        logger.debug("backend_result['status']")
-        logger.debug(backend_result['status'])
         if backend_result['status'] != "SUCCESS":
             raise Exception
         return backend_result
