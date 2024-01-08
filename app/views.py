@@ -124,7 +124,7 @@ def celery_worker_check():
         timestamp = datetime.now()
         logger.info("Adding debug task to Celery queue")
         task_id = str(demodjango_task.delay(f"{timestamp}"))
-        backend_result = get_result_from_celery_cackend()
+        backend_result = get_result_from_celery_backend()
         connection_info = f"{backend_result['result']} with task_id {task_id} was processed at {backend_result['date_done']} with status {backend_result['status']}"
         return render_connection_info(addon_type, True, connection_info)
     except RetryError:
