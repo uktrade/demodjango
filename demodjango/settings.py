@@ -17,6 +17,7 @@ from pathlib import Path
 import dj_database_url
 import environ
 from dbt_copilot_python.network import setup_allowed_hosts
+from dbt_copilot_python.utility import is_copilot
 from django_log_formatter_asim import ASIMFormatter
 from dotenv import load_dotenv
 
@@ -124,10 +125,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'demodjango.wsgi.application'
 
-if os.getenv('COPILOT_APPLICATION_NAME', False):
-    sqlite_db_root = Path(tempfile.gettempdir())
-else:
-    sqlite_db_root = BASE_DIR
+sqlite_db_root = BASE_DIR if is_copilot() else Path(tempfile.gettempdir())
 
 DATABASES = {
     'default': {
