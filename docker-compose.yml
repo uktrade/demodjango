@@ -11,6 +11,7 @@ services:
       ALLOWED_HOSTS: '*'
       AWS_ENDPOINT_URL: 'http://s3:9090'
       DATABASE_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-aurora","username":"postgres"}'
+      DEBUG: true
       DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
       OPENSEARCH_ENDPOINT: 'http://opensearch:9200'
       RDS_DATABASE_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
@@ -27,16 +28,17 @@ services:
       - s3
       - opensearch
 
-  celery:
+  celery-worker:
     image: demodjango/application:latest
-    command: celery --app demodjango.celery worker -l INFO
+    command: celery --app demodjango.celery worker --task-events --loglevel INFO
     entrypoint: ''
     volumes:
       - .:/app
     depends_on:
       - redis
     environment:
-      CELERY_BROKER_URL: 'rediss://redis:6379'
+      REDIS_ENDPOINT: redis://redis:6379
+      DEBUG: true
       DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
       DJANGO_SETTINGS_MODULE: demodjango.settings
 
@@ -52,6 +54,9 @@ services:
 
   redis:
     image: redis
+    # Expose port so we can query it for debugging
+    ports:
+      - "6379:6379"
 
   s3:
     image: adobe/s3mock
