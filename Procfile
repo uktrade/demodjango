@@ -1,2 +1,2 @@
-web: python manage.py migrate && python manage.py migrate --database rds && python manage.py migrate --database aurora && python manage.py load_defaults && gunicorn -b 0.0.0.0:$PORT config.wsgi:application
+web: python manage.py migrate && python manage.py migrate --database rds && python manage.py migrate --database aurora && python manage.py load_defaults && opentelemetry-instrument --traces_exporter console,otlp --metrics_exporter console --service_name your-service-name --exporter_otlp_endpoint 0.0.0.0:4317 gunicorn -b 0.0.0.0:$PORT config.wsgi:application
 celery-worker: celery -A config.celery worker -l INFO
