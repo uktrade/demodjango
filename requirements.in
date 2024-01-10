@@ -10,6 +10,8 @@ gunicorn
 opentelemetry-distro==0.41b0
 opentelemetry-exporter-otlp==1.20.0
 opentelemetry-instrumentation-wsgi==0.41b0
+opentelemetry-propagator-aws-xray
+opentelemetry-sdk-extension-aws
 pip-tools
 psycopg2-binary
 python-dotenv
