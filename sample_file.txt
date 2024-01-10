@@ -1,1 +1,1 @@
-a test text file pulled from S3
+Test content read from a text file in S3
