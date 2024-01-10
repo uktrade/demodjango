@@ -7,6 +7,9 @@ django-log-formatter-asim
 django==3.2.23
 elasticsearch==7.10.1
 gunicorn
+opentelemetry-distro==0.41b0
+opentelemetry-exporter-otlp==1.20.0
+opentelemetry-instrumentation-wsgi==0.41b0
 pip-tools
 psycopg2-binary
 python-dotenv
