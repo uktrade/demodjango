@@ -55,4 +55,5 @@ wcwidth==0.2.12
 whitenoise==6.6.0
 zipp==3.17.0
 opentelemetry-distro==0.41b0
+opentelemetry-instrumentation-wsgi==0.41b0
 opentelemetry-exporter-otlp==1.20.0
