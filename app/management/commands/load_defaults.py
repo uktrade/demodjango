@@ -14,22 +14,17 @@ from app.models import SampleTable
 class Command(BaseCommand):
     def handle(self, *args, **options):
 
-        # Load single row to db
-        SampleTable.objects.update_or_create(sampleid=1, sample_name="DB is connected")
+        SampleTable.objects.update_or_create(sampleid=1, sample_name="Database is connected")
 
-
-        # breakpoint()
-
-        # Load data into redis
         if settings.REDIS_ENDPOINT:
-            r = redis.Redis.from_url(f'{settings.REDIS_ENDPOINT}/0')
-            r.set('Using', 'Redis')
+            r = redis.Redis.from_url(f'{settings.REDIS_ENDPOINT}')
+            r.set('test-data', 'Test content read from Redis')
 
         if settings.S3_BUCKET_NAME:
             object_name = os.path.basename("sample_file.txt")
             s3_client = boto3.client('s3')
             try:
-                response = s3_client.upload_file(object_name, settings.S3_BUCKET_NAME, object_name)
+                s3_client.upload_file(object_name, settings.S3_BUCKET_NAME, object_name)
             except ClientError as e:
                 logging.error(e)
 
@@ -38,7 +33,7 @@ class Command(BaseCommand):
 
             doc = {
                 'author': 'author_name',
-                'text': 'some content read from OpenSearch.',
+                'text': 'Test content read from OpenSearch.',
                 'timestamp': datetime.now(),
             }
             resp = es.index(index="test-index", id=1, body=doc)
