@@ -17,6 +17,7 @@ from pathlib import Path
 import dj_database_url
 import environ
 from dbt_copilot_python.network import setup_allowed_hosts
+from dbt_copilot_python.utility import is_copilot
 from django_log_formatter_asim import ASIMFormatter
 from dotenv import load_dotenv
 
@@ -68,7 +69,6 @@ LOGGING = {
         "django": {
             "handlers": [
                 "asim",
-                "stdout",
             ],
             "level": "DEBUG",
             "propagate": True,
@@ -76,7 +76,6 @@ LOGGING = {
         "django.request": {
             "handlers": [
                 "asim",
-                "stdout",
             ],
             "level": "DEBUG",
             "propagate": True,
@@ -106,7 +105,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'config.urls'
+ROOT_URLCONF = 'demodjango.urls'
 
 TEMPLATES = [
     {
@@ -124,9 +123,9 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'config.wsgi.application'
+WSGI_APPLICATION = 'demodjango.wsgi.application'
 
-sqlite_db_root = Path(tempfile.gettempdir()) if os.getenv('COPILOT_APPLICATION_NAME', False) else BASE_DIR
+sqlite_db_root = BASE_DIR if is_copilot() else Path(tempfile.gettempdir())
 
 DATABASES = {
     'default': {
@@ -138,12 +137,16 @@ DATABASES = {
 RDS_DATABASE_CREDENTIALS = os.getenv("RDS_DATABASE_CREDENTIALS", "")
 
 if RDS_DATABASE_CREDENTIALS:
-    DATABASES["rds"] = dj_database_url.config(default=database_url_from_env("RDS_DATABASE_CREDENTIALS"))
+    DATABASES["rds"] = dj_database_url.config(
+        default=database_url_from_env("RDS_DATABASE_CREDENTIALS")
+    )
 
 DATABASE_CREDENTIALS = os.getenv("DATABASE_CREDENTIALS", "")
 
 if DATABASE_CREDENTIALS:
-    DATABASES['aurora'] = dj_database_url.config(default=database_url_from_env("DATABASE_CREDENTIALS"))
+    DATABASES['aurora'] = dj_database_url.config(
+        default=database_url_from_env("DATABASE_CREDENTIALS")
+    )
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -192,7 +195,10 @@ S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "")
 OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT", "")
 
 # Celery
-CELERY_BROKER_URL = (os.getenv("CELERY_BROKER_URL", "") + "?ssl_cert_reqs=required")
+CELERY_BROKER_URL = os.getenv("REDIS_ENDPOINT")
+if CELERY_BROKER_URL.startswith("rediss://"):
+    CELERY_BROKER_URL = f"{CELERY_BROKER_URL}?ssl_cert_reqs=CERT_REQUIRED"
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_RESULT_SERIALIZER = "json"
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True

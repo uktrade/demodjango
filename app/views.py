@@ -1,17 +1,24 @@
+import datetime
+import json
 import logging
-
-import redis
-import boto3
-from .util import render_connection_info
 from datetime import datetime
-from django.http import HttpResponse
+
+import boto3
+import redis
 from django.conf import settings
 from django.db import connections
+from django.http import HttpResponse
 from elasticsearch import Elasticsearch
+from tenacity import retry, stop_after_delay, RetryError
 
+from celery_worker.tasks import demodjango_task
+from demodjango import celery_app
+from .util import render_connection_info
+
+logger = logging.getLogger("django")
 
 def index(request):
-    logging.getLogger("django").info("Rendering landing page")
+    logger.info("Rendering landing page")
 
     status_output = "".join(
         [
@@ -38,64 +45,92 @@ def server_time_check():
 
 
 def postgres_rds_check():
+    addon_type = 'PostgreSQL (RDS)'
     try:
         with connections['rds'].cursor() as c:
             c.execute('SELECT version()')
-            return render_connection_info('PostgreSQL (RDS)', True, c.fetchone()[0])
+            return render_connection_info(addon_type, True, c.fetchone()[0])
     except Exception as e:
-        return render_connection_info('PostgreSQL (RDS)', False, str(e))
+        return render_connection_info(addon_type, False, str(e))
 
 
 def postgres_aurora_check():
+    addon_type = 'PostgreSQL (Aurora)'
     try:
         with connections['aurora'].cursor() as c:
             c.execute('SELECT version()')
-            return render_connection_info('PostgreSQL (Aurora)', True, c.fetchone()[0])
+            return render_connection_info(addon_type, True, c.fetchone()[0])
     except Exception as e:
-        return render_connection_info('PostgreSQL (Aurora)', False, str(e))
+        return render_connection_info(addon_type, False, str(e))
 
 
 def sqlite_check():
+    addon_type = 'SQLite3'
     try:
         with connections['default'].cursor() as c:
             c.execute('SELECT SQLITE_VERSION()')
-            return render_connection_info('SQLite3', True, c.fetchone()[0])
+            return render_connection_info(addon_type, True, c.fetchone()[0])
     except Exception as e:
-        return render_connection_info('SQLite3', False, str(e))
+        return render_connection_info(addon_type, False, str(e))
 
 
 def redis_check():
+    addon_type = 'Redis'
     try:
         r = redis.Redis.from_url(f'{settings.REDIS_ENDPOINT}/0')
-        return render_connection_info('Redis', True, r.get('Using').decode())
+        return render_connection_info(addon_type, True, r.get('Using').decode())
     except Exception as e:
-        return render_connection_info('Redis', False, str(e))
+        return render_connection_info(addon_type, False, str(e))
 
 
 def s3_bucket_check():
+    addon_type = 'S3 Bucket'
     try:
         s3 = boto3.resource('s3')
         bucket = s3.Bucket(settings.S3_BUCKET_NAME)
         body = bucket.Object('sample_file.txt')
         return render_connection_info(
-            'S3 Bucket', True, body.get()['Body'].read().decode()
+            addon_type, True, body.get()['Body'].read().decode()
         )
     except Exception as e:
-        return render_connection_info('S3 Bucket', False, str(e))
+        return render_connection_info(addon_type, False, str(e))
 
 
 def opensearch_check():
+    addon_type = 'OpenSearch'
     try:
         es = Elasticsearch(f'{settings.OPENSEARCH_ENDPOINT}')
         res = es.get(index="test-index", id=1)
-        return render_connection_info('OpenSearch', True, res['_source']['text'])
+        return render_connection_info(addon_type, True, res['_source']['text'])
     except Exception as e:
-        return render_connection_info('OpenSearch', False, str(e))
+        return render_connection_info(addon_type, False, str(e))
 
 
 def celery_worker_check():
-    return render_connection_info(
-        'Celery Worker',
-        False,
-        "Todo: Part of DBTP-576 Redis disaster recovery"
-    )
+    addon_type = 'Celery Worker'
+    get_result_timeout = 2
+
+    @retry(stop=stop_after_delay(get_result_timeout))
+    def get_result_from_celery_backend():
+        logger.info("Getting result from Celery backend")
+        backend_result = json.loads(celery_app.backend.get(f"celery-task-meta-{task_id}"))
+        logger.debug("backend_result")
+        logger.debug(backend_result)
+        if backend_result['status'] != "SUCCESS":
+            raise Exception
+        return backend_result
+
+    try:
+        timestamp = datetime.now()
+        logger.info("Adding debug task to Celery queue")
+        task_id = str(demodjango_task.delay(f"{timestamp}"))
+        backend_result = get_result_from_celery_backend()
+        connection_info = f"{backend_result['result']} with task_id {task_id} was processed at {backend_result['date_done']} with status {backend_result['status']}"
+        return render_connection_info(addon_type, True, connection_info)
+    except RetryError:
+        connection_info = f"task_id {task_id} was not processed within {get_result_timeout} seconds"
+        logger.error(connection_info)
+        return render_connection_info(addon_type, False, connection_info)
+    except Exception as e:
+        logger.error(e)
+        return render_connection_info(addon_type, False, str(e))
