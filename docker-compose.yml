@@ -17,6 +17,8 @@ services:
       RDS_DATABASE_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
       REDIS_ENDPOINT: 'redis://redis:6379'
       S3_BUCKET_NAME: test-bucket
+      AWS_ACCESS_KEY_ID: access-key-id
+      AWS_SECRET_ACCESS_KEY: secret-access-key
     ports:
       - "8080:8080"
     volumes:
@@ -46,11 +48,13 @@ services:
     image: postgres
     environment:
       POSTGRES_PASSWORD: pgSecretPassword
+      POSTGRES_DB: main
 
   postgres-aurora:
     image: postgres
     environment:
       POSTGRES_PASSWORD: pgSecretPassword
+      POSTGRES_DB: main
 
   redis:
     image: redis
@@ -61,9 +65,10 @@ services:
   s3:
     image: adobe/s3mock
     environment:
-      initialBucket: test-bucket
+      initialBuckets: test-bucket
 
   opensearch:
     image: opensearchproject/opensearch
     environment:
       'discovery.type': single-node
+      'plugins.security.disabled': true

@@ -77,8 +77,8 @@ def sqlite_check():
 def redis_check():
     addon_type = 'Redis'
     try:
-        r = redis.Redis.from_url(f'{settings.REDIS_ENDPOINT}/0')
-        return render_connection_info(addon_type, True, r.get('Using').decode())
+        r = redis.Redis.from_url(f'{settings.REDIS_ENDPOINT}')
+        return render_connection_info(addon_type, True, r.get('test-data').decode())
     except Exception as e:
         return render_connection_info(addon_type, False, str(e))
 
