@@ -29,7 +29,7 @@ def _serialize_request(request):
     }
 def index(request):
     logger.info("Rendering landing page")
-    request_logger.info("Rendering landing page request")
+    # request_logger.info("Rendering landing page request")
     logger.info(_serialize_request(request))
 
     status_output = "".join(
