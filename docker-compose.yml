@@ -34,12 +34,6 @@ services:
     image: demodjango/application:latest
     command: celery --app demodjango.celery worker --task-events --loglevel INFO
     entrypoint: ''
-    healthcheck:
-      test: [ "CMD-SHELL", "celery --app demodjango.celery inspect ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 2
-      start_period: 5s
     volumes:
       - .:/app
     depends_on:

@@ -16,21 +16,17 @@ from demodjango import celery_app
 from .util import render_connection_info
 
 logger = logging.getLogger("django")
-# request_logger = logging.getLogger("django.request")
 
 
-def _serialize_request(request):
-    return {
+def index(request):
+    logger.info("Rendering landing page")
+    logger.info({
         "method": request.method,
         "path": request.path,
         "GET": dict(request.GET),
         "POST": dict(request.POST),
         "headers": dict(request.headers),
-    }
-def index(request):
-    logger.info("Rendering landing page")
-    # request_logger.info("Rendering landing page request")
-    logger.info(_serialize_request(request))
+    })
 
     status_output = "".join(
         [
