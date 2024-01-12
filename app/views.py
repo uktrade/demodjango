@@ -19,6 +19,13 @@ logger = logging.getLogger("django")
 
 def index(request):
     logger.info("Rendering landing page")
+    logger.info({
+        "method": request.method,
+        "path": request.path,
+        "GET": dict(request.GET),
+        "POST": dict(request.POST),
+        "headers": dict(request.headers),
+    })
 
     status_output = "".join(
         [
@@ -32,6 +39,8 @@ def index(request):
             celery_worker_check()
         ]
     )
+
+    logger.info("Landing page checks completed")
 
     return HttpResponse(
         "<!doctype html><html><head><title>DemoDjango</title></head><body>"
