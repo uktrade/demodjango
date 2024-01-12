@@ -16,9 +16,11 @@ from demodjango import celery_app
 from .util import render_connection_info
 
 logger = logging.getLogger("django")
+request_logger = logging.getLogger("django.request")
 
 def index(request):
     logger.info("Rendering landing page")
+    request_logger.info("Rendering landing page request")
 
     status_output = "".join(
         [
