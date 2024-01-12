@@ -16,7 +16,7 @@ from demodjango import celery_app
 from .util import render_connection_info
 
 logger = logging.getLogger("django")
-request_logger = logging.getLogger("django.request")
+# request_logger = logging.getLogger("django.request")
 
 
 def _serialize_request(request):
@@ -44,6 +44,8 @@ def index(request):
             celery_worker_check()
         ]
     )
+
+    logger.info("Landing page checks completed")
 
     return HttpResponse(
         "<!doctype html><html><head><title>DemoDjango</title></head><body>"
