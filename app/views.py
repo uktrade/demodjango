@@ -17,7 +17,6 @@ from .util import render_connection_info
 
 logger = logging.getLogger("django")
 
-
 def index(request):
     logger.info("Rendering landing page")
     logger.info({
