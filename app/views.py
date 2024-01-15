@@ -111,13 +111,13 @@ def opensearch_check():
 
     @retry(stop=stop_after_delay(get_result_timeout), wait=wait_fixed(1))
     def read_content_from_opensearch():
-        es = Elasticsearch(f'{settings.OPENSEARCH_ENDPOINT}')
-        res = es.get(index="test-index", id=1)
-        return res
+        elasticsearch_client = Elasticsearch(f'{settings.OPENSEARCH_ENDPOINT}')
+        results = elasticsearch_client.get(index="test-index", id=1)
+        return results
 
     try:
-        res = read_content_from_opensearch()
-        return render_connection_info(addon_type, True, res['_source']['text'])
+        results = read_content_from_opensearch()
+        return render_connection_info(addon_type, True, results['_source']['text'])
     except RetryError:
         connection_info = f"Unable to read content from {addon_type} within {get_result_timeout} seconds"
         logger.error(connection_info)
