@@ -130,7 +130,7 @@ def celery_worker_check():
     addon_type = 'Celery Worker'
     get_result_timeout = 2
 
-    @retry(stop=stop_after_delay(get_result_timeout))
+    @retry(stop=stop_after_delay(get_result_timeout), wait=wait_fixed(1))
     def get_result_from_celery_backend():
         logger.info("Getting result from Celery backend")
         backend_result = json.loads(celery_app.backend.get(f"celery-task-meta-{task_id}"))
