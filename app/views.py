@@ -51,16 +51,6 @@ def index(request):
     )
 
 
-def git_information():
-    git_commit = os.environ.get("GIT_COMMIT", "Unknown")
-    git_branch = os.environ.get("GIT_BRANCH", "Unknown")
-    git_tag = os.environ.get("GIT_TAG", "Unknown")
-
-    return render_connection_info('Git information',
-                                  git_commit != "Unknown",
-                                  f"Commit: {git_commit}, Branch: {git_branch}, Tag: {git_tag}")
-
-
 def server_time_check():
     return render_connection_info('Server Time', True, str(datetime.now()))
 
@@ -166,3 +156,13 @@ def celery_worker_check():
     except Exception as e:
         logger.error(e)
         return render_connection_info(addon_type, False, str(e))
+
+
+def git_information():
+    git_commit = os.environ.get("GIT_COMMIT", "Unknown")
+    git_branch = os.environ.get("GIT_BRANCH", "Unknown")
+    git_tag = os.environ.get("GIT_TAG", "Unknown")
+
+    return render_connection_info('Git information',
+                                  git_commit != "Unknown",
+                                  f"Commit: {git_commit}, Branch: {git_branch}, Tag: {git_tag}")
