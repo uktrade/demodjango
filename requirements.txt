@@ -53,18 +53,13 @@ django==3.2.23
     # via
     #   -r requirements.in
     #   dj-database-url
-    #   django-audit-log-middleware
     #   django-log-formatter-asim
     #   django-requestlogs
     #   djangorestframework
-django-audit-log-middleware==0.0.4
-    # via -r requirements.in
 django-environ==0.11.2
     # via -r requirements.in
 django-ipware==3.0.7
-    # via
-    #   -r requirements.in
-    #   django-audit-log-middleware
+    # via -r requirements.in
 django-log-formatter-asim==0.0.4
     # via -r requirements.in
 django-requestlogs==0.8
