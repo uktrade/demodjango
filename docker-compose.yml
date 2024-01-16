@@ -43,7 +43,7 @@ services:
     volumes:
       - .:/app
     healthcheck:
-      test: [ "CMD-SHELL", "celery --app demodjango.celery inspect ping" ]
+      test: [ "CMD-SHELL", "python celery_worker/healthcheck.py" ]
       interval: 10s
       timeout: 5s
       retries: 2
