@@ -54,10 +54,18 @@ django==3.2.23
     #   -r requirements.in
     #   dj-database-url
     #   django-log-formatter-asim
+    #   django-requestlogs
+    #   djangorestframework
 django-environ==0.11.2
+    # via -r requirements.in
+django-ipware==3.0.7
     # via -r requirements.in
 django-log-formatter-asim==0.0.4
     # via -r requirements.in
+django-requestlogs==0.8
+    # via -r requirements.in
+djangorestframework==3.14.0
+    # via django-requestlogs
 elasticsearch==7.10.1
     # via -r requirements.in
 filelock==3.13.1
@@ -101,7 +109,9 @@ python-dateutil==2.8.2
 python-dotenv==1.0.0
     # via -r requirements.in
 pytz==2023.3.post1
-    # via django
+    # via
+    #   django
+    #   djangorestframework
 pyyaml==6.0.1
     # via pre-commit
 redis==5.0.1
