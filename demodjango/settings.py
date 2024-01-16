@@ -83,6 +83,8 @@ LOGGING = {
     },
 }
 
+DLFA_INCLUDE_RAW_LOG = True
+
 # Application definition
 
 INSTALLED_APPS = [
