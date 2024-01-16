@@ -1,6 +1,7 @@
 import datetime
 import json
 import logging
+import os
 from datetime import datetime
 
 import boto3
@@ -36,7 +37,8 @@ def index(request):
             redis_check(),
             s3_bucket_check(),
             opensearch_check(),
-            celery_worker_check()
+            celery_worker_check(),
+            git_information(),
         ]
     )
 
@@ -47,6 +49,16 @@ def index(request):
         f"{status_output}"
         "</body></html>"
     )
+
+
+def git_information():
+    git_commit = os.environ.get("GIT_COMMIT", "Unknown")
+    git_branch = os.environ.get("GIT_BRANCH", "Unknown")
+    git_tag = os.environ.get("GIT_TAG", "Unknown")
+
+    return render_connection_info('Git information',
+                                  git_commit != "Unknown",
+                                  f"Commit: {git_commit}, Branch: {git_branch}, Tag: {git_tag}")
 
 
 def server_time_check():
