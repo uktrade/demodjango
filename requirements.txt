@@ -55,14 +55,22 @@ django==3.2.23
     #   dj-database-url
     #   django-audit-log-middleware
     #   django-log-formatter-asim
+    #   django-requestlogs
+    #   djangorestframework
 django-audit-log-middleware==0.0.4
     # via -r requirements.in
 django-environ==0.11.2
     # via -r requirements.in
 django-ipware==3.0.7
-    # via django-audit-log-middleware
+    # via
+    #   -r requirements.in
+    #   django-audit-log-middleware
 django-log-formatter-asim==0.0.4
     # via -r requirements.in
+django-requestlogs==0.8
+    # via -r requirements.in
+djangorestframework==3.14.0
+    # via django-requestlogs
 elasticsearch==7.10.1
     # via -r requirements.in
 filelock==3.13.1
@@ -106,7 +114,9 @@ python-dateutil==2.8.2
 python-dotenv==1.0.0
     # via -r requirements.in
 pytz==2023.3.post1
-    # via django
+    # via
+    #   django
+    #   djangorestframework
 pyyaml==6.0.1
     # via pre-commit
 redis==5.0.1

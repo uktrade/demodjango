@@ -55,6 +55,7 @@ LOGGING = {
         "asim": {
             "class": "logging.StreamHandler",
             "formatter": "asim_formatter",
+            'filters': ['request_id_context'],
         },
         "stdout": {
             "class": "logging.StreamHandler",
@@ -80,6 +81,18 @@ LOGGING = {
             "level": "DEBUG",
             "propagate": True,
         },
+        'requestlogs': {
+            "handlers": [
+                "asim",
+            ],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+    'filters': {
+        'request_id_context': {
+            '()': 'requestlogs.logging.RequestIdContext',
+        },
     },
 }
 
@@ -94,7 +107,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "django_audit_log_middleware",
     'app',
 ]
 
@@ -106,8 +118,13 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django_audit_log_middleware.AuditLogMiddleware',
+    'requestlogs.middleware.RequestLogsMiddleware',
+    'requestlogs.middleware.RequestIdMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'requestlogs.views.exception_handler',
+}
 
 ROOT_URLCONF = 'demodjango.urls'
 
@@ -170,7 +187,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
@@ -181,7 +197,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/

@@ -2,10 +2,11 @@ boto3
 celery
 dbt-copilot-python
 dj-database-url
-django-audit-log-middleware
 django-environ
+django-ipware
 django-log-formatter-asim
 django==3.2.23
+django-requestlogs
 elasticsearch==7.10.1
 gunicorn
 pip-tools
