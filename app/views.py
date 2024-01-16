@@ -9,7 +9,7 @@ from django.conf import settings
 from django.db import connections
 from django.http import HttpResponse
 from elasticsearch import Elasticsearch
-from tenacity import retry, stop_after_delay, RetryError
+from tenacity import retry, stop_after_delay, RetryError, wait_fixed
 
 from celery_worker.tasks import demodjango_task
 from demodjango import celery_app
@@ -107,10 +107,21 @@ def s3_bucket_check():
 
 def opensearch_check():
     addon_type = 'OpenSearch'
+    get_result_timeout = 5
+
+    @retry(stop=stop_after_delay(get_result_timeout), wait=wait_fixed(1))
+    def read_content_from_opensearch():
+        elasticsearch_client = Elasticsearch(f'{settings.OPENSEARCH_ENDPOINT}')
+        results = elasticsearch_client.get(index="test-index", id=1)
+        return results
+
     try:
-        es = Elasticsearch(f'{settings.OPENSEARCH_ENDPOINT}')
-        res = es.get(index="test-index", id=1)
-        return render_connection_info(addon_type, True, res['_source']['text'])
+        results = read_content_from_opensearch()
+        return render_connection_info(addon_type, True, results['_source']['text'])
+    except RetryError:
+        connection_info = f"Unable to read content from {addon_type} within {get_result_timeout} seconds"
+        logger.error(connection_info)
+        return render_connection_info(addon_type, False, connection_info)
     except Exception as e:
         return render_connection_info(addon_type, False, str(e))
 
@@ -119,7 +130,7 @@ def celery_worker_check():
     addon_type = 'Celery Worker'
     get_result_timeout = 2
 
-    @retry(stop=stop_after_delay(get_result_timeout))
+    @retry(stop=stop_after_delay(get_result_timeout), wait=wait_fixed(1))
     def get_result_from_celery_backend():
         logger.info("Getting result from Celery backend")
         backend_result = json.loads(celery_app.backend.get(f"celery-task-meta-{task_id}"))
