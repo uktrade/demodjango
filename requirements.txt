@@ -53,9 +53,14 @@ django==3.2.23
     # via
     #   -r requirements.in
     #   dj-database-url
+    #   django-audit-log-middleware
     #   django-log-formatter-asim
+django-audit-log-middleware==0.0.4
+    # via -r requirements.in
 django-environ==0.11.2
     # via -r requirements.in
+django-ipware==3.0.7
+    # via django-audit-log-middleware
 django-log-formatter-asim==0.0.4
     # via -r requirements.in
 elasticsearch==7.10.1

@@ -2,6 +2,7 @@ boto3
 celery
 dbt-copilot-python
 dj-database-url
+django-audit-log-middleware
 django-environ
 django-log-formatter-asim
 django==3.2.23
