@@ -1,9 +1,12 @@
+import tempfile
 from pathlib import Path
 
 from celery import bootsteps
 
 
-HEARTBEAT_FILE = Path('/tmp/celery_worker_heartbeat')
+HEARTBEAT_FILE = Path(f"{tempfile.gettempdir()}/celery_worker_heartbeat")
+
+print(f"Test files: {HEARTBEAT_FILE}")
 
 class LivenessProbe(bootsteps.StartStopStep):
     requires = {'celery.worker.components:Timer'}

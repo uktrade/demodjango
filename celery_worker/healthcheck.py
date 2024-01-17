@@ -1,13 +1,16 @@
 # See https://medium.com/ambient-innovation/health-checks-for-celery-in-kubernetes-cf3274a3e106
 
 import sys
+import tempfile
 
 from datetime import datetime
 from pathlib import Path
 
 
-READINESS_FILE = Path('/tmp/celery_ready')
-HEARTBEAT_FILE = Path('/tmp/celery_worker_heartbeat')
+READINESS_FILE = Path(f"{tempfile.gettempdir()}/celery_ready")
+HEARTBEAT_FILE = Path(f"{tempfile.gettempdir()}/celery_worker_heartbeat")
+
+print(f"Test files: {READINESS_FILE} {HEARTBEAT_FILE}")
 
 if not READINESS_FILE.is_file():
     print("Healthcheck: Celery readiness file NOT found.")
