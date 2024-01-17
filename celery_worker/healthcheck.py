@@ -8,8 +8,6 @@ from pathlib import Path
 
 READINESS_FILE = Path(f"{tempfile.gettempdir()}/celery_ready")
 HEARTBEAT_FILE = Path(f"{tempfile.gettempdir()}/celery_worker_heartbeat")
-#
-# print(f"Test files: {READINESS_FILE} {HEARTBEAT_FILE}")
 
 if not READINESS_FILE.is_file():
     print("Healthcheck: Celery readiness file NOT found.")
@@ -26,7 +24,7 @@ time_diff = current_timestamp - heartbeat_timestamp
 if time_diff > 60:
     print(
         "Healthcheck: Celery Worker heartbeat file timestamp DOES NOT matches the given constraint."
-        )
+    )
     sys.exit(1)
 
 print("Healthcheck: Celery Worker heartbeat file found and timestamp matches the given constraint.")

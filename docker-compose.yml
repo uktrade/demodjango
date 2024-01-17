@@ -39,7 +39,7 @@ services:
   celery-worker:
     image: demodjango/application:latest
     command: celery --app demodjango.celery worker --task-events --loglevel INFO
-    entrypoint: ""
+    entrypoint: ''
     volumes:
       - .:/app
     healthcheck:
