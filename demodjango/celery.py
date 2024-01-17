@@ -12,8 +12,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "demodjango.settings")
 READINESS_FILE = Path(f"{tempfile.gettempdir()}/celery_ready")
 HEARTBEAT_FILE = Path(f"{tempfile.gettempdir()}/celery_worker_heartbeat")
 
-print(f"Test files: {READINESS_FILE} {HEARTBEAT_FILE}")
-
 celery_app = Celery("demodjango_celery")
 celery_app.config_from_object("django.conf:settings", namespace="CELERY")
 celery_app.autodiscover_tasks()
