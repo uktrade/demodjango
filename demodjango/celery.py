@@ -15,7 +15,6 @@ celery_app = Celery("demodjango_celery")
 celery_app.config_from_object("django.conf:settings", namespace="CELERY")
 celery_app.autodiscover_tasks()
 
-# Add liveness probe for k8s
 celery_app.steps["worker"].add(LivenessProbe)
 
 
