@@ -6,6 +6,8 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 
+from dateutil.tz import tz
+
 READINESS_FILE = Path(f"{tempfile.gettempdir()}/celery_ready")
 HEARTBEAT_FILE = Path(f"{tempfile.gettempdir()}/celery_worker_heartbeat")
 
@@ -18,8 +20,8 @@ if not HEARTBEAT_FILE.is_file():
     sys.exit(1)
 
 stats = HEARTBEAT_FILE.stat()
-heartbeat_timestamp = stats.st_mtime
-current_timestamp = datetime.timestamp(datetime.now())
+heartbeat_timestamp = float(HEARTBEAT_FILE.read_text())
+current_timestamp = datetime.timestamp(datetime.now(tz=tz.UTC))
 time_diff = current_timestamp - heartbeat_timestamp
 if time_diff > 60:
     print(
