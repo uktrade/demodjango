@@ -48,7 +48,8 @@ def index(request):
     else:
         status_check_results += [f() for f in optional_checks.values()]
 
-    logger.info("Landing page checks completed")
+    logger.info(f"Landing page checks completed: "
+                f"{settings.ACTIVE_CHECKS if settings.ACTIVE_CHECKS else 'all'}")
 
     return HttpResponse(
         "<!doctype html><html><head><title>DemoDjango</title></head><body>"
