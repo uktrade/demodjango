@@ -3,6 +3,7 @@ import json
 import logging
 import os
 from datetime import datetime
+from typing import Dict, Callable
 
 import boto3
 import redis
@@ -18,6 +19,7 @@ from .util import render_connection_info
 
 logger = logging.getLogger("django")
 
+
 def index(request):
     logger.info("Rendering landing page")
     logger.info({
@@ -28,25 +30,29 @@ def index(request):
         "headers": dict(request.headers),
     })
 
-    status_output = "".join(
-        [
-            server_time_check(),
-            postgres_rds_check(),
-            postgres_aurora_check(),
-            sqlite_check(),
-            redis_check(),
-            s3_bucket_check(),
-            opensearch_check(),
-            celery_worker_check(),
-            git_information(),
-        ]
-    )
+    status_check_results = [server_time_check(), git_information(), sqlite_check()]
+
+    optional_checks: Dict[str, Callable] = {
+        'postgres_rds': postgres_rds_check,
+        'postgres_aurora': postgres_aurora_check,
+        'redis': redis_check,
+        's3': s3_bucket_check,
+        'opensearch': opensearch_check,
+        'celery': celery_worker_check,
+    }
+
+    if settings.ACTIVE_CHECKS:
+        for name, check in optional_checks.items():
+            if name in settings.ACTIVE_CHECKS:
+                status_check_results.append(check())
+    else:
+        status_check_results += [f() for f in optional_checks.values()]
 
     logger.info("Landing page checks completed")
 
     return HttpResponse(
         "<!doctype html><html><head><title>DemoDjango</title></head><body>"
-        f"{status_output}"
+        f"{''.join(status_check_results)}"
         "</body></html>"
     )
 
