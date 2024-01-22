@@ -19,6 +19,8 @@ services:
       S3_BUCKET_NAME: test-bucket
       AWS_ACCESS_KEY_ID: access-key-id
       AWS_SECRET_ACCESS_KEY: secret-access-key
+      OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel:4317'
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: 'http://otel:4317'
     ports:
       - "8080:8080"
     volumes:
@@ -35,6 +37,12 @@ services:
       - redis
       - s3
       - opensearch
+      - otel
+
+  otel:
+    image: public.ecr.aws/aws-observability/aws-otel-collector:v0.17.0
+    environment:
+      AWS_REGION: eu-west-2
 
   celery-worker:
     image: demodjango/application:latest

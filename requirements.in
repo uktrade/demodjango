@@ -9,6 +9,11 @@ django==3.2.23
 django-requestlogs
 elasticsearch==7.10.1
 gunicorn
+opentelemetry-distro
+opentelemetry-exporter-otlp
+opentelemetry-instrumentation-wsgi
+opentelemetry-propagator-aws-xray
+opentelemetry-sdk-extension-aws
 pip-tools
 psycopg2-binary
 python-dotenv
