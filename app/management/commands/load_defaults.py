@@ -5,7 +5,7 @@ import os
 
 from botocore.exceptions import ClientError
 from datetime import datetime
-from elasticsearch import Elasticsearch
+from opensearchpy import OpenSearch
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from app.models import SampleTable
@@ -29,12 +29,12 @@ class Command(BaseCommand):
                 logging.error(e)
 
         if settings.OPENSEARCH_ENDPOINT:
-            es = Elasticsearch(f'{settings.OPENSEARCH_ENDPOINT}')
+            opensearch_client = OpenSearch(f'{settings.OPENSEARCH_ENDPOINT}')
 
             doc = {
                 'author': 'author_name',
                 'text': 'Test content read from OpenSearch.',
                 'timestamp': datetime.now(),
             }
-            resp = es.index(index="test-index", id=1, body=doc)
-            print(resp['result'])
+            response = opensearch_client.index(index="test-index", id=1, body=doc)
+            print(response['result'])
