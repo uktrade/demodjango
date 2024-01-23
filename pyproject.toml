@@ -31,7 +31,3 @@ redis = "^5.0.1"
 requests = "^2.31.0"
 tenacity = "^8.2.3"
 whitenoise = "^6.6.0"
-
-#[build-system]
-#requires = ["poetry-core"]
-#build-backend = "poetry.core.masonry.api"
