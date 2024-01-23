@@ -28,12 +28,12 @@ services:
       - "8080:8080"
     volumes:
       - ./:/app
-    # healthcheck:
-    #   test: "curl -f localhost:8080"
-    #   interval: 10s
-    #   timeout: 5s
-    #   retries: 2
-    #   start_period: 15s
+    healthcheck:
+      test: "curl -f localhost:8080"
+      interval: 10s
+      timeout: 5s
+      retries: 2
+      start_period: 15s
     links:
       - postgres-rds
       - postgres-aurora
