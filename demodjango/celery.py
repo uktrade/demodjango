@@ -4,8 +4,7 @@ from pathlib import Path
 
 from celery import Celery
 from celery.signals import worker_ready, worker_shutdown
-
-from celery_worker.liveness_probe import LivenessProbe
+from dbt_copilot_python.celery_health_check.liveness_probe import LivenessProbe
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "demodjango.settings")
 
