@@ -14,7 +14,6 @@ from opensearchpy import OpenSearch
 from tenacity import retry, stop_after_delay, RetryError, wait_fixed
 
 from celery_worker.tasks import demodjango_task
-from demodjango import celery_app
 from .util import render_connection_info
 
 logger = logging.getLogger("django")
@@ -136,6 +135,8 @@ def opensearch_check():
 
 
 def celery_worker_check():
+    from demodjango import celery_app
+
     addon_type = 'Celery Worker'
     get_result_timeout = 2
 
