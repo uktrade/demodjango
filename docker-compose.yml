@@ -21,6 +21,9 @@ services:
       AWS_SECRET_ACCESS_KEY: secret-access-key
       OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel:4317'
       OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: 'http://otel:4317'
+      GIT_COMMIT: "3x4mp13"
+      GIT_BRANCH: "example-branch"
+      GIT_TAG: "3.2.1"
     ports:
       - "8080:8080"
     volumes:
