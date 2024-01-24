@@ -54,7 +54,7 @@ services:
   #   volumes:
   #     - .:/app
   #   healthcheck:
-  #     test: [ "CMD-SHELL", "python celery_worker/healthcheck.py" ]
+  #     test: [ "CMD-SHELL", "python -m dbt_copilot_python.celery_health_check.healthcheck" ]
   #     interval: 10s
   #     timeout: 5s
   #     retries: 2
