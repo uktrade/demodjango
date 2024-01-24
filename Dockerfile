@@ -1,15 +1,22 @@
-FROM python:3.9
+FROM python:3.11-bookworm
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV POETRY_VIRTUALENVS_CREATE=false
 
 RUN apt-get update && apt-get upgrade -y
 RUN mkdir /app
 
 WORKDIR /app
 
-COPY requirements.txt .
+RUN pip install --upgrade pip
+RUN pip install poetry
 
-RUN pip install -r requirements.txt
+COPY poetry.lock pyproject.toml /app/
 
-COPY . .
+RUN poetry install --no-root
+
+COPY . /app/
 
 ENV DOCKERIZE_VERSION v0.6.1
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \

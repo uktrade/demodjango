@@ -10,7 +10,7 @@ import redis
 from django.conf import settings
 from django.db import connections
 from django.http import HttpResponse
-from elasticsearch import Elasticsearch
+from opensearchpy import OpenSearch
 from tenacity import retry, stop_after_delay, RetryError, wait_fixed
 
 from celery_worker.tasks import demodjango_task
@@ -120,8 +120,8 @@ def opensearch_check():
 
     @retry(stop=stop_after_delay(get_result_timeout), wait=wait_fixed(1))
     def read_content_from_opensearch():
-        elasticsearch_client = Elasticsearch(f'{settings.OPENSEARCH_ENDPOINT}')
-        results = elasticsearch_client.get(index="test-index", id=1)
+        opensearch_client = OpenSearch(f'{settings.OPENSEARCH_ENDPOINT}')
+        results = opensearch_client.get(index="test-index", id=1)
         return results
 
     try:
