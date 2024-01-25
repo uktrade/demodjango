@@ -381,13 +381,13 @@ files = [
 
 [[package]]
 name = "dbt-copilot-python"
-version = "0.1.5.dev2"
+version = "0.1.5.dev3"
 description = "Helper functions to run Django and Flask applications in AWS Copilot/ECS."
 optional = false
 python-versions = ">=3.9,<4.0"
 files = [
-    {file = "dbt_copilot_python-0.1.5.dev2-py3-none-any.whl", hash = "sha256:f9f2697433f6a458334b1806dcf4574ff3d44e86320531d14f334ae1b0cd4d09"},
-    {file = "dbt_copilot_python-0.1.5.dev2.tar.gz", hash = "sha256:d69567e49eed18395f8428aec801382e4b4d7e2d79d93d8e2ca8bad6fa77bdf7"},
+    {file = "dbt_copilot_python-0.1.5.dev3-py3-none-any.whl", hash = "sha256:f09964d89c7de3ba4028d78d0d299f84a31a47d28fa6ab146c27a53255acc838"},
+    {file = "dbt_copilot_python-0.1.5.dev3.tar.gz", hash = "sha256:4e8316601e759079fc98d4ea626fa3729faa71f28c53db78ca1aeeae405a9568"},
 ]
 
 [package.dependencies]
@@ -1748,4 +1748,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "b1f301ac44e899b0e3d199ac42e6445b07b1820831c411f9575a2536f37be5d5"
+content-hash = "8ba6f1665c2f632184f525db403ad9d1f0a5479a31aefec9bb49b732a10cca3b"
