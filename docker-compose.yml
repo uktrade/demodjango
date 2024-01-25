@@ -47,25 +47,25 @@ services:
     environment:
       AWS_REGION: eu-west-2
 
-   celery-worker:
-     image: demodjango/application:latest
-     command: celery --app demodjango.celery worker --task-events --loglevel INFO
-     entrypoint: ''
-     volumes:
-       - .:/app
-     healthcheck:
-       test: [ "CMD-SHELL", "python -m dbt_copilot_python.celery_health_check.healthcheck" ]
-       interval: 10s
-       timeout: 5s
-       retries: 2
-       start_period: 5s
-     depends_on:
-       - redis
-     environment:
-       REDIS_ENDPOINT: redis://redis:6379
-       DEBUG: true
-       DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
-       DJANGO_SETTINGS_MODULE: demodjango.settings
+  celery-worker:
+    image: demodjango/application:latest
+    command: celery --app demodjango.celery worker --task-events --loglevel INFO
+    entrypoint: ''
+    volumes:
+      - .:/app
+    healthcheck:
+      test: [ "CMD-SHELL", "python -m dbt_copilot_python.celery_health_check.healthcheck" ]
+      interval: 10s
+      timeout: 5s
+      retries: 2
+      start_period: 5s
+    depends_on:
+      - redis
+    environment:
+      REDIS_ENDPOINT: redis://redis:6379
+      DEBUG: true
+      DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
+      DJANGO_SETTINGS_MODULE: demodjango.settings
 
   postgres-rds:
     image: postgres
