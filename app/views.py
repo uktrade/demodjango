@@ -31,12 +31,12 @@ def index(request):
     status_output = "".join(
         [
             server_time_check(),
-            # postgres_rds_check(),
-            # postgres_aurora_check(),
-            # sqlite_check(),
-            # redis_check(),
-            # s3_bucket_check(),
-            # opensearch_check(),
+            postgres_rds_check(),
+            postgres_aurora_check(),
+            sqlite_check(),
+            redis_check(),
+            s3_bucket_check(),
+            opensearch_check(),
             celery_worker_check(),
             git_information(),
         ]
