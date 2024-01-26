@@ -40,6 +40,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 DEBUG = True if (os.getenv("DEBUG") == "True") else False
 
 ALLOWED_HOSTS = setup_allowed_hosts(["*"])
+ACTIVE_CHECKS = [x.strip() for x in os.getenv("ACTIVE_CHECKS", "").split(",")]
 
 DLFA_INCLUDE_RAW_LOG = True
 
@@ -215,7 +216,7 @@ OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT", "")
 
 # Celery
 CELERY_BROKER_URL = os.getenv("REDIS_ENDPOINT")
-if CELERY_BROKER_URL.startswith("rediss://"):
+if CELERY_BROKER_URL and CELERY_BROKER_URL.startswith("rediss://"):
     CELERY_BROKER_URL = f"{CELERY_BROKER_URL}?ssl_cert_reqs=CERT_REQUIRED"
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_ACCEPT_CONTENT = ["application/json"]
