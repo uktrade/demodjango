@@ -63,17 +63,17 @@ files = [
 
 [[package]]
 name = "boto3"
-version = "1.34.28"
+version = "1.34.29"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">= 3.8"
 files = [
-    {file = "boto3-1.34.28-py3-none-any.whl", hash = "sha256:fb56622ce195c06ae0d15ae9472d44529362a869ad52862a5a28b891530969f9"},
-    {file = "boto3-1.34.28.tar.gz", hash = "sha256:9e0dcca7bb0567f7b4b84d1d26c19b217abfe149d19106af7f120f09142688cf"},
+    {file = "boto3-1.34.29-py3-none-any.whl", hash = "sha256:34b2b404bd2bec869ec2fc6aeeeeb884c72a9b895e2c7716b95381ab8deb9069"},
+    {file = "boto3-1.34.29.tar.gz", hash = "sha256:50776db195a73533f4f2c9d000c69f9d0e9fb9810f9f81584adc283e9516ad0d"},
 ]
 
 [package.dependencies]
-botocore = ">=1.34.28,<1.35.0"
+botocore = ">=1.34.29,<1.35.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.10.0,<0.11.0"
 
@@ -82,13 +82,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.34.28"
+version = "1.34.29"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.8"
 files = [
-    {file = "botocore-1.34.28-py3-none-any.whl", hash = "sha256:03be8209257ab65f3c8be7377cf8d38bff6a6afbe3d36c72924e48959bb694dc"},
-    {file = "botocore-1.34.28.tar.gz", hash = "sha256:45c99ccc6389ab1a87e996a7cc8797c7e41d5ecd9a5757d567ba3a57cb7655e7"},
+    {file = "botocore-1.34.29-py3-none-any.whl", hash = "sha256:44d918b91a1c1085d99266f8bf6ecc087c8a73a8efbb8e829f0c2dcd1ddf9963"},
+    {file = "botocore-1.34.29.tar.gz", hash = "sha256:34223fdb8ebd47d1fce5724bb1bcb164e81853ea9ca532b50639c749fc347458"},
 ]
 
 [package.dependencies]
@@ -373,13 +373,13 @@ files = [
 
 [[package]]
 name = "dbt-copilot-python"
-version = "0.1.5.dev6"
+version = "0.2.0"
 description = "Helper functions to run Django and Flask applications in AWS Copilot/ECS."
 optional = false
 python-versions = ">=3.9,<4.0"
 files = [
-    {file = "dbt_copilot_python-0.1.5.dev6-py3-none-any.whl", hash = "sha256:30f692871a5e2fb3e9846dc29e4c438fa1590ed328630ba2a6f68f7ebb069a8d"},
-    {file = "dbt_copilot_python-0.1.5.dev6.tar.gz", hash = "sha256:2edf6b606ecfe3563da063c24fb9492220b858aed53c11677379bfd11515e4bc"},
+    {file = "dbt_copilot_python-0.2.0-py3-none-any.whl", hash = "sha256:1c2191c7b867effb32b249c08e5024eb73ca6a5007a4ef8b7617807f28c8ef59"},
+    {file = "dbt_copilot_python-0.2.0.tar.gz", hash = "sha256:20a23aba6b40c9484f0f8b758bfc7ca18321281c26c709a9346dca8b7f2279e7"},
 ]
 
 [package.dependencies]
@@ -389,9 +389,6 @@ opentelemetry-exporter-otlp = "1.22.0"
 opentelemetry-instrumentation-wsgi = "0.43b0"
 opentelemetry-propagator-aws-xray = ">=1.0.1,<2.0.0"
 opentelemetry-sdk-extension-aws = ">=2.0.1,<3.0.0"
-pytest-celery = ">=0.0.0,<0.0.1"
-pytest-mock = ">=3.12.0,<4.0.0"
-redis = ">=5.0.1,<6.0.0"
 requests = ">=2.31.0,<3.0.0"
 
 [[package]]
@@ -695,17 +692,6 @@ zipp = ">=0.5"
 docs = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "rst.linker (>=1.9)", "sphinx (<7.2.5)", "sphinx (>=3.5)", "sphinx-lint"]
 perf = ["ipython"]
 testing = ["flufl.flake8", "importlib-resources (>=1.3)", "packaging", "pyfakefs", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=2.2)", "pytest-mypy (>=0.9.1)", "pytest-perf (>=0.9.2)", "pytest-ruff"]
-
-[[package]]
-name = "iniconfig"
-version = "2.0.0"
-description = "brain-dead simple config-ini parsing"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "iniconfig-2.0.0-py3-none-any.whl", hash = "sha256:b6a85871a79d2e3b22d2d1b94ac2824226a63c6b741c88f7ae975f18b6778374"},
-    {file = "iniconfig-2.0.0.tar.gz", hash = "sha256:2d91e135bf72d31a410b17c16da610a82cb55f6b0477d1a902134b24a455b8b3"},
-]
 
 [[package]]
 name = "jmespath"
@@ -1076,21 +1062,6 @@ docs = ["furo (>=2023.7.26)", "proselint (>=0.13)", "sphinx (>=7.1.1)", "sphinx-
 test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=7.4)", "pytest-cov (>=4.1)", "pytest-mock (>=3.11.1)"]
 
 [[package]]
-name = "pluggy"
-version = "1.4.0"
-description = "plugin and hook calling mechanisms for python"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "pluggy-1.4.0-py3-none-any.whl", hash = "sha256:7db9f7b503d67d1c5b95f59773ebb58a8c1c288129a88665838012cfb07b8981"},
-    {file = "pluggy-1.4.0.tar.gz", hash = "sha256:8c85c2876142a764e5b7548e7d9a0e0ddb46f5185161049a79b7e974454223be"},
-]
-
-[package.extras]
-dev = ["pre-commit", "tox"]
-testing = ["pytest", "pytest-benchmark"]
-
-[[package]]
 name = "pre-commit"
 version = "3.6.0"
 description = "A framework for managing and maintaining multi-language pre-commit hooks."
@@ -1235,57 +1206,6 @@ files = [
 ]
 
 [[package]]
-name = "pytest"
-version = "7.4.4"
-description = "pytest: simple powerful testing with Python"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "pytest-7.4.4-py3-none-any.whl", hash = "sha256:b090cdf5ed60bf4c45261be03239c2c1c22df034fbffe691abe93cd80cea01d8"},
-    {file = "pytest-7.4.4.tar.gz", hash = "sha256:2cf0005922c6ace4a3e2ec8b4080eb0d9753fdc93107415332f50ce9e7994280"},
-]
-
-[package.dependencies]
-colorama = {version = "*", markers = "sys_platform == \"win32\""}
-iniconfig = "*"
-packaging = "*"
-pluggy = ">=0.12,<2.0"
-
-[package.extras]
-testing = ["argcomplete", "attrs (>=19.2.0)", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.7.2)", "requests", "setuptools", "xmlschema"]
-
-[[package]]
-name = "pytest-celery"
-version = "0.0.0"
-description = "pytest-celery a shim pytest plugin to enable celery.contrib.pytest"
-optional = false
-python-versions = "*"
-files = [
-    {file = "pytest-celery-0.0.0.tar.gz", hash = "sha256:cfd060fc32676afa1e4f51b2938f903f7f75d952186b8c6cf631628c4088f406"},
-    {file = "pytest_celery-0.0.0-py2.py3-none-any.whl", hash = "sha256:63dec132df3a839226ecb003ffdbb0c2cb88dd328550957e979c942766578060"},
-]
-
-[package.dependencies]
-celery = ">=4.4.0"
-
-[[package]]
-name = "pytest-mock"
-version = "3.12.0"
-description = "Thin-wrapper around the mock package for easier use with pytest"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "pytest-mock-3.12.0.tar.gz", hash = "sha256:31a40f038c22cad32287bb43932054451ff5583ff094bca6f675df2f8bc1a6e9"},
-    {file = "pytest_mock-3.12.0-py3-none-any.whl", hash = "sha256:0972719a7263072da3a21c7f4773069bcc7486027d7e8e1f81d98a47e701bc4f"},
-]
-
-[package.dependencies]
-pytest = ">=5.0"
-
-[package.extras]
-dev = ["pre-commit", "pytest-asyncio", "tox"]
-
-[[package]]
 name = "python-dateutil"
 version = "2.8.2"
 description = "Extensions to the standard Python datetime module"
@@ -1315,13 +1235,13 @@ cli = ["click (>=5.0)"]
 
 [[package]]
 name = "pytz"
-version = "2023.3.post1"
+version = "2023.4"
 description = "World timezone definitions, modern and historical"
 optional = false
 python-versions = "*"
 files = [
-    {file = "pytz-2023.3.post1-py2.py3-none-any.whl", hash = "sha256:ce42d816b81b68506614c11e8937d3aa9e41007ceb50bfdcb0749b921bf646c7"},
-    {file = "pytz-2023.3.post1.tar.gz", hash = "sha256:7b4fddbeb94a1eba4b557da24f19fdf9db575192544270a9101d8509f9f43d7b"},
+    {file = "pytz-2023.4-py2.py3-none-any.whl", hash = "sha256:f90ef520d95e7c46951105338d918664ebfd6f1d995bd7d153127ce90efafa6a"},
+    {file = "pytz-2023.4.tar.gz", hash = "sha256:31d4583c4ed539cd037956140d695e42c033a19e984bfce9964a3f7d59bc2b40"},
 ]
 
 [[package]]
@@ -1692,4 +1612,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "fba6b508da7641ceed5d1e55f70dffe90079866ac286e13b15021bdb470a9fe9"
+content-hash = "eec07ba63d5e46b92ce306549c5b78dc08a89da0fef86286c6ada541f83bd5b0"
