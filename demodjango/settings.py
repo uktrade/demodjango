@@ -40,7 +40,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 DEBUG = True if (os.getenv("DEBUG") == "True") else False
 
 ALLOWED_HOSTS = setup_allowed_hosts(["*"])
-ACTIVE_CHECKS = [x.strip() for x in os.getenv("ACTIVE_CHECKS", "").split(",")]
+ACTIVE_CHECKS = list(filter(None, [x.strip() for x in os.getenv("ACTIVE_CHECKS", "").split(",")]))
 
 DLFA_INCLUDE_RAW_LOG = True
 
