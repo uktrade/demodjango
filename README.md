@@ -54,8 +54,10 @@ OPENSEARCH_CREDENTIALS = "{"username":"username", "password": "password"}"
 
 ## Testing
 
-Testing is done through Playwright (linkme)
+Browser testing is done with [Playwright](https://playwright.dev/).
 
 After installing the dependencies, run `playwright install` to install the browsers
 
-Run the test suite with `./smoke_tests.sh` locally (helper for `LANDING_PAGE_URL="http://localhost:8080" pytest ./tests/smoke`)
+Run the test suite with `./smoke_tests.sh` to test against your local running environment.
+
+You can target deployed environments with `./smoke_tests.sh <environment>`.
