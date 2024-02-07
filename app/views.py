@@ -1,4 +1,3 @@
-import datetime
 import json
 import logging
 import os
@@ -80,7 +79,7 @@ def index(request):
 
 
 def server_time_check():
-    return render_connection_info(ALL_CHECKS[SERVER_TIME], True, str(datetime.now()))
+    return render_connection_info(ALL_CHECKS[SERVER_TIME], True, str(datetime.utcnow()))
 
 
 def postgres_rds_check():
@@ -173,7 +172,7 @@ def celery_worker_check():
         return backend_result
 
     try:
-        timestamp = datetime.now()
+        timestamp = datetime.utcnow()
         logger.info("Adding debug task to Celery queue")
         task_id = str(demodjango_task.delay(f"{timestamp}"))
         backend_result = get_result_from_celery_backend()

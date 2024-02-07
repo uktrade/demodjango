@@ -34,7 +34,7 @@ class Command(BaseCommand):
             doc = {
                 'author': 'author_name',
                 'text': 'Test content read from OpenSearch.',
-                'timestamp': datetime.now(),
+                'timestamp': datetime.utcnow(),
             }
             response = opensearch_client.index(index="test-index", id=1, body=doc)
             print(response['result'])
