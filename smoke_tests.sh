@@ -11,7 +11,7 @@ case "${target}" in
     ;;
 esac
 
-echo "Running smoke tests against ${target}"
+echo "Running smoke tests against ${host}"
 
 export LANDING_PAGE_URL=${host}
 pytest ./tests/smoke
