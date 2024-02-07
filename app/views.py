@@ -18,6 +18,28 @@ from .util import render_connection_info
 
 logger = logging.getLogger("django")
 
+CELERY = 'celery'
+GIT_INFORMATION = 'git_information'
+OPENSEARCH = 'opensearch'
+POSTGRES_AURORA = 'postgres_aurora'
+POSTGRES_RDS = 'postgres_rds'
+REDIS = 'redis'
+S3 = 's3'
+SERVER_TIME = 'server_time'
+SQLITE = 'sqlite3'
+
+ALL_CHECKS = {
+    CELERY: 'Celery Worker',
+    GIT_INFORMATION: 'Git information',
+    OPENSEARCH: 'OpenSearch',
+    POSTGRES_AURORA: 'PostgreSQL (Aurora)',
+    POSTGRES_RDS: 'PostgreSQL (RDS)',
+    REDIS: 'Redis',
+    S3: 'S3 Bucket',
+    SERVER_TIME: 'Server Time',
+    SQLITE: 'SQLite3',
+}
+
 
 def index(request):
     logger.info("Rendering landing page")
@@ -32,12 +54,12 @@ def index(request):
     status_check_results = [server_time_check(), git_information(), sqlite_check()]
 
     optional_checks: Dict[str, Callable] = {
-        'postgres_rds': postgres_rds_check,
-        'postgres_aurora': postgres_aurora_check,
-        'redis': redis_check,
-        's3': s3_bucket_check,
-        'opensearch': opensearch_check,
-        'celery': celery_worker_check,
+        POSTGRES_RDS: postgres_rds_check,
+        POSTGRES_AURORA: postgres_aurora_check,
+        REDIS: redis_check,
+        S3: s3_bucket_check,
+        OPENSEARCH: opensearch_check,
+        CELERY: celery_worker_check,
     }
 
     if settings.ACTIVE_CHECKS:
@@ -58,11 +80,11 @@ def index(request):
 
 
 def server_time_check():
-    return render_connection_info('Server Time', True, str(datetime.now()))
+    return render_connection_info(ALL_CHECKS[SERVER_TIME], True, str(datetime.now()))
 
 
 def postgres_rds_check():
-    addon_type = 'PostgreSQL (RDS)'
+    addon_type = ALL_CHECKS[POSTGRES_RDS]
     try:
         with connections['rds'].cursor() as c:
             c.execute('SELECT version()')
@@ -72,7 +94,7 @@ def postgres_rds_check():
 
 
 def postgres_aurora_check():
-    addon_type = 'PostgreSQL (Aurora)'
+    addon_type = ALL_CHECKS[POSTGRES_AURORA]
     try:
         with connections['aurora'].cursor() as c:
             c.execute('SELECT version()')
@@ -82,7 +104,7 @@ def postgres_aurora_check():
 
 
 def sqlite_check():
-    addon_type = 'SQLite3'
+    addon_type = ALL_CHECKS[SQLITE]
     try:
         with connections['default'].cursor() as c:
             c.execute('SELECT SQLITE_VERSION()')
@@ -92,7 +114,7 @@ def sqlite_check():
 
 
 def redis_check():
-    addon_type = 'Redis'
+    addon_type = ALL_CHECKS[REDIS]
     try:
         r = redis.Redis.from_url(f'{settings.REDIS_ENDPOINT}')
         return render_connection_info(addon_type, True, r.get('test-data').decode())
@@ -101,7 +123,7 @@ def redis_check():
 
 
 def s3_bucket_check():
-    addon_type = 'S3 Bucket'
+    addon_type = ALL_CHECKS[S3]
     try:
         s3 = boto3.resource('s3')
         bucket = s3.Bucket(settings.S3_BUCKET_NAME)
@@ -114,7 +136,7 @@ def s3_bucket_check():
 
 
 def opensearch_check():
-    addon_type = 'OpenSearch'
+    addon_type = ALL_CHECKS[OPENSEARCH]
     get_result_timeout = 5
 
     @retry(stop=stop_after_delay(get_result_timeout), wait=wait_fixed(1))
@@ -137,7 +159,7 @@ def opensearch_check():
 def celery_worker_check():
     from demodjango import celery_app
 
-    addon_type = 'Celery Worker'
+    addon_type = ALL_CHECKS[CELERY]
     get_result_timeout = 2
 
     @retry(stop=stop_after_delay(get_result_timeout), wait=wait_fixed(1))
@@ -171,6 +193,6 @@ def git_information():
     git_branch = os.environ.get("GIT_BRANCH", "Unknown")
     git_tag = os.environ.get("GIT_TAG", "Unknown")
 
-    return render_connection_info('Git information',
+    return render_connection_info(ALL_CHECKS[GIT_INFORMATION],
                                   git_commit != "Unknown",
                                   f"Commit: {git_commit}, Branch: {git_branch}, Tag: {git_tag}")
