@@ -18,15 +18,10 @@ from app.views import (
 )
 
 
-PAGE_TITLE = "DemoDjango"
-
-
 def test_page_loads_with_title_and_has_success_ticks(page: Page):
-    page.goto(
-        os.getenv("LANDING_PAGE_URL")
-    )
+    page.goto(os.getenv("LANDING_PAGE_URL"))
 
-    expect(page).to_have_title(re.compile(PAGE_TITLE))
+    expect(page).to_have_title(re.compile("DemoDjango"))
 
     expect(
         page.get_by_test_id(slugify(ALL_CHECKS[SERVER_TIME]))
