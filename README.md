@@ -51,3 +51,11 @@ To connect to OpenSearch, set the following env var:
 OPENSEARCH_ENDPOINT = "https://{domain_url}:443"
 OPENSEARCH_CREDENTIALS = "{"username":"username", "password": "password"}"
 ```
+
+## Testing
+
+Testing is done through Playwright (linkme)
+
+After installing the dependencies, run `playwright install` to install the browsers
+
+Run the test suite with `pytest .`
