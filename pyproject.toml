@@ -31,3 +31,7 @@ redis = "^5.0.1"
 requests = "^2.31.0"
 tenacity = "^8.2.3"
 whitenoise = "^6.6.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest-playwright = "^0.4.4"
+
