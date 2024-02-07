@@ -58,4 +58,4 @@ Testing is done through Playwright (linkme)
 
 After installing the dependencies, run `playwright install` to install the browsers
 
-Run the test suite with `pytest .`
+Run the test suite with `./smoke_tests.sh` locally (helper for `LANDING_PAGE_URL="http://localhost:8080" pytest ./tests/smoke`)
