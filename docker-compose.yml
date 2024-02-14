@@ -24,6 +24,7 @@ services:
       GIT_COMMIT: "3x4mp13"
       GIT_BRANCH: "example-branch"
       GIT_TAG: "3.2.1"
+      HTTP_CHECK_URLS: "https://bbc.co.uk|200|GET,http://neverssl.com,https://httpstat.us/400,https://bbc.co.uk|300|PLAS,https://hreoiuvh09e8.bom"
     ports:
       - "8080:8080"
     volumes:
