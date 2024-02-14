@@ -49,6 +49,10 @@ services:
       AWS_REGION: eu-west-2
 
   celery-worker:
+    build:
+      context: .
+      cache_from:
+        - demodjango/application:latest
     image: demodjango/application:latest
     command: celery --app demodjango.celery worker --task-events --loglevel INFO
     entrypoint: ''
