@@ -6,7 +6,7 @@ def test_rendering_a_successful_report():
 
     output = report.render()
 
-    assert "<strong>Report Title</strong>\n\n" == output
+    assert "<strong>Report Title: success</strong>\n\n" == output
 
 
 def test_rendering_an_unsuccessful_report():
@@ -17,6 +17,6 @@ def test_rendering_an_unsuccessful_report():
 
     output = report.render()
 
-    assert '<strong>Report Title</strong>' in output
+    assert '<strong>Report Title: failure</strong>' in output
     assert 'Something went wrong!' in output
     assert 'And something else went wrong!' in output

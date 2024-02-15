@@ -1,4 +1,4 @@
-<strong>{{ report.summary }}</strong>
+<strong>{{ report.summary }}: {% if report.success %}success{% else %}failure{% endif %}</strong>
 {% for error in report.errors %}
     {{ error }}
 {% endfor %}
