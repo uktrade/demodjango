@@ -3,11 +3,9 @@ import logging
 import os
 from datetime import datetime
 from typing import Dict, Callable
-from urllib.parse import urlparse
 
 import boto3
 import redis
-import requests
 from django.conf import settings
 from django.db import connections
 from django.http import HttpResponse
@@ -15,7 +13,8 @@ from opensearchpy import OpenSearch
 from tenacity import retry, stop_after_delay, RetryError, wait_fixed
 
 from celery_worker.tasks import demodjango_task
-from .util import render_connection_info, STATUS_SUCCESS, STATUS_FAIL
+from .check.check_http import HTTPCheck
+from .util import render_connection_info
 
 logger = logging.getLogger("django")
 
@@ -77,7 +76,9 @@ def index(request):
                 f"{settings.ACTIVE_CHECKS if settings.ACTIVE_CHECKS else 'all'}")
 
     return HttpResponse(
-        "<!doctype html><html><head><title>DemoDjango</title></head><body>"
+        "<!doctype html><html><head>"
+        "<title>DemoDjango</title>"
+        "</head><body>"
         f"{''.join(status_check_results)}"
         "</body></html>"
     )
@@ -203,48 +204,11 @@ def git_information():
 
 
 def http_check():
-    urls = os.environ.get("HTTP_CHECK_URLS", "https://httpstat.us/200|200|GET").split(",")
-    urls = [u for u in urls if u]
+    urls = os.environ.get("HTTP_CHECK_URLS", "https://httpstat.us/200|200|GET")
 
-    passed = True
-    message = ""
+    check = HTTPCheck(urls)
+    check.execute()
 
-    if not urls:
-        passed = False
-        message = ("No urls provided, set HTTP_CHECK_URLS to a comma separated list of "
-                   "URL|STATUS_CODE|METHOD Example: 'http://api.dev.demodjango.internal|200|GET,"
-                   "http://api.dev.demodjango.internal/path|403|POST'")
-
-    for url in urls:
-        segments = url.split("|")
-        url = segments[0]
-        url_parsed = urlparse(url)
-        status = int(segments[1]) if len(segments) > 1 else 200
-        method = segments[2].lower() if len(segments) > 2 else 'get'
-        request_success = True
-
-        check_message = f"{method.upper()} {url_parsed.hostname}{url_parsed.path} "
-
-        requester = getattr(requests, method, None)
-        if not requester:
-            check_message += f"invalid HTTP method {method} "
-            request_success = False
-
-        if request_success:
-            try:
-                r = requester(url)
-
-                if r.status_code != status:
-                    check_message += f"response has status code <code>{r.status_code}</code>, but expected <code>{status}</code> "
-                    passed = False
-                    request_success = False
-            except Exception as e:
-                passed = False
-                request_success = False
-                check_message += f"{e} "
-
-        check_message = f'<span style="color: green">{STATUS_SUCCESS}</span> {check_message}' if request_success else f'<span style="color: red">{STATUS_FAIL}</span> {check_message}'
-        check_message += "<br>"
-        message += check_message
-
-    return render_connection_info(ALL_CHECKS[HTTP_CONNECTION], passed, message)
+    return render_connection_info(ALL_CHECKS[HTTP_CONNECTION],
+                                  check.success,
+                                  "".join([c.render() for c in check.report]))
