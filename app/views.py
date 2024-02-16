@@ -13,6 +13,7 @@ from opensearchpy import OpenSearch
 from tenacity import retry, stop_after_delay, RetryError, wait_fixed
 
 from celery_worker.tasks import demodjango_task
+from .check.check_http import HTTPCheck
 from .util import render_connection_info
 
 logger = logging.getLogger("django")
@@ -26,6 +27,7 @@ REDIS = 'redis'
 S3 = 's3'
 SERVER_TIME = 'server_time'
 SQLITE = 'sqlite3'
+HTTP_CONNECTION = 'http'
 
 ALL_CHECKS = {
     CELERY: 'Celery Worker',
@@ -37,6 +39,7 @@ ALL_CHECKS = {
     S3: 'S3 Bucket',
     SERVER_TIME: 'Server Time',
     SQLITE: 'SQLite3',
+    HTTP_CONNECTION: 'HTTP Checks',
 }
 
 
@@ -59,6 +62,7 @@ def index(request):
         S3: s3_bucket_check,
         OPENSEARCH: opensearch_check,
         CELERY: celery_worker_check,
+        HTTP_CONNECTION: http_check,
     }
 
     if settings.ACTIVE_CHECKS:
@@ -72,7 +76,9 @@ def index(request):
                 f"{settings.ACTIVE_CHECKS if settings.ACTIVE_CHECKS else 'all'}")
 
     return HttpResponse(
-        "<!doctype html><html><head><title>DemoDjango</title></head><body>"
+        "<!doctype html><html><head>"
+        "<title>DemoDjango</title>"
+        "</head><body>"
         f"{''.join(status_check_results)}"
         "</body></html>"
     )
@@ -195,3 +201,14 @@ def git_information():
     return render_connection_info(ALL_CHECKS[GIT_INFORMATION],
                                   git_commit != "Unknown",
                                   f"Commit: {git_commit}, Branch: {git_branch}, Tag: {git_tag}")
+
+
+def http_check():
+    urls = os.environ.get("HTTP_CHECK_URLS", "https://httpstat.us/200|200|GET")
+
+    check = HTTPCheck(urls)
+    check.execute()
+
+    return render_connection_info(ALL_CHECKS[HTTP_CONNECTION],
+                                  check.success,
+                                  "".join([c.render() for c in check.report]))
