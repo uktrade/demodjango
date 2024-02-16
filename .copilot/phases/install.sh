@@ -4,3 +4,6 @@
 set -e
 
 # Add commands below to run as part of the install phase
+
+pip install poetry
+poetry install
