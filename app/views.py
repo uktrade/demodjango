@@ -19,6 +19,7 @@ from .util import render_connection_info
 logger = logging.getLogger("django")
 
 CELERY = 'celery'
+BEAT = 'beat'
 GIT_INFORMATION = 'git_information'
 OPENSEARCH = 'opensearch'
 POSTGRES_AURORA = 'postgres_aurora'
@@ -30,6 +31,7 @@ SQLITE = 'sqlite3'
 HTTP_CONNECTION = 'http'
 
 ALL_CHECKS = {
+    BEAT: 'Celery Beat',
     CELERY: 'Celery Worker',
     GIT_INFORMATION: 'Git information',
     OPENSEARCH: 'OpenSearch',
@@ -62,6 +64,7 @@ def index(request):
         S3: s3_bucket_check,
         OPENSEARCH: opensearch_check,
         CELERY: celery_worker_check,
+        BEAT: celery_beat_check,
         HTTP_CONNECTION: http_check,
     }
 
@@ -191,6 +194,11 @@ def celery_worker_check():
     except Exception as e:
         logger.error(e)
         return render_connection_info(addon_type, False, str(e))
+
+
+def celery_beat_check():
+    addon_type = ALL_CHECKS[BEAT]
+    return render_connection_info(addon_type, False, "")
 
 
 def git_information():

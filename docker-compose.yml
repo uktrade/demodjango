@@ -54,7 +54,7 @@ services:
       cache_from:
         - demodjango/application:latest
     image: demodjango/application:latest
-    command: celery --app demodjango.celery worker --task-events --loglevel INFO
+    command: celery_worker --app demodjango.celery_worker worker --task-events --loglevel INFO
     entrypoint: ''
     volumes:
       - .:/app
@@ -64,6 +64,24 @@ services:
       timeout: 5s
       retries: 2
       start_period: 5s
+    depends_on:
+      - redis
+    environment:
+      REDIS_ENDPOINT: redis://redis:6379
+      DEBUG: true
+      DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
+      DJANGO_SETTINGS_MODULE: demodjango.settings
+
+  celery-beat:
+    build:
+      context: .
+      cache_from:
+        - demodjango/application:latest
+    image: demodjango/application:latest
+    command: celery_worker --app demodjango.celery_worker beat --loglevel INFO
+    entrypoint: ''
+    volumes:
+      - .:/app
     depends_on:
       - redis
     environment:
