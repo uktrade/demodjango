@@ -54,7 +54,7 @@ services:
       cache_from:
         - demodjango/application:latest
     image: demodjango/application:latest
-    command: celery_worker --app demodjango.celery_worker worker --task-events --loglevel INFO
+    command: celery --app demodjango.celery worker --task-events --loglevel INFO
     entrypoint: ''
     volumes:
       - .:/app
@@ -78,7 +78,7 @@ services:
       cache_from:
         - demodjango/application:latest
     image: demodjango/application:latest
-    command: celery_worker --app demodjango.celery_worker beat --loglevel INFO
+    command: bash -c "python manage.py migrate && celery --app demodjango.celery beat --loglevel INFO"
     entrypoint: ''
     volumes:
       - .:/app
