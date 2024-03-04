@@ -160,7 +160,7 @@ RDS_DATABASE_CREDENTIALS = os.getenv("RDS_DATABASE_CREDENTIALS", "")
 
 if RDS_DATABASE_CREDENTIALS:
     DATABASES["rds"] = dj_database_url.config(
-        default=database_url_from_env("RDS_DATABASE_CREDENTIALS")
+        default=os.get_env(os.get_env("RDS_DATABASE_CREDENTIALS"))
     )
 
 DATABASE_CREDENTIALS = os.getenv("DATABASE_CREDENTIALS", "")
