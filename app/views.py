@@ -9,7 +9,7 @@ import redis
 from django.conf import settings
 from django.db import connections
 from django.http import HttpResponse
-from django_celery_beat.models import IntervalSchedule, PeriodicTask
+# from django_celery_beat.models import IntervalSchedule, PeriodicTask
 from opensearchpy import OpenSearch
 from tenacity import retry, stop_after_delay, RetryError, wait_fixed
 
