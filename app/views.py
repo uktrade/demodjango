@@ -201,16 +201,16 @@ def celery_beat_check():
     addon_type = ALL_CHECKS[BEAT]
     timestamp = datetime.utcnow()
 
-    interval, _ = IntervalSchedule.objects.get_or_create(
-        every=10,
-        period=IntervalSchedule.SECONDS
-    )
-
-    PeriodicTask.objects.create(
-        interval=interval,
-        name=f"my-task-{timestamp}",
-        task="celery_worker.tasks.demodjango_scheduled_task"
-    )
+    # interval, _ = IntervalSchedule.objects.get_or_create(
+    #     every=10,
+    #     period=IntervalSchedule.SECONDS
+    # )
+    #
+    # PeriodicTask.objects.create(
+    #     interval=interval,
+    #     name=f"my-task-{timestamp}",
+    #     task="celery_worker.tasks.demodjango_scheduled_task"
+    # )
 
     return render_connection_info(addon_type, False, "")
 
