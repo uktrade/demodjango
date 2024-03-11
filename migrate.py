@@ -6,7 +6,7 @@ ACTIVE_CHECKS = [x.strip() for x in os.getenv("ACTIVE_CHECKS", "").split(",")]
 migrations = ["python manage.py migrate"]
 
 optional_migrations = {
-    "postgres_rds": "python manage.py migrate --database rds",
+    "postgres_sqlite": "python manage.py migrate --database sqlite",
     "postgres_aurora": "python manage.py migrate --database aurora",
 }
 

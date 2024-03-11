@@ -66,11 +66,13 @@ services:
       start_period: 5s
     depends_on:
       - redis
+      - postgres-rds
     environment:
       REDIS_ENDPOINT: redis://redis:6379
       DEBUG: true
       DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
       DJANGO_SETTINGS_MODULE: demodjango.settings
+      RDS_DATABASE_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
 
   celery-beat:
     build:
@@ -78,17 +80,19 @@ services:
       cache_from:
         - demodjango/application:latest
     image: demodjango/application:latest
-    command: bash -c "python manage.py migrate && celery --app demodjango.celery beat --loglevel INFO"
+    command: celery --app demodjango.celery beat --loglevel INFO
     entrypoint: ''
     volumes:
       - .:/app
     depends_on:
       - redis
+      - postgres-rds
     environment:
       REDIS_ENDPOINT: redis://redis:6379
       DEBUG: true
       DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
       DJANGO_SETTINGS_MODULE: demodjango.settings
+      RDS_DATABASE_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
 
   postgres-rds:
     image: postgres

@@ -95,7 +95,7 @@ def server_time_check():
 def postgres_rds_check():
     addon_type = ALL_CHECKS[POSTGRES_RDS]
     try:
-        with connections['rds'].cursor() as c:
+        with connections['default'].cursor() as c:
             c.execute('SELECT version()')
             return render_connection_info(addon_type, True, c.fetchone()[0])
     except Exception as e:
@@ -115,7 +115,7 @@ def postgres_aurora_check():
 def sqlite_check():
     addon_type = ALL_CHECKS[SQLITE]
     try:
-        with connections['default'].cursor() as c:
+        with connections['sqlite'].cursor() as c:
             c.execute('SELECT SQLITE_VERSION()')
             return render_connection_info(addon_type, True, c.fetchone()[0])
     except Exception as e:

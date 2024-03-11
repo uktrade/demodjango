@@ -151,18 +151,14 @@ WSGI_APPLICATION = 'demodjango.wsgi.application'
 sqlite_db_root = BASE_DIR if is_copilot() else Path(tempfile.gettempdir())
 
 DATABASES = {
-    'default': {
+    "default": dj_database_url.config(
+        default=database_url_from_env("RDS_DATABASE_CREDENTIALS")
+    ),
+    "sqlite": {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': sqlite_db_root / "demodjango.sqlite3",
     }
 }
-
-RDS_DATABASE_CREDENTIALS = os.getenv("RDS_DATABASE_CREDENTIALS", "")
-
-if RDS_DATABASE_CREDENTIALS:
-    DATABASES["rds"] = dj_database_url.config(
-        default=database_url_from_env("RDS_DATABASE_CREDENTIALS")
-    )
 
 DATABASE_CREDENTIALS = os.getenv("DATABASE_CREDENTIALS", "")
 
