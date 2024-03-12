@@ -14,7 +14,7 @@ from tenacity import retry, stop_after_delay, RetryError, wait_fixed
 
 from celery_worker.tasks import demodjango_task
 from .check.check_http import HTTPCheck
-from .models import ScheduledTask
+
 from .util import render_connection_info
 
 logger = logging.getLogger("django")
@@ -198,6 +198,7 @@ def celery_worker_check():
 
 
 def celery_beat_check():
+    from .models import ScheduledTask
     addon_type = ALL_CHECKS[BEAT]
 
     try:

@@ -3,7 +3,6 @@ import logging
 
 from celery import shared_task
 
-from app.models import ScheduledTask
 
 logger = logging.getLogger("django")
 
@@ -16,6 +15,8 @@ def demodjango_task(timestamp):
 
 @shared_task(bind=True)
 def demodjango_scheduled_task(self):
+    from app.models import ScheduledTask
+
     timestamp = datetime.utcnow()
 
     task = ScheduledTask()
