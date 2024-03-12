@@ -9,12 +9,12 @@ import redis
 from django.conf import settings
 from django.db import connections
 from django.http import HttpResponse
-# from django_celery_beat.models import IntervalSchedule, PeriodicTask
 from opensearchpy import OpenSearch
 from tenacity import retry, stop_after_delay, RetryError, wait_fixed
 
 from celery_worker.tasks import demodjango_task
 from .check.check_http import HTTPCheck
+from .models import ScheduledTask
 from .util import render_connection_info
 
 logger = logging.getLogger("django")
@@ -199,20 +199,13 @@ def celery_worker_check():
 
 def celery_beat_check():
     addon_type = ALL_CHECKS[BEAT]
-    timestamp = datetime.utcnow()
 
-    # interval, _ = IntervalSchedule.objects.get_or_create(
-    #     every=10,
-    #     period=IntervalSchedule.SECONDS
-    # )
-    #
-    # PeriodicTask.objects.create(
-    #     interval=interval,
-    #     name=f"my-task-{timestamp}",
-    #     task="celery_worker.tasks.demodjango_scheduled_task"
-    # )
-
-    return render_connection_info(addon_type, False, "")
+    try:
+        latest_task = ScheduledTask.objects.all().order_by('-timestamp').first()
+        connection_info = f"Latest task scheduled with task_id {latest_task.taskid} at {latest_task.timestamp}"
+        return render_connection_info(addon_type, True, connection_info)
+    except Exception as e:
+        return render_connection_info(addon_type, False, str(e))
 
 
 def git_information():

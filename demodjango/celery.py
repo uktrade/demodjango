@@ -1,7 +1,6 @@
 import os
 
 from celery import Celery
-from celery.schedules import crontab
 from dbt_copilot_python.celery_health_check import healthcheck
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "demodjango.settings")
@@ -15,6 +14,6 @@ celery_app = healthcheck.setup(celery_app)
 celery_app.conf.beat_schedule = {
     "schedule-demodjango-task": {
         "task": "celery_worker.tasks.demodjango_scheduled_task",
-        "schedule": crontab(hour=0, minute=1),
+        "schedule": 30.0,
     },
 }
