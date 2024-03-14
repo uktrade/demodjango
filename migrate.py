@@ -2,9 +2,9 @@ import os
 import subprocess
 
 ACTIVE_CHECKS = [x.strip() for x in os.getenv("ACTIVE_CHECKS", "").split(",")]
-RDS_DATABASE_CREDENTIALS = os.getenv("RDS_DATABASE_CREDENTIALS", "")
+RDS_POSTGRES_CREDENTIALS = os.getenv("RDS_POSTGRES_CREDENTIALS", "")
 
-if RDS_DATABASE_CREDENTIALS:
+if RDS_POSTGRES_CREDENTIALS:
     migrations = ["python manage.py migrate", "python manage.py migrate --database sqlite"]
 else:
     migrations = ["python manage.py migrate"]

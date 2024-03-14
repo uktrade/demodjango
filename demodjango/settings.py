@@ -150,12 +150,13 @@ WSGI_APPLICATION = 'demodjango.wsgi.application'
 
 sqlite_db_root = BASE_DIR if is_copilot() else Path(tempfile.gettempdir())
 
-RDS_DATABASE_CREDENTIALS = os.getenv("RDS_DATABASE_CREDENTIALS", "")
-
-if RDS_DATABASE_CREDENTIALS:
+# Django requires a default database. If RDS is present make it the default
+# database to enable celery-beat, otherwise use SQLite
+RDS_POSTGRES_CREDENTIALS = os.getenv("RDS_POSTGRES_CREDENTIALS", "")
+if RDS_POSTGRES_CREDENTIALS:
     DATABASES = {
         "default": dj_database_url.config(
-            default=database_url_from_env("RDS_DATABASE_CREDENTIALS")
+            default=database_url_from_env("RDS_POSTGRES_CREDENTIALS")
         ),
         "sqlite": {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -170,11 +171,10 @@ else:
         }
     }
 
-DATABASE_CREDENTIALS = os.getenv("DATABASE_CREDENTIALS", "")
-
-if DATABASE_CREDENTIALS:
+AURORA_POSTGRES_CREDENTIALS = os.getenv("AURORA_POSTGRES_CREDENTIALS", "")
+if AURORA_POSTGRES_CREDENTIALS:
     DATABASES['aurora'] = dj_database_url.config(
-        default=database_url_from_env("DATABASE_CREDENTIALS")
+        default=database_url_from_env("AURORA_POSTGRES_CREDENTIALS")
     )
 
 # Password validation

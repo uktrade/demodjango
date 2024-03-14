@@ -45,7 +45,7 @@ ALL_CHECKS = {
     HTTP_CONNECTION: 'HTTP Checks',
 }
 
-RDS_DATABASE_CREDENTIALS = os.environ.get("RDS_DATABASE_CREDENTIALS", "")
+RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")
 
 
 def index(request):
@@ -97,7 +97,7 @@ def server_time_check():
 def postgres_rds_check():
     addon_type = ALL_CHECKS[POSTGRES_RDS]
     try:
-        if not RDS_DATABASE_CREDENTIALS:
+        if not RDS_POSTGRES_CREDENTIALS:
             raise Exception("No RDS database")
 
         with connections['default'].cursor() as c:
@@ -121,7 +121,7 @@ def sqlite_check():
     addon_type = ALL_CHECKS[SQLITE]
     try:
         db_name = "default"
-        if RDS_DATABASE_CREDENTIALS:
+        if RDS_POSTGRES_CREDENTIALS:
             db_name = "sqlite"
 
         with connections[db_name].cursor() as c:
@@ -211,7 +211,7 @@ def celery_beat_check():
     addon_type = ALL_CHECKS[BEAT]
 
     try:
-        if not RDS_DATABASE_CREDENTIALS:
+        if not RDS_POSTGRES_CREDENTIALS:
             raise Exception("Database not found")
 
         latest_task = ScheduledTask.objects.all().order_by('-timestamp').first()
