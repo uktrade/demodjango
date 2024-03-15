@@ -14,11 +14,13 @@ from tenacity import retry, stop_after_delay, RetryError, wait_fixed
 
 from celery_worker.tasks import demodjango_task
 from .check.check_http import HTTPCheck
+
 from .util import render_connection_info
 
 logger = logging.getLogger("django")
 
 CELERY = 'celery'
+BEAT = 'beat'
 GIT_INFORMATION = 'git_information'
 OPENSEARCH = 'opensearch'
 POSTGRES_AURORA = 'postgres_aurora'
@@ -30,6 +32,7 @@ SQLITE = 'sqlite3'
 HTTP_CONNECTION = 'http'
 
 ALL_CHECKS = {
+    BEAT: 'Celery Beat',
     CELERY: 'Celery Worker',
     GIT_INFORMATION: 'Git information',
     OPENSEARCH: 'OpenSearch',
@@ -41,6 +44,8 @@ ALL_CHECKS = {
     SQLITE: 'SQLite3',
     HTTP_CONNECTION: 'HTTP Checks',
 }
+
+RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")
 
 
 def index(request):
@@ -62,6 +67,7 @@ def index(request):
         S3: s3_bucket_check,
         OPENSEARCH: opensearch_check,
         CELERY: celery_worker_check,
+        BEAT: celery_beat_check,
         HTTP_CONNECTION: http_check,
     }
 
@@ -91,7 +97,10 @@ def server_time_check():
 def postgres_rds_check():
     addon_type = ALL_CHECKS[POSTGRES_RDS]
     try:
-        with connections['rds'].cursor() as c:
+        if not RDS_POSTGRES_CREDENTIALS:
+            raise Exception("No RDS database")
+
+        with connections['default'].cursor() as c:
             c.execute('SELECT version()')
             return render_connection_info(addon_type, True, c.fetchone()[0])
     except Exception as e:
@@ -111,7 +120,11 @@ def postgres_aurora_check():
 def sqlite_check():
     addon_type = ALL_CHECKS[SQLITE]
     try:
-        with connections['default'].cursor() as c:
+        db_name = "default"
+        if RDS_POSTGRES_CREDENTIALS:
+            db_name = "sqlite"
+
+        with connections[db_name].cursor() as c:
             c.execute('SELECT SQLITE_VERSION()')
             return render_connection_info(addon_type, True, c.fetchone()[0])
     except Exception as e:
@@ -190,6 +203,21 @@ def celery_worker_check():
         return render_connection_info(addon_type, False, connection_info)
     except Exception as e:
         logger.error(e)
+        return render_connection_info(addon_type, False, str(e))
+
+
+def celery_beat_check():
+    from .models import ScheduledTask
+    addon_type = ALL_CHECKS[BEAT]
+
+    try:
+        if not RDS_POSTGRES_CREDENTIALS:
+            raise Exception("Database not found")
+
+        latest_task = ScheduledTask.objects.all().order_by('-timestamp').first()
+        connection_info = f"Latest task scheduled with task_id {latest_task.taskid} at {latest_task.timestamp}"
+        return render_connection_info(addon_type, True, connection_info)
+    except Exception as e:
         return render_connection_info(addon_type, False, str(e))
 
 

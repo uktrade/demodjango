@@ -102,6 +102,7 @@ DLFA_INCLUDE_RAW_LOG = True
 # Application definition
 
 INSTALLED_APPS = [
+    'django_celery_beat',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -149,25 +150,31 @@ WSGI_APPLICATION = 'demodjango.wsgi.application'
 
 sqlite_db_root = BASE_DIR if is_copilot() else Path(tempfile.gettempdir())
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': sqlite_db_root / "demodjango.sqlite3",
+# Django requires a default database. If RDS is present make it the default
+# database to enable celery-beat, otherwise use SQLite
+RDS_POSTGRES_CREDENTIALS = os.getenv("RDS_POSTGRES_CREDENTIALS", "")
+if RDS_POSTGRES_CREDENTIALS:
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=database_url_from_env("RDS_POSTGRES_CREDENTIALS")
+        ),
+        "sqlite": {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': sqlite_db_root / "demodjango.sqlite3",
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': sqlite_db_root / "demodjango.sqlite3",
+        }
+    }
 
-RDS_DATABASE_CREDENTIALS = os.getenv("RDS_DATABASE_CREDENTIALS", "")
-
-if RDS_DATABASE_CREDENTIALS:
-    DATABASES["rds"] = dj_database_url.config(
-        default=database_url_from_env("RDS_DATABASE_CREDENTIALS")
-    )
-
-DATABASE_CREDENTIALS = os.getenv("DATABASE_CREDENTIALS", "")
-
-if DATABASE_CREDENTIALS:
+AURORA_POSTGRES_CREDENTIALS = os.getenv("AURORA_POSTGRES_CREDENTIALS", "")
+if AURORA_POSTGRES_CREDENTIALS:
     DATABASES['aurora'] = dj_database_url.config(
-        default=database_url_from_env("DATABASE_CREDENTIALS")
+        default=database_url_from_env("AURORA_POSTGRES_CREDENTIALS")
     )
 
 # Password validation
@@ -222,3 +229,4 @@ CELERY_RESULT_BACKEND = CELERY_BROKER_URL
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"

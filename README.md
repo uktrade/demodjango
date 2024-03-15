@@ -16,7 +16,7 @@ By default, it will use SQLite for the backend database and the app will work fi
 To connect to an Aurora Postgres instance, set the following env var:
 
 ```
-DATABASE_CREDENTIALS = DATABASE_CREDENTIALS_STRING
+AURORA_POSTGRES_CREDENTIALS = AURORA_POSTGRES_CREDENTIALS_STRING
 ```
 
 ## RDS Postgres
@@ -24,7 +24,7 @@ DATABASE_CREDENTIALS = DATABASE_CREDENTIALS_STRING
 To connect to an RDS Postgres instance, set the following env var:
 
 ```
-RDS_DATABASE_CREDENTIALS = "{"db_credential_key": "db_credential_value"}"
+RDS_POSTGRES_CREDENTIALS = "{"db_credential_key": "db_credential_value"}"
 ```
 
 ## Redis
