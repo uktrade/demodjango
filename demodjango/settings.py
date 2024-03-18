@@ -16,12 +16,14 @@ import tempfile
 from pathlib import Path
 import dj_database_url
 import environ
+import sentry_sdk
 from dbt_copilot_python.network import setup_allowed_hosts
 from dbt_copilot_python.utility import is_copilot
 from django_log_formatter_asim import ASIMFormatter
 from dotenv import load_dotenv
 
 from dbt_copilot_python.database import database_url_from_env
+from sentry_sdk.integrations.django import DjangoIntegration
 
 load_dotenv()
 
@@ -230,3 +232,12 @@ CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
+
+SENTRY_DSN = os.getenv("SENTRY_DSN", "")
+
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=1.0,
+    )
