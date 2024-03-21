@@ -14,7 +14,7 @@ from app.models import SampleTable
 class Command(BaseCommand):
     def handle(self, *args, **options):
 
-        SampleTable.objects.update_or_create(sampleid=1, sample_name="Database is connected")
+        SampleTable.objects.update_or_create(sample_id=1, sample_name="Database is connected")
 
         if settings.REDIS_ENDPOINT:
             r = redis.Redis.from_url(f'{settings.REDIS_ENDPOINT}')
