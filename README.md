@@ -61,3 +61,16 @@ After installing the dependencies, run `playwright install` to install the brows
 Run the test suite with `./smoke_tests.sh` to test against your local running environment.
 
 You can target deployed environments with `./smoke_tests.sh <environment>`.
+
+
+## Running the application with docker-compose
+
+docker-compose will run several services as part of the demodjango application.
+These are defined in the docker-compose.yml file.
+
+```
+  docker-compose build
+  docker-compose up
+```
+
+
