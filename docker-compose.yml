@@ -122,3 +122,5 @@ services:
     environment:
       'discovery.type': single-node
       'plugins.security.disabled': true
+      OPENSEARCH_INITIAL_ADMIN_PASSWORD: P4ssword-does-not-matter
+      
