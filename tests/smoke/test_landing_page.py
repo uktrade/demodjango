@@ -14,7 +14,6 @@ from app.views import (
     REDIS,
     S3,
     SERVER_TIME,
-    SQLITE,
     HTTP_CONNECTION,
 )
 
@@ -30,10 +29,6 @@ def test_page_loads_with_title_and_has_success_ticks(page: Page):
 
     expect(
         page.get_by_test_id(slugify(ALL_CHECKS[GIT_INFORMATION]))
-    ).to_have_text(re.compile(STATUS_SUCCESS))
-
-    expect(
-        page.get_by_test_id(slugify(ALL_CHECKS[SQLITE]))
     ).to_have_text(re.compile(STATUS_SUCCESS))
 
     expect(
