@@ -7,9 +7,9 @@ from app.util import STATUS_SUCCESS
 from app.views import (
     ALL_CHECKS,
     CELERY,
+    BEAT,
     GIT_INFORMATION,
     OPENSEARCH,
-    POSTGRES_AURORA,
     POSTGRES_RDS,
     REDIS,
     S3,
@@ -36,10 +36,6 @@ def test_page_loads_with_title_and_has_success_ticks(page: Page):
     ).to_have_text(re.compile(STATUS_SUCCESS))
 
     expect(
-        page.get_by_test_id(slugify(ALL_CHECKS[POSTGRES_AURORA]))
-    ).to_have_text(re.compile(STATUS_SUCCESS))
-
-    expect(
         page.get_by_test_id(slugify(ALL_CHECKS[REDIS]))
     ).to_have_text(re.compile(STATUS_SUCCESS))
 
@@ -53,6 +49,10 @@ def test_page_loads_with_title_and_has_success_ticks(page: Page):
 
     expect(
         page.get_by_test_id(slugify(ALL_CHECKS[CELERY]))
+    ).to_have_text(re.compile(STATUS_SUCCESS))
+
+    expect(
+        page.get_by_test_id(slugify(ALL_CHECKS[BEAT]))
     ).to_have_text(re.compile(STATUS_SUCCESS))
 
     expect(

@@ -7,7 +7,7 @@ case "${target}" in
     host="http://localhost:8080"
     ;;
   *)
-    host="https://v2.demodjango.${target}.uktrade.digital/"
+    host="https://internal.${target}.demodjango.uktrade.digital/"
     ;;
 esac
 
