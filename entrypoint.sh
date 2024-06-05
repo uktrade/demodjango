@@ -2,7 +2,6 @@
 dockerize -wait tcp://opensearch:9200 -timeout 60s
 
 python manage.py migrate
-python manage.py migrate --database sqlite
 python manage.py migrate --database aurora
 python manage.py load_defaults
 
