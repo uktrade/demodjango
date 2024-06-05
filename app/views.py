@@ -28,7 +28,6 @@ POSTGRES_RDS = 'postgres_rds'
 REDIS = 'redis'
 S3 = 's3'
 SERVER_TIME = 'server_time'
-SQLITE = 'sqlite3'
 HTTP_CONNECTION = 'http'
 
 ALL_CHECKS = {
@@ -41,7 +40,6 @@ ALL_CHECKS = {
     REDIS: 'Redis',
     S3: 'S3 Bucket',
     SERVER_TIME: 'Server Time',
-    SQLITE: 'SQLite3',
     HTTP_CONNECTION: 'HTTP Checks',
 }
 
@@ -58,7 +56,7 @@ def index(request):
         "headers": dict(request.headers),
     })
 
-    status_check_results = [server_time_check(), git_information(), sqlite_check()]
+    status_check_results = [server_time_check(), git_information()]
 
     optional_checks: Dict[str, Callable] = {
         POSTGRES_RDS: postgres_rds_check,
@@ -112,20 +110,6 @@ def postgres_aurora_check():
     try:
         with connections['aurora'].cursor() as c:
             c.execute('SELECT version()')
-            return render_connection_info(addon_type, True, c.fetchone()[0])
-    except Exception as e:
-        return render_connection_info(addon_type, False, str(e))
-
-
-def sqlite_check():
-    addon_type = ALL_CHECKS[SQLITE]
-    try:
-        db_name = "default"
-        if RDS_POSTGRES_CREDENTIALS:
-            db_name = "sqlite"
-
-        with connections[db_name].cursor() as c:
-            c.execute('SELECT SQLITE_VERSION()')
             return render_connection_info(addon_type, True, c.fetchone()[0])
     except Exception as e:
         return render_connection_info(addon_type, False, str(e))
