@@ -9,14 +9,6 @@ SECRET_KEY = "changeMe"
 ALLOWED_HOSTS = "hostname"
 ```
 
-## Aurora Postgres
-
-To connect to an Aurora Postgres instance, set the following env var:
-
-```
-AURORA_POSTGRES_CREDENTIALS = AURORA_POSTGRES_CREDENTIALS_STRING
-```
-
 ## RDS Postgres
 
 To connect to an RDS Postgres instance, set the following env var:
