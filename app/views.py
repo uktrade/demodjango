@@ -25,6 +25,7 @@ GIT_INFORMATION = 'git_information'
 OPENSEARCH = 'opensearch'
 POSTGRES_AURORA = 'postgres_aurora'
 POSTGRES_RDS = 'postgres_rds'
+READ_WRITE = 'read_write'
 REDIS = 'redis'
 S3 = 's3'
 SERVER_TIME = 'server_time'
@@ -37,6 +38,7 @@ ALL_CHECKS = {
     OPENSEARCH: 'OpenSearch',
     POSTGRES_AURORA: 'PostgreSQL (Aurora)',
     POSTGRES_RDS: 'PostgreSQL (RDS)',
+    READ_WRITE: 'Filesystem read/write',
     REDIS: 'Redis',
     S3: 'S3 Bucket',
     SERVER_TIME: 'Server Time',
@@ -61,6 +63,7 @@ def index(request):
     optional_checks: Dict[str, Callable] = {
         POSTGRES_RDS: postgres_rds_check,
         POSTGRES_AURORA: postgres_aurora_check,
+        READ_WRITE: read_write_check,
         REDIS: redis_check,
         S3: s3_bucket_check,
         OPENSEARCH: opensearch_check,
@@ -201,6 +204,32 @@ def celery_beat_check():
         latest_task = ScheduledTask.objects.all().order_by('-timestamp').first()
         connection_info = f"Latest task scheduled with task_id {latest_task.taskid} at {latest_task.timestamp}"
         return render_connection_info(addon_type, True, connection_info)
+    except Exception as e:
+        return render_connection_info(addon_type, False, str(e))
+
+
+def read_write_check():
+    import tempfile
+    addon_type = ALL_CHECKS[READ_WRITE]
+    timestamp = datetime.now()  # ensures no stale file is present
+
+    try:
+        # create a temporary file
+        temp = tempfile.NamedTemporaryFile()
+
+        # write into temporary file
+        with open(temp.name, 'w') as f:
+            f.write(str(timestamp))
+
+        # read from temporary file
+        with open(temp.name, 'r') as f:
+            from_file_timestamp = f.read()
+
+        # delete temporary file
+        temp.close()
+
+        read_write_status = f"Read/write successfully completed at {from_file_timestamp}"
+        return render_connection_info(addon_type, True, read_write_status)
     except Exception as e:
         return render_connection_info(addon_type, False, str(e))
 
