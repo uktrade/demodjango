@@ -11,6 +11,7 @@ from app.views import (
     GIT_INFORMATION,
     OPENSEARCH,
     POSTGRES_RDS,
+    READ_WRITE,
     REDIS,
     S3,
     SERVER_TIME,
@@ -33,6 +34,10 @@ def test_page_loads_with_title_and_has_success_ticks(page: Page):
 
     expect(
         page.get_by_test_id(slugify(ALL_CHECKS[POSTGRES_RDS]))
+    ).to_have_text(re.compile(STATUS_SUCCESS))
+
+    expect(
+        page.get_by_test_id(slugify(ALL_CHECKS[READ_WRITE]))
     ).to_have_text(re.compile(STATUS_SUCCESS))
 
     expect(
