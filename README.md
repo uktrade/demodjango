@@ -9,8 +9,6 @@ SECRET_KEY = "changeMe"
 ALLOWED_HOSTS = "hostname"
 ```
 
-By default, it will use SQLite for the backend database and the app will work fine as is.
-
 ## Aurora Postgres
 
 To connect to an Aurora Postgres instance, set the following env var:
