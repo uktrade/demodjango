@@ -152,8 +152,9 @@ WSGI_APPLICATION = 'demodjango.wsgi.application'
 
 # Django requires a default database. If RDS is present make it the default
 # database to enable celery-beat
-RDS_POSTGRES_CREDENTIALS = os.getenv("RDS_POSTGRES_CREDENTIALS")
-DATABASES = {
+RDS_POSTGRES_CREDENTIALS = os.getenv("RDS_POSTGRES_CREDENTIALS", "")
+if RDS_POSTGRES_CREDENTIALS:
+    DATABASES = {
     "default": dj_database_url.config(
         default=database_url_from_env("RDS_POSTGRES_CREDENTIALS")
     )
