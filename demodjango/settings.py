@@ -150,24 +150,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'demodjango.wsgi.application'
 
-sqlite_db_root = BASE_DIR if is_copilot() else Path(tempfile.gettempdir())
-
 # Django requires a default database. If RDS is present make it the default
-# database to enable celery-beat, otherwise use SQLite
-RDS_POSTGRES_CREDENTIALS = os.getenv("RDS_POSTGRES_CREDENTIALS", "")
-if RDS_POSTGRES_CREDENTIALS:
-    DATABASES = {
-        "default": dj_database_url.config(
-            default=database_url_from_env("RDS_POSTGRES_CREDENTIALS")
-        )
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': sqlite_db_root / "demodjango.sqlite3",
-        }
-    }
+# database to enable celery-beat
+RDS_POSTGRES_CREDENTIALS = os.getenv("RDS_POSTGRES_CREDENTIALS")
+DATABASES = {
+    "default": dj_database_url.config(
+        default=database_url_from_env("RDS_POSTGRES_CREDENTIALS")
+    )
+}
 
 AURORA_POSTGRES_CREDENTIALS = os.getenv("AURORA_POSTGRES_CREDENTIALS", "")
 if AURORA_POSTGRES_CREDENTIALS:
