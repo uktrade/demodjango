@@ -159,11 +159,7 @@ if RDS_POSTGRES_CREDENTIALS:
     DATABASES = {
         "default": dj_database_url.config(
             default=database_url_from_env("RDS_POSTGRES_CREDENTIALS")
-        ),
-        "sqlite": {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': sqlite_db_root / "demodjango.sqlite3",
-        }
+        )
     }
 else:
     DATABASES = {
