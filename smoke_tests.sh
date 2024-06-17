@@ -13,6 +13,7 @@ esac
 
 echo -e "\nInstalling required browsers"
 poetry run playwright install
+poetry run playwright install-deps
 
 echo -e "\nRunning smoke tests against ${host}"
 
