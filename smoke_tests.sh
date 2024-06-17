@@ -14,4 +14,4 @@ esac
 echo "Running smoke tests against ${host}"
 
 export LANDING_PAGE_URL=${host}
-pytest ./tests/smoke
+poetry run pytest ./tests/smoke
