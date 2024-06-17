@@ -23,7 +23,6 @@ CELERY = 'celery'
 BEAT = 'beat'
 GIT_INFORMATION = 'git_information'
 OPENSEARCH = 'opensearch'
-POSTGRES_AURORA = 'postgres_aurora'
 POSTGRES_RDS = 'postgres_rds'
 READ_WRITE = 'read_write'
 REDIS = 'redis'
@@ -36,7 +35,6 @@ ALL_CHECKS = {
     CELERY: 'Celery Worker',
     GIT_INFORMATION: 'Git information',
     OPENSEARCH: 'OpenSearch',
-    POSTGRES_AURORA: 'PostgreSQL (Aurora)',
     POSTGRES_RDS: 'PostgreSQL (RDS)',
     READ_WRITE: 'Filesystem read/write',
     REDIS: 'Redis',
@@ -62,7 +60,6 @@ def index(request):
 
     optional_checks: Dict[str, Callable] = {
         POSTGRES_RDS: postgres_rds_check,
-        POSTGRES_AURORA: postgres_aurora_check,
         READ_WRITE: read_write_check,
         REDIS: redis_check,
         S3: s3_bucket_check,
@@ -102,16 +99,6 @@ def postgres_rds_check():
             raise Exception("No RDS database")
 
         with connections['default'].cursor() as c:
-            c.execute('SELECT version()')
-            return render_connection_info(addon_type, True, c.fetchone()[0])
-    except Exception as e:
-        return render_connection_info(addon_type, False, str(e))
-
-
-def postgres_aurora_check():
-    addon_type = ALL_CHECKS[POSTGRES_AURORA]
-    try:
-        with connections['aurora'].cursor() as c:
             c.execute('SELECT version()')
             return render_connection_info(addon_type, True, c.fetchone()[0])
     except Exception as e:
