@@ -11,7 +11,10 @@ case "${target}" in
     ;;
 esac
 
-echo "Running smoke tests against ${host}"
+echo -e "\nInstalling required browsers"
+poetry run playwright install
+
+echo -e "\nRunning smoke tests against ${host}"
 
 export LANDING_PAGE_URL=${host}
 poetry run pytest ./tests/smoke
