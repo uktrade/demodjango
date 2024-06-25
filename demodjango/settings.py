@@ -158,12 +158,6 @@ if RDS_POSTGRES_CREDENTIALS:
     )
 }
 
-AURORA_POSTGRES_CREDENTIALS = os.getenv("AURORA_POSTGRES_CREDENTIALS", "")
-if AURORA_POSTGRES_CREDENTIALS:
-    DATABASES['aurora'] = dj_database_url.config(
-        default=database_url_from_env("AURORA_POSTGRES_CREDENTIALS")
-    )
-
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
 

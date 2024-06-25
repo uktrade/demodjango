@@ -10,7 +10,6 @@ services:
     environment:
       ALLOWED_HOSTS: '*'
       AWS_ENDPOINT_URL: 'http://s3:9090'
-      AURORA_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-aurora","username":"postgres"}'
       DEBUG: true
       DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
       OPENSEARCH_ENDPOINT: 'http://opensearch:9200'
@@ -35,7 +34,6 @@ services:
       start_period: 15s
     links:
       - postgres-rds
-      - postgres-aurora
       - redis
       - s3
       - opensearch
@@ -92,12 +90,6 @@ services:
       POSTGRES_PASSWORD: pgSecretPassword
       POSTGRES_DB: main
 
-  postgres-aurora:
-    image: postgres
-    environment:
-      POSTGRES_PASSWORD: pgSecretPassword
-      POSTGRES_DB: main
-
   redis:
     image: redis
     # Expose port so we can query it for debugging
@@ -115,4 +107,4 @@ services:
       'discovery.type': single-node
       'plugins.security.disabled': true
       OPENSEARCH_INITIAL_ADMIN_PASSWORD: P4ssword-does-not-matter
-      
+
