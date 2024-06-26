@@ -152,11 +152,8 @@ WSGI_APPLICATION = 'demodjango.wsgi.application'
 # database to enable celery-beat
 RDS_POSTGRES_CREDENTIALS = os.getenv("RDS_POSTGRES_CREDENTIALS", "")
 if RDS_POSTGRES_CREDENTIALS:
-    DATABASES = {
-    "default": dj_database_url.config(
-        default=database_from_env("RDS_POSTGRES_CREDENTIALS")
-    )
-}
+    DATABASES = database_from_env("RDS_POSTGRES_CREDENTIALS")
+print(DATABASES)
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
