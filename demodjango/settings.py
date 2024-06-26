@@ -12,17 +12,15 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 import os
 import sys
-import tempfile
 from pathlib import Path
+
 import dj_database_url
 import environ
 import sentry_sdk
+from dbt_copilot_python.database import database_url_from_env, database_from_env
 from dbt_copilot_python.network import setup_allowed_hosts
-from dbt_copilot_python.utility import is_copilot
 from django_log_formatter_asim import ASIMFormatter
 from dotenv import load_dotenv
-
-from dbt_copilot_python.database import database_url_from_env
 from sentry_sdk.integrations.django import DjangoIntegration
 
 load_dotenv()
@@ -150,24 +148,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'demodjango.wsgi.application'
 
-sqlite_db_root = BASE_DIR if is_copilot() else Path(tempfile.gettempdir())
-
 # Django requires a default database. If RDS is present make it the default
-# database to enable celery-beat, otherwise use SQLite
+# database to enable celery-beat
 RDS_POSTGRES_CREDENTIALS = os.getenv("RDS_POSTGRES_CREDENTIALS", "")
 if RDS_POSTGRES_CREDENTIALS:
-    DATABASES = {
-        "default": dj_database_url.config(
-            default=database_url_from_env("RDS_POSTGRES_CREDENTIALS")
-        )
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': sqlite_db_root / "demodjango.sqlite3",
-        }
-    }
+    DATABASES = database_from_env("RDS_POSTGRES_CREDENTIALS")
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators

@@ -13,7 +13,7 @@ services:
       DEBUG: true
       DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
       OPENSEARCH_ENDPOINT: 'http://opensearch:9200'
-      RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
+      RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgresql","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
       REDIS_ENDPOINT: 'redis://redis:6379'
       S3_BUCKET_NAME: test-bucket
       AWS_ACCESS_KEY_ID: access-key-id
@@ -21,7 +21,11 @@ services:
       GIT_COMMIT: "3x4mp13"
       GIT_BRANCH: "example-branch"
       GIT_TAG: "3.2.1"
-      HTTP_CHECK_URLS: "https://bbc.co.uk|200|GET,http://neverssl.com,https://httpstat.us/400,https://bbc.co.uk|300|PLAS,https://hreoiuvh09e8.bom"
+      HTTP_CHECK_URLS: "https://bbc.co.uk|200|GET,http://neverssl.com"
+      # Optional HTTP_CHECK_URL checks to test failures:
+      #   - https://httpstat.us/400 (unexpected status)
+      #   - https://bbc.co.uk|300|PLAS (invalid HTTP method)
+      #   - https://hreoiuvh09e8.bom (
     ports:
       - "8080:8080"
     volumes:
@@ -62,7 +66,7 @@ services:
       DEBUG: true
       DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
       DJANGO_SETTINGS_MODULE: demodjango.settings
-      RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
+      RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgresql","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
 
   celery-beat:
     build:
@@ -82,7 +86,7 @@ services:
       DEBUG: true
       DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
       DJANGO_SETTINGS_MODULE: demodjango.settings
-      RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
+      RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgresql","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
 
   postgres-rds:
     image: postgres
