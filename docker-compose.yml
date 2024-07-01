@@ -13,7 +13,7 @@ services:
       DEBUG: true
       DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
       OPENSEARCH_ENDPOINT: 'http://opensearch:9200'
-      RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgresql","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
+      RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
       REDIS_ENDPOINT: 'redis://redis:6379'
       S3_BUCKET_NAME: test-bucket
       AWS_ACCESS_KEY_ID: access-key-id
@@ -66,7 +66,7 @@ services:
       DEBUG: true
       DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
       DJANGO_SETTINGS_MODULE: demodjango.settings
-      RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgresql","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
+      RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
 
   celery-beat:
     build:
@@ -86,7 +86,7 @@ services:
       DEBUG: true
       DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
       DJANGO_SETTINGS_MODULE: demodjango.settings
-      RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgresql","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
+      RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
 
   postgres-rds:
     image: postgres
