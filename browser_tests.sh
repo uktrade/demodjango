@@ -18,4 +18,4 @@ poetry run playwright install-deps
 
 echo -e "\nRunning $tests tests against ${host}"
 export LANDING_PAGE_URL=${host}
-poetry run pytest ./tests/$tests
+poetry run pytest ./tests/browser/$tests
