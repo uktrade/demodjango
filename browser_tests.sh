@@ -1,6 +1,7 @@
 #!/bin/bash
 
 target="$1"
+tests="$2"
 
 case "${target}" in
   "" | "local")
@@ -15,6 +16,6 @@ echo -e "\nInstalling required browsers"
 poetry run playwright install
 poetry run playwright install-deps
 
-echo -e "\nRunning smoke tests against ${host}"
+echo -e "\nRunning $tests tests against ${host}"
 export LANDING_PAGE_URL=${host}
-poetry run pytest ./tests/smoke
+poetry run pytest ./tests/$tests
