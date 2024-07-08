@@ -48,9 +48,16 @@ Browser testing is done with [Playwright](https://playwright.dev/).
 
 After installing the dependencies, run `playwright install` to install the browsers
 
-Run the test suite with `./smoke_tests.sh` to test against your local running environment.
+Run the browser tests with `./tests/browser/run.sh <environment> <tests>`.
 
-You can target deployed environments with `./smoke_tests.sh <environment>`.
+Examples:
+
+- Run smoke tests against `toolspr` environment
+  - `./tests/browser/run.sh toolspr smoke`
+- Run smoke tests against your local Docker Compose environment
+  - `./tests/browser/run.sh local smoke`
+- Run maintenance page tests against your local Docker Compose environment
+  - `./tests/browser/run.sh local maintenance_pages`
 
 
 ## Running the application with docker-compose
