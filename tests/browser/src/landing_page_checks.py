@@ -1,8 +1,8 @@
 import re
-import os
-from playwright.sync_api import Page, expect
 
 from normality import slugify
+from playwright.sync_api import Page, expect
+
 from app.util import STATUS_SUCCESS
 from app.views import (
     ALL_CHECKS,
@@ -19,9 +19,7 @@ from app.views import (
 )
 
 
-def test_page_loads_with_title_and_has_success_ticks(page: Page):
-    page.goto(os.getenv("LANDING_PAGE_URL"))
-
+def assert_landing_page_has_normal_content(page: Page):
     expect(page).to_have_title(re.compile("DemoDjango"))
 
     expect(

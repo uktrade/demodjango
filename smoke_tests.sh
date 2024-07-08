@@ -1,20 +1,5 @@
 #!/bin/bash
 
-target="$1"
+# Todo: Remove this once platform-tools regression tests etc. have been adjusted to use the new browser tests script
 
-case "${target}" in
-  "" | "local")
-    host="http://localhost:8080"
-    ;;
-  *)
-    host="https://internal.${target}.demodjango.uktrade.digital/"
-    ;;
-esac
-
-echo -e "\nInstalling required browsers"
-poetry run playwright install
-poetry run playwright install-deps
-
-echo -e "\nRunning smoke tests against ${host}"
-export LANDING_PAGE_URL=${host}
-poetry run pytest ./tests/smoke
+./tests/browser/run.sh "$1" "smoke"
