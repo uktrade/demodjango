@@ -6,7 +6,7 @@ set -e
 # git config --global credential.UseHttpPath true
 
 # Add commands below to run as part of the pre_build phase
-CODESTAR_CONNECTION_ARN="arn:aws:codestar-connections:eu-west-2:563763463626:connection/122da7c9-9fa3-42b2-9125-1db0f957913d"
+
 # poetry run pytest tests/app
 if [ -f "./.gitmodules" ]; then
   echo ".gitmodules file exists. Modifying URLs..."
