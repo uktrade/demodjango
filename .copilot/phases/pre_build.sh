@@ -3,6 +3,8 @@
 # Exit early if something goes wrong
 set -e
 
+git config --global credential.UseHttpPath true
+
 # Add commands below to run as part of the pre_build phase
 
 poetry run pytest tests/app
