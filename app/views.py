@@ -22,25 +22,27 @@ logger = logging.getLogger("django")
 CELERY = 'celery'
 BEAT = 'beat'
 GIT_INFORMATION = 'git_information'
+HTTP_CONNECTION = 'http'
 OPENSEARCH = 'opensearch'
 POSTGRES_RDS = 'postgres_rds'
+PRIVATE_SUBMODULE = 'private_submodule'
 READ_WRITE = 'read_write'
 REDIS = 'redis'
 S3 = 's3'
 SERVER_TIME = 'server_time'
-HTTP_CONNECTION = 'http'
 
 ALL_CHECKS = {
     BEAT: 'Celery Beat',
     CELERY: 'Celery Worker',
     GIT_INFORMATION: 'Git information',
+    HTTP_CONNECTION: 'HTTP Checks',
     OPENSEARCH: 'OpenSearch',
     POSTGRES_RDS: 'PostgreSQL (RDS)',
+    PRIVATE_SUBMODULE: 'Private submodule',
     READ_WRITE: 'Filesystem read/write',
     REDIS: 'Redis',
     S3: 'S3 Bucket',
     SERVER_TIME: 'Server Time',
-    HTTP_CONNECTION: 'HTTP Checks',
 }
 
 RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")
@@ -67,6 +69,7 @@ def index(request):
         CELERY: celery_worker_check,
         BEAT: celery_beat_check,
         HTTP_CONNECTION: http_check,
+        PRIVATE_SUBMODULE: private_submodule_check,
     }
 
     if settings.ACTIVE_CHECKS:
@@ -240,3 +243,21 @@ def http_check():
     return render_connection_info(ALL_CHECKS[HTTP_CONNECTION],
                                   check.success,
                                   "".join([c.render() for c in check.report]))
+
+
+def private_submodule_check():
+    file_path = "demodjango-private/sample.txt"
+    success = False
+    connection_info = f"Failed to read file from private submodule at path: {file_path}"
+    
+    if os.path.exists(file_path):
+        pass
+    
+    with open(file_path, 'r') as file:
+        content = file.read()
+        if 'lorem ipsum' in content.lower():
+            success = True
+            connection_info = f"Successfully built sample.txt file in private submodule at: {file_path}"
+        
+        
+    return render_connection_info(ALL_CHECKS[PRIVATE_SUBMODULE], success, connection_info)
