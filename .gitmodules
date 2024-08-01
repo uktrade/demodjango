@@ -1,3 +1,0 @@
-[submodule "demodjango-private"]
-	path = demodjango-private
-	url = git@github.com:uktrade/platform-demo-private.git
