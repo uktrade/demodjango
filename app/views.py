@@ -246,7 +246,7 @@ def http_check():
 
 
 def private_submodule_check():
-    file_path = "demodjango-private/sample.txt"
+    file_path = "platform-demo-private/sample.txt"
     success = False
     connection_info = f"Failed to read file from private submodule at path: {file_path}"
     
