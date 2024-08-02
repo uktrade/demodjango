@@ -9,6 +9,8 @@ import redis
 from django.conf import settings
 from django.db import connections
 from django.http import HttpResponse
+from django.http import JsonResponse
+from django.utils import timezone
 from opensearchpy import OpenSearch
 from tenacity import retry, stop_after_delay, RetryError, wait_fixed
 
@@ -261,3 +263,13 @@ def private_submodule_check():
         
         
     return render_connection_info(ALL_CHECKS[PRIVATE_SUBMODULE], success, connection_info)
+
+
+def api(request):
+    current_time = timezone.now().isoformat()
+    response_data = {
+        "message": "Success",
+        "timestamp": current_time
+    }
+    
+    return JsonResponse(response_data)
