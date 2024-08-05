@@ -266,10 +266,9 @@ def private_submodule_check():
 
 
 def api(request):
-    current_time = timezone.now().isoformat()
     response_data = {
         "message": "Success",
-        "timestamp": current_time
+        "timestamp": timezone.now().isoformat()
     }
     
     return JsonResponse(response_data)
