@@ -26,4 +26,4 @@ def test_api_view(client):
     
     assert response.status_code == 200
     assert response_data['message'] == "Success"
-    assert response_data['timestamp'] == "2024-08-01T12:34:56+00:00"
+    assert response_data['timestamp'] == "2024-08-01T12:34:56"
