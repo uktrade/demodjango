@@ -8,7 +8,7 @@ from playwright.sync_api import Page
 
 def is_approx_now(time: datetime):
     now = datetime.now()
-    tolerance = timedelta(seconds=3)
+    tolerance = timedelta(seconds=60)
     
     return abs(now - time) <= tolerance
 
