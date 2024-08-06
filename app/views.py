@@ -10,7 +10,6 @@ from django.conf import settings
 from django.db import connections
 from django.http import HttpResponse
 from django.http import JsonResponse
-from django.utils import timezone
 from opensearchpy import OpenSearch
 from tenacity import retry, stop_after_delay, RetryError, wait_fixed
 
@@ -268,7 +267,7 @@ def private_submodule_check():
 def api(request):
     response_data = {
         "message": "Success",
-        "timestamp": timezone.now().isoformat()
+        "timestamp": datetime.now().isoformat()
     }
     
     return JsonResponse(response_data)
