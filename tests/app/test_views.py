@@ -21,7 +21,7 @@ def test_http_view(patched_requests, mock_environment):
 @freeze_time("2024-08-01 12:34:56")
 def test_api_view(client):
     with patch.dict("os.environ", {"IS_API": "True"}):
-        response = client.get(reverse("api"))
+        response = client.get("/")
         response_data = json.loads(response.content)
         
         assert response.status_code == 200
