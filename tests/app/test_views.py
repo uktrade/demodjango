@@ -1,7 +1,6 @@
 import json
 from unittest.mock import patch, Mock
 
-from django.test import Client
 from django.urls import reverse
 from freezegun import freeze_time
 
@@ -21,9 +20,10 @@ def test_http_view(patched_requests, mock_environment):
 
 @freeze_time("2024-08-01 12:34:56")
 def test_api_view(client):
-    response = client.get(reverse('api'))
-    response_data = json.loads(response.content)
-    
-    assert response.status_code == 200
-    assert response_data['message'] == "Success"
-    assert response_data['timestamp'] == "2024-08-01T12:34:56"
+    with patch.dict("os.environ", {"IS_API": "True"}):
+        response = client.get(reverse("api"))
+        response_data = json.loads(response.content)
+        
+        assert response.status_code == 200
+        assert response_data["message"] == "Success"
+        assert response_data["timestamp"] == "2024-08-01T12:34:56"
