@@ -2,7 +2,6 @@ import json
 from unittest.mock import patch, Mock
 
 from django.test import override_settings
-from django.urls import reverse
 from freezegun import freeze_time
 
 from app import views
@@ -21,7 +20,7 @@ def test_http_view(patched_requests, mock_environment):
 @override_settings(IS_API=True)
 @freeze_time("2024-08-01 12:34:56")
 def test_api_view(client):
-    response = client.get(reverse("api"))
+    response = client.get("/")
     response_data = json.loads(response.content)
     
     assert response.status_code == 200
