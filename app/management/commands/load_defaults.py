@@ -13,7 +13,7 @@ from app.models import SampleTable
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        if settings.IS_API:
+        if os.getenv("IS_API"):
             return;
         
         SampleTable.objects.update_or_create(sample_id=1, sample_name="Database is connected")
