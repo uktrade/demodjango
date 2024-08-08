@@ -42,7 +42,7 @@ DEBUG = True if (os.getenv("DEBUG") == "True") else False
 ALLOWED_HOSTS = setup_allowed_hosts(["*"])
 ACTIVE_CHECKS = list(filter(None, [x.strip() for x in os.getenv("ACTIVE_CHECKS", "").split(",")]))
 
-IS_API = True if (os.getenv("IS_API") == "True") else False
+IS_API = True if os.getenv("IS_API") else False
 
 DLFA_INCLUDE_RAW_LOG = True
 
