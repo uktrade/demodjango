@@ -14,7 +14,9 @@ def is_approx_now(time: datetime):
 
 def test_api_response(page: Page):
     landing_page_url = os.getenv("LANDING_PAGE_URL")
-    response = page.goto(f"{landing_page_url}/api/")
+    api_url = landing_page_url.replace("https://internal.", "https://internal.api.")
+    
+    response = page.goto(api_url)
     
     assert response.status == 200
     
