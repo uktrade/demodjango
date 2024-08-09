@@ -4,6 +4,7 @@ from datetime import datetime
 from datetime import timedelta
 from unittest.mock import patch
 
+import pytest
 from playwright.sync_api import Page
 
 def is_approx_now(time: datetime):
@@ -28,3 +29,16 @@ def test_api_response(page: Page):
     time = datetime.fromisoformat(timestamp_str)
     
     assert is_approx_now(time)
+
+if os.getenv("IS_API"):
+    def test_web_response(page: Page):
+        landing_page_url = os.getenv("LANDING_PAGE_URL")
+        api_url = landing_page_url.replace("https://internal.", "https://internal.api.")
+        
+        response = page.goto(f"{api_url}test-web")
+        
+        assert response.status == 200
+        
+        response_data = response.json()
+    
+        assert response_data['message'] == "API reached web service"
