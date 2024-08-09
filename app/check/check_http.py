@@ -1,5 +1,7 @@
-from typing import List, Union
-from urllib.parse import urlparse, ParseResult
+from typing import List
+from typing import Union
+from urllib.parse import ParseResult
+from urllib.parse import urlparse
 
 import requests
 
@@ -20,10 +22,10 @@ class HTTPCheckInstance:
         self.report.summary = definition
 
     def execute(self):
-        segments = self.definition.split('|')
+        segments = self.definition.split("|")
 
         self.status_code = 200
-        self.method = 'get'
+        self.method = "get"
 
         self.url = urlparse(segments[0])
 
@@ -34,7 +36,9 @@ class HTTPCheckInstance:
             pass
         except ValueError:
             self.report.success = False
-            self.report.errors.append(f'expected status code to be integer, got {segments[1]}')
+            self.report.errors.append(
+                f"expected status code to be integer, got {segments[1]}"
+            )
             return
 
         try:
@@ -47,7 +51,9 @@ class HTTPCheckInstance:
 
         if not requester:
             self.report.success = False
-            self.report.errors.append(f'method "{self.method.upper()}" is not a valid HTTP method')
+            self.report.errors.append(
+                f'method "{self.method.upper()}" is not a valid HTTP method'
+            )
             return
 
         try:
@@ -56,7 +62,8 @@ class HTTPCheckInstance:
             if r.status_code != self.status_code:
                 self.report.success = False
                 self.report.errors.append(
-                    f"expected HTTP Status {self.status_code} but got {r.status_code}")
+                    f"expected HTTP Status {self.status_code} but got {r.status_code}"
+                )
 
         except ValueError:
             self.report.success = False
@@ -70,7 +77,7 @@ class HTTPCheck(Check):
     checks: List[HTTPCheckInstance]
 
     def __init__(self, definition: str):
-        self.checks = [HTTPCheckInstance(d) for d in definition.split(',')]
+        self.checks = [HTTPCheckInstance(d) for d in definition.split(",")]
 
     def execute(self):
         for check in self.checks:
