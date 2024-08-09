@@ -283,4 +283,4 @@ def test_web(request):
     if response.status_code == 200:
         return JsonResponse({"message": f"API reached web service at {web_url}"}, status=200)
     else:
-        return JsonResponse({"message": f"API failed to reach web service {web_url}"}, status=response.status_code)
+        return JsonResponse({"message": f"API failed to reach web service at {web_url}"}, status=response.status_code)

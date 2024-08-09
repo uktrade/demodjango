@@ -41,6 +41,6 @@ def test_test_web(mock_get, mock_reverse, client):
     response_data = json.loads(response.content)
     
     mock_get.assert_called_once_with("https://internal.local.demodjango.uktrade.digital/")
-    assert response_data["message"] == "API reached web service"
+    assert response_data["message"] == "API reached web service at https://internal.local.demodjango.uktrade.digital/"
     assert response.status_code == 200
     
