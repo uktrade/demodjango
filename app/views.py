@@ -6,10 +6,12 @@ from typing import Dict, Callable
 
 import boto3
 import redis
+import requests
 from django.conf import settings
 from django.db import connections
 from django.http import HttpResponse
 from django.http import JsonResponse
+from django.urls import reverse
 from opensearchpy import OpenSearch
 from tenacity import retry, stop_after_delay, RetryError, wait_fixed
 
@@ -271,3 +273,14 @@ def api(request):
     }
     
     return JsonResponse(response_data)
+
+def test_web(request):
+    api_url = reverse("api")
+    full_api_url = request.build_absolute_uri(api_url)
+    web_url = full_api_url.replace(".api", "")
+    response = requests.get(web_url)
+    
+    if response.status_code == 200:
+        return JsonResponse({"message": f"API reached web service at {web_url}"}, status=200)
+    else:
+        return JsonResponse({"message": f"API failed to reach web service at {web_url}"}, status=response.status_code)
