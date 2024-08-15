@@ -1,4 +1,4 @@
-repository: public.ecr.aws/demodjango/application
+repository: demodjango/application
 builder:
   name: paketobuildpacks/builder-jammy-base
   version: 0.4.240
