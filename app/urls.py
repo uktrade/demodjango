@@ -1,5 +1,3 @@
-import os
-
 from django.conf import settings
 from django.urls import path, include
 
@@ -14,6 +12,11 @@ if settings.IS_API:
         path('', include(api_patterns), name='api')
     ]
 else:
+    web_patterns = [
+        path('', views.index, name='index'),
+        path('ipfilter/', views.ipfilter, name='ipfilter'),
+        path('ipfilter-basic-auth/', views.ipfilter_basic_auth, name="ipfilter-basic-auth"),
+    ]
     urlpatterns = [
-        path('', views.index, name='index')
+        path('', include(web_patterns), name='index')
     ]

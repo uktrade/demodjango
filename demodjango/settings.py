@@ -46,6 +46,9 @@ IS_API = True if os.getenv("IS_API") else False
 
 DLFA_INCLUDE_RAW_LOG = True
 
+BASIC_AUTH_USERNAME=os.getenv("BASIC_AUTH_USERNAME")
+BASIC_AUTH_PASSWORD=os.getenv("BASIC_AUTH_PASSWORD")
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
