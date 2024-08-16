@@ -11,4 +11,13 @@ if settings.IS_API:
     ]
     urlpatterns = [path("", include(api_patterns), name="api")]
 else:
-    urlpatterns = [path("", views.index, name="index")]
+    web_patterns = [
+        path("", views.index, name="index"),
+        path("ipfilter/", views.ipfilter, name="ipfilter"),
+        path(
+            "ipfilter-basic-auth/",
+            views.ipfilter_basic_auth,
+            name="ipfilter-basic-auth",
+        ),
+    ]
+    urlpatterns = [path("", include(web_patterns), name="index")]
