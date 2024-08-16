@@ -1,3 +1,4 @@
+import base64
 import json
 import logging
 import os
@@ -8,8 +9,11 @@ import boto3
 import redis
 import requests
 from django.conf import settings
+from django.contrib.auth import authenticate
+from django.contrib.auth import login
 from django.db import connections
 from django.http import HttpResponse
+from django.http import HttpResponseRedirect
 from django.http import JsonResponse
 from django.urls import reverse
 from opensearchpy import OpenSearch
@@ -274,6 +278,7 @@ def api(request):
     
     return JsonResponse(response_data)
 
+
 def test_web(request):
     api_url = reverse("api")
     full_api_url = request.build_absolute_uri(api_url)
@@ -284,3 +289,28 @@ def test_web(request):
         return JsonResponse({"message": f"API reached web service at {web_url}"}, status=200)
     else:
         return JsonResponse({"message": f"API failed to reach web service at {web_url}"}, status=response.status_code)
+
+
+def ipfilter(request):
+    return JsonResponse({"message": f"Success"}, status=200)
+
+
+def ipfilter_basic_auth(request):
+    auth_header = request.META.get('HTTP_AUTHORIZATION')
+    if auth_header:
+        auth_type, auth_string = auth_header.split(' ', 1)
+        if auth_type.lower() == 'basic':
+            decoded_creds = base64.b64decode(auth_string).decode('utf-8')
+            username, password = decoded_creds.split(':', 1)
+
+            if username == settings.BASIC_AUTH_USERNAME and password == settings.BASIC_AUTH_PASSWORD:
+                ipfilter_url = reverse("ipfilter")
+                response = HttpResponseRedirect(ipfilter_url)
+                response.headers["Authorization"] = f"Basic {auth_string}"
+                
+                return response
+    
+    response = HttpResponse('Unauthorized', status=401)
+    response['WWW-Authenticate'] = 'Basic realm="Login Required"'
+    
+    return response
