@@ -49,58 +49,58 @@ DLFA_INCLUDE_RAW_LOG = True
 BASIC_AUTH_USERNAME=os.getenv("BASIC_AUTH_USERNAME")
 BASIC_AUTH_PASSWORD=os.getenv("BASIC_AUTH_PASSWORD")
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "asim_formatter": {
-            "()": ASIMFormatter,
-        },
-    },
-    "handlers": {
-        "asim": {
-            "class": "logging.StreamHandler",
-            "formatter": "asim_formatter",
-            'filters': ['request_id_context'],
-        },
-        "stdout": {
-            "class": "logging.StreamHandler",
-            "stream": sys.stdout,
-        },
-    },
-    "root": {
-        "handlers": ["stdout"],
-        "level": "DEBUG",
-    },
-    "loggers": {
-        "django": {
-            "handlers": [
-                "asim",
-            ],
-            "level": "DEBUG",
-            "propagate": True,
-        },
-        "django.request": {
-            "handlers": [
-                "asim",
-            ],
-            "level": "DEBUG",
-            "propagate": True,
-        },
-        'requestlogs': {
-            "handlers": [
-                "asim",
-            ],
-            'level': 'INFO',
-            'propagate': False,
-        },
-    },
-    'filters': {
-        'request_id_context': {
-            '()': 'requestlogs.logging.RequestIdContext',
-        },
-    },
-}
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "formatters": {
+#         "asim_formatter": {
+#             "()": ASIMFormatter,
+#         },
+#     },
+#     "handlers": {
+#         "asim": {
+#             "class": "logging.StreamHandler",
+#             "formatter": "asim_formatter",
+#             'filters': ['request_id_context'],
+#         },
+#         "stdout": {
+#             "class": "logging.StreamHandler",
+#             "stream": sys.stdout,
+#         },
+#     },
+#     "root": {
+#         "handlers": ["stdout"],
+#         "level": "DEBUG",
+#     },
+#     "loggers": {
+#         "django": {
+#             "handlers": [
+#                 "asim",
+#             ],
+#             "level": "DEBUG",
+#             "propagate": True,
+#         },
+#         "django.request": {
+#             "handlers": [
+#                 "asim",
+#             ],
+#             "level": "DEBUG",
+#             "propagate": True,
+#         },
+#         'requestlogs': {
+#             "handlers": [
+#                 "asim",
+#             ],
+#             'level': 'INFO',
+#             'propagate': False,
+#         },
+#     },
+#     'filters': {
+#         'request_id_context': {
+#             '()': 'requestlogs.logging.RequestIdContext',
+#         },
+#     },
+# }
 
 DLFA_INCLUDE_RAW_LOG = True
 
@@ -163,7 +163,7 @@ if RDS_POSTGRES_CREDENTIALS:
 else:
     DATABASES = {
         'default': {
-            'ENGINE': '', 
+            'ENGINE': '',
         }
     }
 
