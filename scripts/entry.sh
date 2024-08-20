@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 # Only run migrations if there is a DB present.
 if [[ ! -z "${RDS_POSTGRES_CREDENTIALS}" ]]; then
