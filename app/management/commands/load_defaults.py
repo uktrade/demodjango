@@ -15,8 +15,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if os.getenv("IS_API"):
             return;
-        
-        SampleTable.objects.update_or_create(sample_id=1, sample_name="Database is connected")
+
+        if settings.RDS_POSTGRES_CREDENTIALS:
+            SampleTable.objects.update_or_create(sample_id=1, sample_name="Database is connected")
 
         if settings.REDIS_ENDPOINT:
             r = redis.Redis.from_url(f'{settings.REDIS_ENDPOINT}')
