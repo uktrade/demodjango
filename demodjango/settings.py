@@ -161,6 +161,12 @@ if RDS_POSTGRES_CREDENTIALS:
     DATABASES = database_from_env("RDS_POSTGRES_CREDENTIALS")
     # Because it comes in from the environment as postgres, not postgresql...
     DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "",
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
