@@ -3,53 +3,55 @@ import json
 import logging
 import os
 from datetime import datetime
-from typing import Dict, Callable
+from typing import Callable
+from typing import Dict
 
 import boto3
 import redis
 import requests
 from django.conf import settings
-from django.contrib.auth import authenticate
-from django.contrib.auth import login
 from django.db import connections
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
 from django.urls import reverse
 from opensearchpy import OpenSearch
-from tenacity import retry, stop_after_delay, RetryError, wait_fixed
+from tenacity import RetryError
+from tenacity import retry
+from tenacity import stop_after_delay
+from tenacity import wait_fixed
 
 from celery_worker.tasks import demodjango_task
-from .check.check_http import HTTPCheck
 
+from .check.check_http import HTTPCheck
 from .util import render_connection_info
 
 logger = logging.getLogger("django")
 
-CELERY = 'celery'
-BEAT = 'beat'
-GIT_INFORMATION = 'git_information'
-HTTP_CONNECTION = 'http'
-OPENSEARCH = 'opensearch'
-POSTGRES_RDS = 'postgres_rds'
-PRIVATE_SUBMODULE = 'private_submodule'
-READ_WRITE = 'read_write'
-REDIS = 'redis'
-S3 = 's3'
-SERVER_TIME = 'server_time'
+CELERY = "celery"
+BEAT = "beat"
+GIT_INFORMATION = "git_information"
+HTTP_CONNECTION = "http"
+OPENSEARCH = "opensearch"
+POSTGRES_RDS = "postgres_rds"
+PRIVATE_SUBMODULE = "private_submodule"
+READ_WRITE = "read_write"
+REDIS = "redis"
+S3 = "s3"
+SERVER_TIME = "server_time"
 
 ALL_CHECKS = {
-    BEAT: 'Celery Beat',
-    CELERY: 'Celery Worker',
-    GIT_INFORMATION: 'Git information',
-    HTTP_CONNECTION: 'HTTP Checks',
-    OPENSEARCH: 'OpenSearch',
-    POSTGRES_RDS: 'PostgreSQL (RDS)',
-    PRIVATE_SUBMODULE: 'Private submodule',
-    READ_WRITE: 'Filesystem read/write',
-    REDIS: 'Redis',
-    S3: 'S3 Bucket',
-    SERVER_TIME: 'Server Time',
+    BEAT: "Celery Beat",
+    CELERY: "Celery Worker",
+    GIT_INFORMATION: "Git information",
+    HTTP_CONNECTION: "HTTP Checks",
+    OPENSEARCH: "OpenSearch",
+    POSTGRES_RDS: "PostgreSQL (RDS)",
+    PRIVATE_SUBMODULE: "Private submodule",
+    READ_WRITE: "Filesystem read/write",
+    REDIS: "Redis",
+    S3: "S3 Bucket",
+    SERVER_TIME: "Server Time",
 }
 
 RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")
@@ -57,13 +59,15 @@ RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")
 
 def index(request):
     logger.info("Rendering landing page")
-    logger.info({
-        "method": request.method,
-        "path": request.path,
-        "GET": dict(request.GET),
-        "POST": dict(request.POST),
-        "headers": dict(request.headers),
-    })
+    logger.info(
+        {
+            "method": request.method,
+            "path": request.path,
+            "GET": dict(request.GET),
+            "POST": dict(request.POST),
+            "headers": dict(request.headers),
+        }
+    )
 
     status_check_results = [server_time_check(), git_information()]
 
@@ -86,8 +90,10 @@ def index(request):
     else:
         status_check_results += [f() for f in optional_checks.values()]
 
-    logger.info(f"Landing page checks completed: "
-                f"{settings.ACTIVE_CHECKS if settings.ACTIVE_CHECKS else 'all'}")
+    logger.info(
+        f"Landing page checks completed: "
+        f"{settings.ACTIVE_CHECKS if settings.ACTIVE_CHECKS else 'all'}"
+    )
 
     return HttpResponse(
         "<!doctype html><html><head>"
@@ -108,8 +114,8 @@ def postgres_rds_check():
         if not RDS_POSTGRES_CREDENTIALS:
             raise Exception("No RDS database")
 
-        with connections['default'].cursor() as c:
-            c.execute('SELECT version()')
+        with connections["default"].cursor() as c:
+            c.execute("SELECT version()")
             return render_connection_info(addon_type, True, c.fetchone()[0])
     except Exception as e:
         return render_connection_info(addon_type, False, str(e))
@@ -118,8 +124,8 @@ def postgres_rds_check():
 def redis_check():
     addon_type = ALL_CHECKS[REDIS]
     try:
-        r = redis.Redis.from_url(f'{settings.REDIS_ENDPOINT}')
-        return render_connection_info(addon_type, True, r.get('test-data').decode())
+        r = redis.Redis.from_url(f"{settings.REDIS_ENDPOINT}")
+        return render_connection_info(addon_type, True, r.get("test-data").decode())
     except Exception as e:
         return render_connection_info(addon_type, False, str(e))
 
@@ -127,11 +133,11 @@ def redis_check():
 def s3_bucket_check():
     addon_type = ALL_CHECKS[S3]
     try:
-        s3 = boto3.resource('s3')
+        s3 = boto3.resource("s3")
         bucket = s3.Bucket(settings.S3_BUCKET_NAME)
-        body = bucket.Object('sample_file.txt')
+        body = bucket.Object("sample_file.txt")
         return render_connection_info(
-            addon_type, True, body.get()['Body'].read().decode()
+            addon_type, True, body.get()["Body"].read().decode()
         )
     except Exception as e:
         return render_connection_info(addon_type, False, str(e))
@@ -143,13 +149,13 @@ def opensearch_check():
 
     @retry(stop=stop_after_delay(get_result_timeout), wait=wait_fixed(1))
     def read_content_from_opensearch():
-        opensearch_client = OpenSearch(f'{settings.OPENSEARCH_ENDPOINT}')
+        opensearch_client = OpenSearch(f"{settings.OPENSEARCH_ENDPOINT}")
         results = opensearch_client.get(index="test-index", id=1)
         return results
 
     try:
         results = read_content_from_opensearch()
-        return render_connection_info(addon_type, True, results['_source']['text'])
+        return render_connection_info(addon_type, True, results["_source"]["text"])
     except RetryError:
         connection_info = f"Unable to read content from {addon_type} within {get_result_timeout} seconds"
         logger.error(connection_info)
@@ -167,10 +173,12 @@ def celery_worker_check():
     @retry(stop=stop_after_delay(get_result_timeout), wait=wait_fixed(1))
     def get_result_from_celery_backend():
         logger.info("Getting result from Celery backend")
-        backend_result = json.loads(celery_app.backend.get(f"celery-task-meta-{task_id}"))
+        backend_result = json.loads(
+            celery_app.backend.get(f"celery-task-meta-{task_id}")
+        )
         logger.debug("backend_result")
         logger.debug(backend_result)
-        if backend_result['status'] != "SUCCESS":
+        if backend_result["status"] != "SUCCESS":
             raise Exception
         return backend_result
 
@@ -182,7 +190,9 @@ def celery_worker_check():
         connection_info = f"{backend_result['result']} with task_id {task_id} was processed at {backend_result['date_done']} with status {backend_result['status']}"
         return render_connection_info(addon_type, True, connection_info)
     except RetryError:
-        connection_info = f"task_id {task_id} was not processed within {get_result_timeout} seconds"
+        connection_info = (
+            f"task_id {task_id} was not processed within {get_result_timeout} seconds"
+        )
         logger.error(connection_info)
         return render_connection_info(addon_type, False, connection_info)
     except Exception as e:
@@ -192,13 +202,14 @@ def celery_worker_check():
 
 def celery_beat_check():
     from .models import ScheduledTask
+
     addon_type = ALL_CHECKS[BEAT]
 
     try:
         if not RDS_POSTGRES_CREDENTIALS:
             raise Exception("Database not found")
 
-        latest_task = ScheduledTask.objects.all().order_by('-timestamp').first()
+        latest_task = ScheduledTask.objects.all().order_by("-timestamp").first()
         connection_info = f"Latest task scheduled with task_id {latest_task.taskid} at {latest_task.timestamp}"
         return render_connection_info(addon_type, True, connection_info)
     except Exception as e:
@@ -207,6 +218,7 @@ def celery_beat_check():
 
 def read_write_check():
     import tempfile
+
     addon_type = ALL_CHECKS[READ_WRITE]
     timestamp = datetime.now()  # ensures no stale file is present
 
@@ -215,17 +227,19 @@ def read_write_check():
         temp = tempfile.NamedTemporaryFile()
 
         # write into temporary file
-        with open(temp.name, 'w') as f:
+        with open(temp.name, "w") as f:
             f.write(str(timestamp))
 
         # read from temporary file
-        with open(temp.name, 'r') as f:
+        with open(temp.name, "r") as f:
             from_file_timestamp = f.read()
 
         # delete temporary file
         temp.close()
 
-        read_write_status = f"Read/write successfully completed at {from_file_timestamp}"
+        read_write_status = (
+            f"Read/write successfully completed at {from_file_timestamp}"
+        )
         return render_connection_info(addon_type, True, read_write_status)
     except Exception as e:
         return render_connection_info(addon_type, False, str(e))
@@ -236,9 +250,11 @@ def git_information():
     git_branch = os.environ.get("GIT_BRANCH", "Unknown")
     git_tag = os.environ.get("GIT_TAG", "Unknown")
 
-    return render_connection_info(ALL_CHECKS[GIT_INFORMATION],
-                                  git_commit != "Unknown",
-                                  f"Commit: {git_commit}, Branch: {git_branch}, Tag: {git_tag}")
+    return render_connection_info(
+        ALL_CHECKS[GIT_INFORMATION],
+        git_commit != "Unknown",
+        f"Commit: {git_commit}, Branch: {git_branch}, Tag: {git_tag}",
+    )
 
 
 def http_check():
@@ -247,35 +263,35 @@ def http_check():
     check = HTTPCheck(urls)
     check.execute()
 
-    return render_connection_info(ALL_CHECKS[HTTP_CONNECTION],
-                                  check.success,
-                                  "".join([c.render() for c in check.report]))
+    return render_connection_info(
+        ALL_CHECKS[HTTP_CONNECTION],
+        check.success,
+        "".join([c.render() for c in check.report]),
+    )
 
 
 def private_submodule_check():
     file_path = "platform-demo-private/sample.txt"
     success = False
     connection_info = f"Failed to read file from private submodule at path: {file_path}"
-    
+
     if os.path.exists(file_path):
         pass
-    
-    with open(file_path, 'r') as file:
+
+    with open(file_path, "r") as file:
         content = file.read()
-        if 'lorem ipsum' in content.lower():
+        if "lorem ipsum" in content.lower():
             success = True
             connection_info = f"Successfully built sample.txt file in private submodule at: {file_path}"
-        
-        
-    return render_connection_info(ALL_CHECKS[PRIVATE_SUBMODULE], success, connection_info)
+
+    return render_connection_info(
+        ALL_CHECKS[PRIVATE_SUBMODULE], success, connection_info
+    )
 
 
 def api(request):
-    response_data = {
-        "message": "Success",
-        "timestamp": datetime.now().isoformat()
-    }
-    
+    response_data = {"message": "Success", "timestamp": datetime.now().isoformat()}
+
     return JsonResponse(response_data)
 
 
@@ -284,11 +300,16 @@ def test_web(request):
     full_api_url = request.build_absolute_uri(api_url)
     web_url = full_api_url.replace(".api", "")
     response = requests.get(web_url)
-    
+
     if response.status_code == 200:
-        return JsonResponse({"message": f"API reached web service at {web_url}"}, status=200)
+        return JsonResponse(
+            {"message": f"API reached web service at {web_url}"}, status=200
+        )
     else:
-        return JsonResponse({"message": f"API failed to reach web service at {web_url}"}, status=response.status_code)
+        return JsonResponse(
+            {"message": f"API failed to reach web service at {web_url}"},
+            status=response.status_code,
+        )
 
 
 def ipfilter(request):
@@ -296,21 +317,24 @@ def ipfilter(request):
 
 
 def ipfilter_basic_auth(request):
-    auth_header = request.META.get('HTTP_AUTHORIZATION')
+    auth_header = request.META.get("HTTP_AUTHORIZATION")
     if auth_header:
-        auth_type, auth_string = auth_header.split(' ', 1)
-        if auth_type.lower() == 'basic':
-            decoded_creds = base64.b64decode(auth_string).decode('utf-8')
-            username, password = decoded_creds.split(':', 1)
+        auth_type, auth_string = auth_header.split(" ", 1)
+        if auth_type.lower() == "basic":
+            decoded_creds = base64.b64decode(auth_string).decode("utf-8")
+            username, password = decoded_creds.split(":", 1)
 
-            if username == settings.BASIC_AUTH_USERNAME and password == settings.BASIC_AUTH_PASSWORD:
+            if (
+                username == settings.BASIC_AUTH_USERNAME
+                and password == settings.BASIC_AUTH_PASSWORD
+            ):
                 ipfilter_url = reverse("ipfilter")
                 response = HttpResponseRedirect(ipfilter_url)
                 response.headers["Authorization"] = f"Basic {auth_string}"
-                
+
                 return response
-    
-    response = HttpResponse('Unauthorized', status=401)
-    response['WWW-Authenticate'] = 'Basic realm="Login Required"'
-    
+
+    response = HttpResponse("Unauthorized", status=401)
+    response["WWW-Authenticate"] = 'Basic realm="Login Required"'
+
     return response

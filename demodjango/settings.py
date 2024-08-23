@@ -14,10 +14,9 @@ import os
 import sys
 from pathlib import Path
 
-import dj_database_url
 import environ
 import sentry_sdk
-from dbt_copilot_python.database import database_url_from_env, database_from_env
+from dbt_copilot_python.database import database_from_env
 from dbt_copilot_python.network import setup_allowed_hosts
 from django_log_formatter_asim import ASIMFormatter
 from dotenv import load_dotenv
@@ -40,14 +39,16 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 DEBUG = True if (os.getenv("DEBUG") == "True") else False
 
 ALLOWED_HOSTS = setup_allowed_hosts(["*"])
-ACTIVE_CHECKS = list(filter(None, [x.strip() for x in os.getenv("ACTIVE_CHECKS", "").split(",")]))
+ACTIVE_CHECKS = list(
+    filter(None, [x.strip() for x in os.getenv("ACTIVE_CHECKS", "").split(",")])
+)
 
 IS_API = True if os.getenv("IS_API") else False
 
 DLFA_INCLUDE_RAW_LOG = True
 
-BASIC_AUTH_USERNAME=os.getenv("BASIC_AUTH_USERNAME")
-BASIC_AUTH_PASSWORD=os.getenv("BASIC_AUTH_PASSWORD")
+BASIC_AUTH_USERNAME = os.getenv("BASIC_AUTH_USERNAME")
+BASIC_AUTH_PASSWORD = os.getenv("BASIC_AUTH_PASSWORD")
 
 LOGGING = {
     "version": 1,
@@ -61,7 +62,7 @@ LOGGING = {
         "asim": {
             "class": "logging.StreamHandler",
             "formatter": "asim_formatter",
-            'filters': ['request_id_context'],
+            "filters": ["request_id_context"],
         },
         "stdout": {
             "class": "logging.StreamHandler",
@@ -87,17 +88,17 @@ LOGGING = {
             "level": "DEBUG",
             "propagate": True,
         },
-        'requestlogs': {
+        "requestlogs": {
             "handlers": [
                 "asim",
             ],
-            'level': 'INFO',
-            'propagate': False,
+            "level": "INFO",
+            "propagate": False,
         },
     },
-    'filters': {
-        'request_id_context': {
-            '()': 'requestlogs.logging.RequestIdContext',
+    "filters": {
+        "request_id_context": {
+            "()": "requestlogs.logging.RequestIdContext",
         },
     },
 }
@@ -107,51 +108,51 @@ DLFA_INCLUDE_RAW_LOG = True
 # Application definition
 
 INSTALLED_APPS = [
-    'django_celery_beat',
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'app',
+    "django_celery_beat",
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "app",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'requestlogs.middleware.RequestLogsMiddleware',
-    'requestlogs.middleware.RequestIdMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "requestlogs.middleware.RequestLogsMiddleware",
+    "requestlogs.middleware.RequestIdMiddleware",
 ]
 
 REST_FRAMEWORK = {
-    'EXCEPTION_HANDLER': 'requestlogs.views.exception_handler',
+    "EXCEPTION_HANDLER": "requestlogs.views.exception_handler",
 }
 
-ROOT_URLCONF = 'demodjango.urls'
+ROOT_URLCONF = "demodjango.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'demodjango.wsgi.application'
+WSGI_APPLICATION = "demodjango.wsgi.application"
 
 # Django requires a default database. If RDS is present make it the default
 # database to enable celery-beat
@@ -162,8 +163,8 @@ if RDS_POSTGRES_CREDENTIALS:
     DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
 else:
     DATABASES = {
-        'default': {
-            'ENGINE': '',
+        "default": {
+            "ENGINE": "",
         }
     }
 
@@ -172,25 +173,25 @@ else:
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-uk'
+LANGUAGE_CODE = "en-uk"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -199,12 +200,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 RESTRICT_ADMIN = env.bool("RESTRICT_ADMIN", True)
 
 REDIS_ENDPOINT = os.getenv("REDIS_ENDPOINT")

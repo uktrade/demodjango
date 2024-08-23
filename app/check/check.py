@@ -1,4 +1,5 @@
-from typing import Union, List
+from typing import List
+from typing import Union
 
 from app.check.report import CheckReport
 

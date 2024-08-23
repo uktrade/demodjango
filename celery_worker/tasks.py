@@ -1,8 +1,7 @@
-from datetime import datetime
 import logging
+from datetime import datetime
 
 from celery import shared_task
-
 
 logger = logging.getLogger("django")
 
