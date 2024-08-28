@@ -19,5 +19,6 @@ else:
             views.ipfilter_basic_auth,
             name="ipfilter-basic-auth",
         ),
+        path("sso/", views.sso, name="sso")
     ]
     urlpatterns = [path("", include(web_patterns), name="index")]
