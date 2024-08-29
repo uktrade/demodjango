@@ -19,6 +19,7 @@ import sentry_sdk
 from dbt_copilot_python.database import database_from_env
 from dbt_copilot_python.network import setup_allowed_hosts
 from django_log_formatter_asim import ASIMFormatter
+from django.urls import reverse_lazy
 from dotenv import load_dotenv
 from sentry_sdk.integrations.django import DjangoIntegration
 
@@ -115,6 +116,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "authbroker_client",
     "app",
 ]
 
@@ -164,7 +166,7 @@ if RDS_POSTGRES_CREDENTIALS:
 else:
     DATABASES = {
         "default": {
-            "ENGINE": "",
+            "ENGINE": "django.db.backends.sqlite3"
         }
     }
 
@@ -221,6 +223,20 @@ CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
+
+# authbroker config
+AUTHBROKER_URL = ""
+AUTHBROKER_CLIENT_ID = ""
+AUTHBROKER_CLIENT_SECRET = ""
+AUTHBROKER_STAFF_SSO_SCOPE = ""
+AUTHBROKER_ANONYMOUS_PATHS = [""]
+AUTHBROKER_ANONYMOUS_URL_NAMES = [""]
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'authbroker_client.backends.AuthbrokerBackend',
+]
+LOGIN_URL = reverse_lazy('authbroker_client:login')
+LOGIN_REDIRECT_URL = reverse_lazy('sso')
 
 SENTRY_DSN = os.getenv("SENTRY_DSN", "")
 

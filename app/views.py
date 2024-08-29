@@ -10,6 +10,7 @@ import boto3
 import redis
 import requests
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.db import connections
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
@@ -316,12 +317,8 @@ def test_web(request):
 def ipfilter(request):
     return JsonResponse({"message": f"Success"}, status=200)
 
-
+@login_required
 def sso(request):
-    sso_token = request.META.get('HTTP_SSO_TOKEN')
-
-    if not sso_token:
-        return HttpResponseRedirect(STAFF_SSO_URL_LOGIN)
     return JsonResponse({"message": "Success"}, status=200)
 
 

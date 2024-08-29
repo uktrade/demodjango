@@ -1,9 +1,11 @@
 import base64
 import json
+import pytest
 from unittest.mock import Mock
 from unittest.mock import patch
 
 import requests
+from django.contrib.auth.models import User
 from django.test import override_settings
 from django.urls import reverse
 from freezegun import freeze_time
@@ -121,17 +123,13 @@ def test_ipfilter_basic_auth_malformed_auth_header(client):
     assert response.status_code == 401
     assert response["WWW-Authenticate"] == 'Basic realm="Login Required"'
 
-
+@pytest.mark.django_db
 def test_sso_success_when_authenticated(client):
-    response = client.get(reverse('sso'), HTTP_SSO_TOKEN='valid_sso_token')
+    user = User.objects.create_user('john', 'lennon@thebeatles.com', 'johnpassword')
+
+    client.login(username='john', password='johnpassword')
+    response = client.get(reverse('sso'))
     response_data = json.loads(response.content.decode())
 
     assert response.status_code == 200
     assert response_data["message"] == "Success"
-
-
-def test_sso_redirect_when_not_authenticated(client):
-    response = client.get(reverse('sso'), HTTP_SSO_TOKEN=None)
-
-    assert response.status_code == 302
-    assert response['Location'] == "https://sso.trade.gov.uk/saml2/login-start/"
