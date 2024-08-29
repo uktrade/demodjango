@@ -44,7 +44,7 @@ OPENSEARCH_CREDENTIALS = "{"username":"username", "password": "password"}"
 
 ## Testing
 To test a file which simply lives in /tests (such as `.tests/test_views.py`) ensure all the various packages are present and up to date.
-Then, run the command `pytest tests/app`.
+Then, run the command `poetry run pytest tests/app`.
 
 Browser testing is done with [Playwright](https://playwright.dev/).
 
