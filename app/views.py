@@ -39,6 +39,7 @@ READ_WRITE = "read_write"
 REDIS = "redis"
 S3 = "s3"
 SERVER_TIME = "server_time"
+STAFF_SSO_URL = "https://sso.trade.gov.uk/saml2/login-start/"
 
 ALL_CHECKS = {
     BEAT: "Celery Beat",
@@ -317,7 +318,11 @@ def ipfilter(request):
 
 
 def sso(request):
-    return JsonResponse({"message": f"Success"}, status=200)
+    sso_token = request.META.get('HTTP_SSO_TOKEN')
+
+    if not sso_token:
+        return HttpResponseRedirect(STAFF_SSO_URL)
+    return JsonResponse({"message": "Success"}, status=200)
 
 
 def ipfilter_basic_auth(request):
