@@ -129,7 +129,7 @@ def test_sso_success_when_authenticated(client):
     User.objects.create_user("john", "lennon@thebeatles.com", "johnpassword")
 
     client.login(username="john", password="johnpassword")
-    response = client.get("/sso/auth/callback")
+    response = client.get("/auth/callback/")
     response_data = json.loads(response.content.decode())
 
     assert response.status_code == 200

@@ -231,6 +231,7 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "authbroker_client.backends.AuthbrokerBackend",
 ]
+AUTHBROKER_REDIRECT_URL = os.getenv("AUTHBROKER_REDIRECT_URL")
 LOGIN_URL = reverse_lazy("authbroker_client:login")
 LOGIN_REDIRECT_URL = reverse_lazy("sso")
 
