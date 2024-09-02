@@ -10,8 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
-import os
-import sys
 from pathlib import Path
 
 import environ
@@ -19,13 +17,10 @@ import sentry_sdk
 from dbt_copilot_python.database import database_from_env
 from dbt_copilot_python.network import setup_allowed_hosts
 from django.urls import reverse_lazy
-from django_log_formatter_asim import ASIMFormatter
-from dotenv import load_dotenv, find_dotenv
+from dotenv import find_dotenv
 
 from sentry_sdk.integrations.django import DjangoIntegration
 
-#
-# load_dotenv(find_dotenv(usecwd=True))
 
 env_file = find_dotenv(usecwd=True)
 
@@ -45,10 +40,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True if (env("DEBUG") == "True") else False
+DEBUG = env.bool("DEBUG", default=False)
 
 ALLOWED_HOSTS = setup_allowed_hosts(["*"])
-# breakpoint()
+
 ACTIVE_CHECKS=[el.strip() for el in env("ACTIVE_CHECKS", default="").split(",")]
 
 # ACTIVE_CHECKS = list(
@@ -244,7 +239,7 @@ AUTHENTICATION_BACKENDS = [
     "authbroker_client.backends.AuthbrokerBackend",
 ]
 LOGIN_URL = reverse_lazy('authbroker_client:login')
-LOGIN_REDIRECT_URL = reverse_lazy("/")
+LOGIN_REDIRECT_URL = reverse_lazy("index")
 
 SENTRY_DSN = env("SENTRY_DSN", default="")
 
