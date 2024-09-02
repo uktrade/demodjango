@@ -233,7 +233,7 @@ AUTHENTICATION_BACKENDS = [
     "authbroker_client.backends.AuthbrokerBackend",
 ]
 LOGIN_URL = reverse_lazy('authbroker_client:login')
-LOGIN_REDIRECT_URL = reverse_lazy("redis_check")
+LOGIN_REDIRECT_URL = reverse_lazy("/")
 
 SENTRY_DSN = os.getenv("SENTRY_DSN", "")
 

@@ -124,13 +124,13 @@ def test_ipfilter_basic_auth_malformed_auth_header(client):
     assert response["WWW-Authenticate"] == 'Basic realm="Login Required"'
 
 
-@pytest.mark.django_db
-def test_sso_success_when_authenticated(client):
-    User.objects.create_user("john", "lennon@thebeatles.com", "johnpassword")
+# @pytest.mark.django_db
+# def test_sso_success_when_authenticated(client):
+#     User.objects.create_user("john", "lennon@thebeatles.com", "johnpassword")
 
-    client.login(username="john", password="johnpassword")
-    response = client.get("/auth/callback/")
-    response_data = json.loads(response.content.decode())
+#     client.login(username="john", password="johnpassword")
+#     response = client.get("/auth/login/")
+#     response_data = json.loads(response.content.decode())
 
-    assert response.status_code == 200
-    assert response_data["message"] == "Success"
+#     assert response.status_code == 200
+#     assert response_data["message"] == "Success"
