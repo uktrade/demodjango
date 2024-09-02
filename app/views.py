@@ -11,7 +11,6 @@ import boto3
 import redis
 import requests
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
 from django.db import connections
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
