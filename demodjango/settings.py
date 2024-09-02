@@ -121,6 +121,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "authbroker_client.middleware.ProtectAllViewsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -231,9 +232,8 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "authbroker_client.backends.AuthbrokerBackend",
 ]
-AUTHBROKER_REDIRECT_URL = os.getenv("AUTHBROKER_REDIRECT_URL")
-LOGIN_URL = reverse_lazy("authbroker_client:login")
-LOGIN_REDIRECT_URL = reverse_lazy("sso")
+LOGIN_URL = reverse_lazy('authbroker_client:login')
+LOGIN_REDIRECT_URL = reverse_lazy("redis_check")
 
 SENTRY_DSN = os.getenv("SENTRY_DSN", "")
 

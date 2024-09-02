@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Callable
 from typing import Dict
 
+from authbroker_client.utils import TOKEN_SESSION_KEY
 import boto3
 import redis
 import requests
@@ -15,6 +16,7 @@ from django.db import connections
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
+from django.shortcuts import redirect
 from django.urls import reverse
 from opensearchpy import OpenSearch
 from tenacity import RetryError
@@ -60,6 +62,9 @@ RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")
 
 
 def index(request):
+    if not request.session.get(TOKEN_SESSION_KEY):
+        return redirect(settings.LOGIN_URL)
+    
     logger.info("Rendering landing page")
     logger.info(
         {
@@ -317,7 +322,7 @@ def test_web(request):
 def ipfilter(request):
     return JsonResponse({"message": f"Success"}, status=200)
 
-@login_required
+
 def sso(request):
     return JsonResponse({"message": "Success"}, status=200)
 
