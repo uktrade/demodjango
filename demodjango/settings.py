@@ -20,89 +20,100 @@ from dbt_copilot_python.database import database_from_env
 from dbt_copilot_python.network import setup_allowed_hosts
 from django.urls import reverse_lazy
 from django_log_formatter_asim import ASIMFormatter
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
+
 from sentry_sdk.integrations.django import DjangoIntegration
 
-load_dotenv()
+#
+# load_dotenv(find_dotenv(usecwd=True))
+
+env_file = find_dotenv(usecwd=True)
+
+if env_file:
+    environ.Env.read_env(env_file)
+
+env = environ.Env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env = environ.Env()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True if (os.getenv("DEBUG") == "True") else False
+DEBUG = True if (env("DEBUG") == "True") else False
 
 ALLOWED_HOSTS = setup_allowed_hosts(["*"])
-ACTIVE_CHECKS = list(
-    filter(None, [x.strip() for x in os.getenv("ACTIVE_CHECKS", "").split(",")])
-)
+# breakpoint()
+ACTIVE_CHECKS=[el.strip() for el in env("ACTIVE_CHECKS", default="").split(",")]
 
-IS_API = True if os.getenv("IS_API") else False
+# ACTIVE_CHECKS = list(
+#     filter(None, [x.strip() for x in env("ACTIVE_CHECKS", "").split(",")])
+# )
+
+IS_API = env("IS_API", default="False") == "True"
 
 DLFA_INCLUDE_RAW_LOG = True
 
-BASIC_AUTH_USERNAME = os.getenv("BASIC_AUTH_USERNAME")
-BASIC_AUTH_PASSWORD = os.getenv("BASIC_AUTH_PASSWORD")
+BASIC_AUTH_USERNAME = env("BASIC_AUTH_USERNAME", default="")
+BASIC_AUTH_PASSWORD = env("BASIC_AUTH_PASSWORD", default="")
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "asim_formatter": {
-            "()": ASIMFormatter,
-        },
-    },
-    "handlers": {
-        "asim": {
-            "class": "logging.StreamHandler",
-            "formatter": "asim_formatter",
-            "filters": ["request_id_context"],
-        },
-        "stdout": {
-            "class": "logging.StreamHandler",
-            "stream": sys.stdout,
-        },
-    },
-    "root": {
-        "handlers": ["stdout"],
-        "level": "DEBUG",
-    },
-    "loggers": {
-        "django": {
-            "handlers": [
-                "asim",
-            ],
-            "level": "DEBUG",
-            "propagate": True,
-        },
-        "django.request": {
-            "handlers": [
-                "asim",
-            ],
-            "level": "DEBUG",
-            "propagate": True,
-        },
-        "requestlogs": {
-            "handlers": [
-                "asim",
-            ],
-            "level": "INFO",
-            "propagate": False,
-        },
-    },
-    "filters": {
-        "request_id_context": {
-            "()": "requestlogs.logging.RequestIdContext",
-        },
-    },
-}
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "formatters": {
+#         "asim_formatter": {
+#             "()": ASIMFormatter,
+#         },
+#     },
+#     "handlers": {
+#         "asim": {
+#             "class": "logging.StreamHandler",
+#             "formatter": "asim_formatter",
+#             "filters": ["request_id_context"],
+#         },
+#         "stdout": {
+#             "class": "logging.StreamHandler",
+#             "stream": sys.stdout,
+#         },
+#     },
+#     "root": {
+#         "handlers": ["stdout"],
+#         "level": "DEBUG",
+#     },
+#     "loggers": {
+#         "django": {
+#             "handlers": [
+#                 "asim",
+#             ],
+#             "level": "DEBUG",
+#             "propagate": True,
+#         },
+#         "django.request": {
+#             "handlers": [
+#                 "asim",
+#             ],
+#             "level": "DEBUG",
+#             "propagate": True,
+#         },
+#         "requestlogs": {
+#             "handlers": [
+#                 "asim",
+#             ],
+#             "level": "INFO",
+#             "propagate": False,
+#         },
+#     },
+#     "filters": {
+#         "request_id_context": {
+#             "()": "requestlogs.logging.RequestIdContext",
+#         },
+#     },
+# }
 
 DLFA_INCLUDE_RAW_LOG = True
 
@@ -121,7 +132,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    "authbroker_client.middleware.ProtectAllViewsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -131,6 +141,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "requestlogs.middleware.RequestLogsMiddleware",
     "requestlogs.middleware.RequestIdMiddleware",
+    "authbroker_client.middleware.ProtectAllViewsMiddleware",
 ]
 
 REST_FRAMEWORK = {
@@ -159,13 +170,13 @@ WSGI_APPLICATION = "demodjango.wsgi.application"
 
 # Django requires a default database. If RDS is present make it the default
 # database to enable celery-beat
-RDS_POSTGRES_CREDENTIALS = os.getenv("RDS_POSTGRES_CREDENTIALS", "")
+RDS_POSTGRES_CREDENTIALS = env("RDS_POSTGRES_CREDENTIALS", default="")
 if RDS_POSTGRES_CREDENTIALS:
     DATABASES = database_from_env("RDS_POSTGRES_CREDENTIALS")
     # Because it comes in from the environment as postgres, not postgresql...
     DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
 else:
-    DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3"}}
+    DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "demodjango.sqlite"}}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -205,14 +216,14 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-RESTRICT_ADMIN = env.bool("RESTRICT_ADMIN", True)
+RESTRICT_ADMIN = env.bool("RESTRICT_ADMIN", default=True)
 
-REDIS_ENDPOINT = os.getenv("REDIS_ENDPOINT")
-S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "")
-OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT", "")
+REDIS_ENDPOINT = env("REDIS_ENDPOINT", default="")
+S3_BUCKET_NAME = env("S3_BUCKET_NAME", default="")
+OPENSEARCH_ENDPOINT = env("OPENSEARCH_ENDPOINT", default="")
 
 # Celery
-CELERY_BROKER_URL = os.getenv("REDIS_ENDPOINT")
+CELERY_BROKER_URL = env("REDIS_ENDPOINT", default="")
 if CELERY_BROKER_URL and CELERY_BROKER_URL.startswith("rediss://"):
     CELERY_BROKER_URL = f"{CELERY_BROKER_URL}?ssl_cert_reqs=CERT_REQUIRED"
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
@@ -222,12 +233,12 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
 
 # authbroker config
-AUTHBROKER_URL = os.getenv("AUTHBROKER_URL")
-AUTHBROKER_CLIENT_ID = os.getenv("AUTHBROKER_CLIENT_ID")
-AUTHBROKER_CLIENT_SECRET = os.getenv("AUTHBROKER_CLIENT_SECRET")
-AUTHBROKER_STAFF_SSO_SCOPE = os.getenv("AUTHBROKER_STAFF_SSO_SCOPE")
-AUTHBROKER_ANONYMOUS_PATHS = os.getenv("AUTHBROKER_ANONYMOUS_PATHS", [])
-AUTHBROKER_ANONYMOUS_URL_NAMES = os.getenv("AUTHBROKER_ANONYMOUS_URL_NAMES", [])
+AUTHBROKER_URL = env("AUTHBROKER_URL", default="")
+AUTHBROKER_CLIENT_ID = env("AUTHBROKER_CLIENT_ID", default="")
+AUTHBROKER_CLIENT_SECRET = env("AUTHBROKER_CLIENT_SECRET", default="")
+AUTHBROKER_STAFF_SSO_SCOPE = env("AUTHBROKER_STAFF_SSO_SCOPE", default="read write")
+AUTHBROKER_ANONYMOUS_PATHS = env("AUTHBROKER_ANONYMOUS_PATHS", default=[])
+AUTHBROKER_ANONYMOUS_URL_NAMES = env("AUTHBROKER_ANONYMOUS_URL_NAMES", default=[])
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "authbroker_client.backends.AuthbrokerBackend",
@@ -235,7 +246,7 @@ AUTHENTICATION_BACKENDS = [
 LOGIN_URL = reverse_lazy('authbroker_client:login')
 LOGIN_REDIRECT_URL = reverse_lazy("/")
 
-SENTRY_DSN = os.getenv("SENTRY_DSN", "")
+SENTRY_DSN = env("SENTRY_DSN", default="")
 
 if SENTRY_DSN:
     sentry_sdk.init(

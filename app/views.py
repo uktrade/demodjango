@@ -63,7 +63,7 @@ RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")
 def index(request):
     if not request.session.get(TOKEN_SESSION_KEY):
         return redirect(settings.LOGIN_URL)
-    
+
     logger.info("Rendering landing page")
     logger.info(
         {
