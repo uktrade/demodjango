@@ -164,7 +164,6 @@ def test_login_required_when_accessing_sso(client):
 
 @pytest.mark.django_db
 def test_sso_successfully_redirects_when_authenticated(client):
-    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
     User.objects.create_user(username="john", email="lennon@thebeatles.com", password="johnpassword")
 
     client.login(username="john", password="johnpassword")
@@ -181,8 +180,6 @@ def test_sso_successfully_redirects_when_authenticated(client):
 
 @pytest.mark.django_db
 def test_sso_redirects_when_not_authenticated(client):
-    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-
     session = client.session
     session[TOKEN_SESSION_KEY] = None
     session.save()
