@@ -322,7 +322,7 @@ def ipfilter(request):
 
 
 def sso(request):
-    return JsonResponse({"message": "Success"}, status=200)
+    return HttpResponseRedirect("/auth/")
 
 
 def ipfilter_basic_auth(request):
