@@ -3,6 +3,7 @@ import json
 from unittest.mock import Mock
 from unittest.mock import patch
 
+import os
 import pytest
 import requests
 from django.contrib.auth.models import User
@@ -24,9 +25,13 @@ def test_http_view(patched_requests, mock_environment):
     assert "https://example.com" in response
 
 
+@pytest.mark.django_db
 @override_settings(ROOT_URLCONF="tests.api_urls")
 @freeze_time("2024-08-01 12:34:56")
 def test_api_view(client):
+    User.objects.create_user("john", "lennon@thebeatles.com", "johnpassword")
+
+    client.login(username="john", password="johnpassword")
     response = client.get("/")
     response_data = json.loads(response.content)
 
@@ -35,10 +40,15 @@ def test_api_view(client):
     assert response_data["timestamp"] == "2024-08-01T12:34:56"
 
 
+@pytest.mark.django_db
 @override_settings(ROOT_URLCONF="tests.api_urls")
 @patch("app.views.reverse")
 @patch("app.views.requests.get")
 def test_test_web(mock_get, mock_reverse, client):
+    User.objects.create_user("john", "lennon@thebeatles.com", "johnpassword")
+
+    client.login(username="john", password="johnpassword")
+    
     mock_reverse.return_value = "https://internal.api.local.demodjango.uktrade.digital/"
     mock_response = requests.Response()
     mock_response.status_code = 200
@@ -145,14 +155,15 @@ def test_ipfilter_basic_auth_malformed_auth_header(client):
     assert response.status_code == 401
     assert response["WWW-Authenticate"] == 'Basic realm="Login Required"'
 
-
 @pytest.mark.django_db
 def test_sso_success_when_authenticated(client):
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
     User.objects.create_user("john", "lennon@thebeatles.com", "johnpassword")
 
     client.login(username="john", password="johnpassword")
     response = client.get("/auth/login/")
-    response_data = json.loads(response.content.decode())
-
-    assert response.status_code == 200
-    assert response_data["message"] == "Success"
+    
+    assert response.status_code == 302
+    
+    index_url = reverse("index")
+    assert response.url == index_url
