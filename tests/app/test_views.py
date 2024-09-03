@@ -156,27 +156,3 @@ def test_ipfilter_basic_auth_malformed_auth_header(client):
     assert response.status_code == 401
     assert response["WWW-Authenticate"] == 'Basic realm="Login Required"'
 
-# @pytest.mark.django_db
-# def test_sso_successfully_redirects_when_authenticated(client):
-#     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-#     User.objects.create_user(username="john", email="lennon@thebeatles.com", password="johnpassword")
-
-#     client.login(username="john", password="johnpassword")
-
-#     session = client.session
-#     session[TOKEN_SESSION_KEY] = TOKEN_SESSION_KEY
-#     session.save()
-
-#     response = client.get("/sso/")
-    
-#     assert response.status_code == 302
-#     assert response.url == reverse("index")
-
-
-# def test_sso_redirects_when_not_authenticated(client):
-#     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-
-#     response = client.get(reverse("sso"))
-    
-#     assert response.status_code == 302
-#     assert response.url.startswith(reverse("login"))
