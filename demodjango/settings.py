@@ -138,7 +138,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "requestlogs.middleware.RequestLogsMiddleware",
     "requestlogs.middleware.RequestIdMiddleware",
-    "authbroker_client.middleware.ProtectAllViewsMiddleware",
 ]
 
 REST_FRAMEWORK = {

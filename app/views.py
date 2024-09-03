@@ -16,6 +16,7 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
 from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from opensearchpy import OpenSearch
 from tenacity import RetryError
@@ -319,6 +320,10 @@ def test_web(request):
 
 def ipfilter(request):
     return JsonResponse({"message": f"Success"}, status=200)
+
+@login_required
+def sso(request):
+    return HttpResponseRedirect(reverse("index"))
 
 
 def ipfilter_basic_auth(request):

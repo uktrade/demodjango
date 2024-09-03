@@ -161,7 +161,7 @@ def test_sso_successfully_redirects_when_authenticated(client):
     User.objects.create_user(username="john", email="lennon@thebeatles.com", password="johnpassword")
 
     client.login(username="john", password="johnpassword")
-    response = client.get("/auth/login/")
+    response = client.get("/sso/")
     
     assert response.status_code == 302
-    assert response.url.startswith('/o/authorize/')
+    assert response.url == "/auth/login/"
