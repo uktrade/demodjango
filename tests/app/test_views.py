@@ -48,7 +48,7 @@ def test_test_web(mock_get, mock_reverse, client):
     User.objects.create_user("john", "lennon@thebeatles.com", "johnpassword")
 
     client.login(username="john", password="johnpassword")
-    
+
     mock_reverse.return_value = "https://internal.api.local.demodjango.uktrade.digital/"
     mock_response = requests.Response()
     mock_response.status_code = 200
@@ -156,14 +156,12 @@ def test_ipfilter_basic_auth_malformed_auth_header(client):
     assert response["WWW-Authenticate"] == 'Basic realm="Login Required"'
 
 @pytest.mark.django_db
-def test_sso_success_when_authenticated(client):
+def test_sso_successfully_redirects_when_authenticated(client):
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-    User.objects.create_user("john", "lennon@thebeatles.com", "johnpassword")
+    User.objects.create_user(username="john", email="lennon@thebeatles.com", password="johnpassword")
 
     client.login(username="john", password="johnpassword")
     response = client.get("/auth/login/")
     
     assert response.status_code == 302
-    
-    index_url = reverse("index")
-    assert response.url == index_url
+    assert response.url.startswith('/o/authorize/')
