@@ -12,10 +12,12 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 
+import sys
 import environ
 import sentry_sdk
 from dbt_copilot_python.database import database_from_env
 from dbt_copilot_python.network import setup_allowed_hosts
+from django_log_formatter_asim import ASIMFormatter
 from django.urls import reverse_lazy
 from dotenv import find_dotenv
 
@@ -57,58 +59,58 @@ DLFA_INCLUDE_RAW_LOG = True
 BASIC_AUTH_USERNAME = env("BASIC_AUTH_USERNAME", default="")
 BASIC_AUTH_PASSWORD = env("BASIC_AUTH_PASSWORD", default="")
 
-# LOGGING = {
-#     "version": 1,
-#     "disable_existing_loggers": False,
-#     "formatters": {
-#         "asim_formatter": {
-#             "()": ASIMFormatter,
-#         },
-#     },
-#     "handlers": {
-#         "asim": {
-#             "class": "logging.StreamHandler",
-#             "formatter": "asim_formatter",
-#             "filters": ["request_id_context"],
-#         },
-#         "stdout": {
-#             "class": "logging.StreamHandler",
-#             "stream": sys.stdout,
-#         },
-#     },
-#     "root": {
-#         "handlers": ["stdout"],
-#         "level": "DEBUG",
-#     },
-#     "loggers": {
-#         "django": {
-#             "handlers": [
-#                 "asim",
-#             ],
-#             "level": "DEBUG",
-#             "propagate": True,
-#         },
-#         "django.request": {
-#             "handlers": [
-#                 "asim",
-#             ],
-#             "level": "DEBUG",
-#             "propagate": True,
-#         },
-#         "requestlogs": {
-#             "handlers": [
-#                 "asim",
-#             ],
-#             "level": "INFO",
-#             "propagate": False,
-#         },
-#     },
-#     "filters": {
-#         "request_id_context": {
-#             "()": "requestlogs.logging.RequestIdContext",
-#         },
-#     },
-# }
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "asim_formatter": {
+            "()": ASIMFormatter,
+        },
+    },
+    "handlers": {
+        "asim": {
+            "class": "logging.StreamHandler",
+            "formatter": "asim_formatter",
+            "filters": ["request_id_context"],
+        },
+        "stdout": {
+            "class": "logging.StreamHandler",
+            "stream": sys.stdout,
+        },
+    },
+    "root": {
+        "handlers": ["stdout"],
+        "level": "DEBUG",
+    },
+    "loggers": {
+        "django": {
+            "handlers": [
+                "asim",
+            ],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+        "django.request": {
+            "handlers": [
+                "asim",
+            ],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+        "requestlogs": {
+            "handlers": [
+                "asim",
+            ],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+    "filters": {
+        "request_id_context": {
+            "()": "requestlogs.logging.RequestIdContext",
+        },
+    },
+}
 
 DLFA_INCLUDE_RAW_LOG = True
 

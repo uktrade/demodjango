@@ -41,7 +41,6 @@ READ_WRITE = "read_write"
 REDIS = "redis"
 S3 = "s3"
 SERVER_TIME = "server_time"
-STAFF_SSO_URL_LOGIN = "https://sso.trade.gov.uk/saml2/login-start/"
 
 ALL_CHECKS = {
     BEAT: "Celery Beat",
