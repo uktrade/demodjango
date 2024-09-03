@@ -19,6 +19,6 @@ else:
             name="ipfilter-basic-auth",
         ),
         path("auth/", include("authbroker_client.urls")),
-        path("sso/", views.index, name="sso"),
+        path("sso/", views.sso, name="sso"),
     ]
     urlpatterns = [path("", include(web_patterns), name="index")]

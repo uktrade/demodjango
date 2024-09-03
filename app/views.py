@@ -319,7 +319,7 @@ def ipfilter(request):
 
 @login_required
 def sso(request):
-    if request.user.is_authenticated and request.session.get(TOKEN_SESSION_KEY, None):    
+    if not request.user.is_authenticated and request.session.get(TOKEN_SESSION_KEY, None):    
         return HttpResponseRedirect(settings.LOGIN_URL)
     return HttpResponseRedirect(reverse("index"))
 

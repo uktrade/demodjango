@@ -156,3 +156,7 @@ def test_ipfilter_basic_auth_malformed_auth_header(client):
     assert response.status_code == 401
     assert response["WWW-Authenticate"] == 'Basic realm="Login Required"'
 
+
+def test_login_required_when_accessing_sso(client):
+    response = client.get("/sso/")
+    assert response.status_code == 302
