@@ -321,10 +321,6 @@ def ipfilter(request):
     return JsonResponse({"message": f"Success"}, status=200)
 
 
-def sso(request):
-    return JsonResponse({"message": "Success"}, status=200)
-
-
 def ipfilter_basic_auth(request):
     auth_header = request.META.get("HTTP_AUTHORIZATION")
     if auth_header:
