@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 
+import os
 import sys
 import environ
 import sentry_sdk
@@ -30,6 +31,7 @@ if env_file:
     environ.Env.read_env(env_file)
 
 env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -231,10 +233,10 @@ CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
 
 # authbroker config
-AUTHBROKER_URL = env.str("AUTHBROKER_URL")
-AUTHBROKER_CLIENT_ID = env.str("AUTHBROKER_CLIENT_ID")
-AUTHBROKER_CLIENT_SECRET = env.str("AUTHBROKER_CLIENT_SECRET")
-AUTHBROKER_STAFF_SSO_SCOPE = env.str("AUTHBROKER_STAFF_SSO_SCOPE", default="")
+AUTHBROKER_URL = os.getenv("AUTHBROKER_URL")
+AUTHBROKER_CLIENT_ID = os.getenv("AUTHBROKER_CLIENT_ID")
+AUTHBROKER_CLIENT_SECRET = os.getenv("AUTHBROKER_CLIENT_SECRET")
+AUTHBROKER_STAFF_SSO_SCOPE = os.getenv("AUTHBROKER_STAFF_SSO_SCOPE", default="")
 AUTHBROKER_ANONYMOUS_PATHS = env.list("AUTHBROKER_ANONYMOUS_PATHS", default=[])
 AUTHBROKER_ANONYMOUS_URL_NAMES = env.list("AUTHBROKER_ANONYMOUS_URL_NAMES", default=[])
 AUTHENTICATION_BACKENDS = [
