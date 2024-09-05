@@ -18,7 +18,6 @@ import environ
 import sentry_sdk
 from dbt_copilot_python.database import database_from_env
 from dbt_copilot_python.network import setup_allowed_hosts
-from django.urls import reverse_lazy
 from django_log_formatter_asim import ASIMFormatter
 from dotenv import load_dotenv
 from sentry_sdk.integrations.django import DjangoIntegration
@@ -164,7 +163,11 @@ if RDS_POSTGRES_CREDENTIALS:
     # Because it comes in from the environment as postgres, not postgresql...
     DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
 else:
-    DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3"}}
+    DATABASES = {
+        "default": {
+            "ENGINE": "",
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -219,20 +222,6 @@ CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
-
-# authbroker config
-AUTHBROKER_URL = os.getenv("AUTHBROKER_URL")
-AUTHBROKER_CLIENT_ID = os.getenv("AUTHBROKER_CLIENT_ID")
-AUTHBROKER_CLIENT_SECRET = os.getenv("AUTHBROKER_CLIENT_SECRET")
-AUTHBROKER_STAFF_SSO_SCOPE = os.getenv("AUTHBROKER_STAFF_SSO_SCOPE")
-AUTHBROKER_ANONYMOUS_PATHS = os.getenv("AUTHBROKER_ANONYMOUS_PATHS", [])
-AUTHBROKER_ANONYMOUS_URL_NAMES = os.getenv("AUTHBROKER_ANONYMOUS_URL_NAMES", [])
-AUTHENTICATION_BACKENDS = [
-    "django.contrib.auth.backends.ModelBackend",
-    "authbroker_client.backends.AuthbrokerBackend",
-]
-LOGIN_URL = reverse_lazy("authbroker_client:login")
-LOGIN_REDIRECT_URL = reverse_lazy("sso")
 
 SENTRY_DSN = os.getenv("SENTRY_DSN", "")
 

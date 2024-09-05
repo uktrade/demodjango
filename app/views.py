@@ -11,7 +11,6 @@ import redis
 import requests
 from bs4 import BeautifulSoup
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
 from django.db import connections
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
@@ -42,7 +41,6 @@ REDIS = "redis"
 S3 = "s3"
 S3_STATIC = "s3_static"
 SERVER_TIME = "server_time"
-STAFF_SSO_URL_LOGIN = "https://sso.trade.gov.uk/saml2/login-start/"
 
 ALL_CHECKS = {
     BEAT: "Celery Beat",
@@ -335,11 +333,6 @@ def test_web(request):
 
 def ipfilter(request):
     return JsonResponse({"message": f"Success"}, status=200)
-
-
-@login_required
-def sso(request):
-    return JsonResponse({"message": "Success"}, status=200)
 
 
 def ipfilter_basic_auth(request):

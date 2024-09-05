@@ -19,7 +19,6 @@ else:
             views.ipfilter_basic_auth,
             name="ipfilter-basic-auth",
         ),
-        path("sso/auth/callback", views.sso, name="sso"),
         path("auth/", include("authbroker_client.urls")),
     ]
     urlpatterns = [path("", include(web_patterns), name="index")]

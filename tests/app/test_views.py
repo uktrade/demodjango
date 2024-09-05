@@ -3,9 +3,7 @@ import json
 from unittest.mock import Mock
 from unittest.mock import patch
 
-import pytest
 import requests
-from django.contrib.auth.models import User
 from django.test import override_settings
 from django.urls import reverse
 from freezegun import freeze_time
@@ -122,15 +120,3 @@ def test_ipfilter_basic_auth_malformed_auth_header(client):
 
     assert response.status_code == 401
     assert response["WWW-Authenticate"] == 'Basic realm="Login Required"'
-
-
-@pytest.mark.django_db
-def test_sso_success_when_authenticated(client):
-    User.objects.create_user("john", "lennon@thebeatles.com", "johnpassword")
-
-    client.login(username="john", password="johnpassword")
-    response = client.get("/sso/auth/callback")
-    response_data = json.loads(response.content.decode())
-
-    assert response.status_code == 200
-    assert response_data["message"] == "Success"

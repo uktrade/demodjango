@@ -36,7 +36,6 @@ pytest = "^8.1.1"
 whitenoise = "^6.7.0"
 freezegun = "^1.5.1"
 pytest-dotenv = "^0.5.2"
-django-staff-sso-client = "^4.3.0"
 beautifulsoup4 = "^4.12.3"
 
 [tool.poetry.group.dev.dependencies]
