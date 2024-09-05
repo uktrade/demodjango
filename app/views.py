@@ -14,6 +14,7 @@ from django.conf import settings
 from django.db import connections
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
@@ -320,8 +321,8 @@ def ipfilter(request):
 @login_required
 def sso(request):
     if not request.user.is_authenticated and request.session.get(TOKEN_SESSION_KEY, None):    
-        return HttpResponseRedirect(settings.LOGIN_URL)
-    return HttpResponseRedirect(reverse("index"))
+        return redirect(settings.LOGIN_URL)
+    return redirect("index")
 
 
 def ipfilter_basic_auth(request):
