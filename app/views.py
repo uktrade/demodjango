@@ -153,7 +153,7 @@ def s3_static_bucket_check():
         response = requests.get(f"https://{settings.STATIC_S3_ENDPOINT}/test.html")
         if response.status_code == 200:
             soup = BeautifulSoup(response.text, "html.parser")
-            return render_connection_info(addon_type, True, soup.body)
+            return render_connection_info(addon_type, True, soup.body.find("p").text)
 
         raise Exception(
             f"Failed to get static asset with status code: {response.status_code}"
