@@ -50,10 +50,6 @@ ALLOWED_HOSTS = setup_allowed_hosts(["*"])
 
 ACTIVE_CHECKS=[el.strip() for el in env("ACTIVE_CHECKS", default="").split(",")]
 
-# ACTIVE_CHECKS = list(
-#     filter(None, [x.strip() for x in env("ACTIVE_CHECKS", "").split(",")])
-# )
-
 IS_API = env("IS_API", default="False") == "True"
 
 DLFA_INCLUDE_RAW_LOG = True
