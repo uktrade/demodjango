@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
-import os
 import sys
 from pathlib import Path
 
@@ -18,37 +17,42 @@ import environ
 import sentry_sdk
 from dbt_copilot_python.database import database_from_env
 from dbt_copilot_python.network import setup_allowed_hosts
+from django.urls import reverse_lazy
 from django_log_formatter_asim import ASIMFormatter
-from dotenv import load_dotenv
+from dotenv import find_dotenv
 from sentry_sdk.integrations.django import DjangoIntegration
 
-load_dotenv()
+env_file = find_dotenv(usecwd=True)
+
+if env_file:
+    environ.Env.read_env(env_file)
+
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-env = environ.Env()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+SECRET_KEY = env("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True if (os.getenv("DEBUG") == "True") else False
+DEBUG = env.bool("DEBUG", default=False)
 
 ALLOWED_HOSTS = setup_allowed_hosts(["*"])
-ACTIVE_CHECKS = list(
-    filter(None, [x.strip() for x in os.getenv("ACTIVE_CHECKS", "").split(",")])
-)
 
-IS_API = True if os.getenv("IS_API") else False
+ACTIVE_CHECKS = [el.strip() for el in env("ACTIVE_CHECKS", default="").split(",")]
+
+IS_API = env("IS_API", default="False") == "True"
 
 DLFA_INCLUDE_RAW_LOG = True
 
-BASIC_AUTH_USERNAME = os.getenv("BASIC_AUTH_USERNAME")
-BASIC_AUTH_PASSWORD = os.getenv("BASIC_AUTH_PASSWORD")
+BASIC_AUTH_USERNAME = env("BASIC_AUTH_USERNAME", default="")
+BASIC_AUTH_PASSWORD = env("BASIC_AUTH_PASSWORD", default="")
 
 LOGGING = {
     "version": 1,
@@ -115,6 +119,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "authbroker_client",
     "app",
 ]
 
@@ -156,7 +161,7 @@ WSGI_APPLICATION = "demodjango.wsgi.application"
 
 # Django requires a default database. If RDS is present make it the default
 # database to enable celery-beat
-RDS_POSTGRES_CREDENTIALS = os.getenv("RDS_POSTGRES_CREDENTIALS", "")
+RDS_POSTGRES_CREDENTIALS = env("RDS_POSTGRES_CREDENTIALS", default="")
 if RDS_POSTGRES_CREDENTIALS:
     DATABASES = database_from_env("RDS_POSTGRES_CREDENTIALS")
     # Because it comes in from the environment as postgres, not postgresql...
@@ -164,7 +169,8 @@ if RDS_POSTGRES_CREDENTIALS:
 else:
     DATABASES = {
         "default": {
-            "ENGINE": "",
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "demodjango.sqlite",
         }
     }
 
@@ -197,6 +203,8 @@ USE_I18N = True
 
 USE_TZ = True
 
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
@@ -206,14 +214,14 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-RESTRICT_ADMIN = env.bool("RESTRICT_ADMIN", True)
+RESTRICT_ADMIN = env.bool("RESTRICT_ADMIN", default=True)
 
-REDIS_ENDPOINT = os.getenv("REDIS_ENDPOINT")
-S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "")
-OPENSEARCH_ENDPOINT = os.getenv("OPENSEARCH_ENDPOINT", "")
+REDIS_ENDPOINT = env("REDIS_ENDPOINT", default="")
+S3_BUCKET_NAME = env("S3_BUCKET_NAME", default="")
+OPENSEARCH_ENDPOINT = env("OPENSEARCH_ENDPOINT", default="")
 
 # Celery
-CELERY_BROKER_URL = os.getenv("REDIS_ENDPOINT")
+CELERY_BROKER_URL = env("REDIS_ENDPOINT", default="")
 if CELERY_BROKER_URL and CELERY_BROKER_URL.startswith("rediss://"):
     CELERY_BROKER_URL = f"{CELERY_BROKER_URL}?ssl_cert_reqs=CERT_REQUIRED"
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
@@ -222,7 +230,21 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
 
-SENTRY_DSN = os.getenv("SENTRY_DSN", "")
+# authbroker config
+AUTHBROKER_URL = env("AUTHBROKER_URL", default="")
+AUTHBROKER_CLIENT_ID = env("AUTHBROKER_CLIENT_ID", default="")
+AUTHBROKER_CLIENT_SECRET = env("AUTHBROKER_CLIENT_SECRET", default="")
+AUTHBROKER_STAFF_SSO_SCOPE = env("AUTHBROKER_STAFF_SSO_SCOPE", default="")
+AUTHBROKER_ANONYMOUS_PATHS = env.list("AUTHBROKER_ANONYMOUS_PATHS", default=[])
+AUTHBROKER_ANONYMOUS_URL_NAMES = env.list("AUTHBROKER_ANONYMOUS_URL_NAMES", default=[])
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "authbroker_client.backends.AuthbrokerBackend",
+]
+LOGIN_URL = reverse_lazy("authbroker_client:login")
+LOGIN_REDIRECT_URL = reverse_lazy("index")
+
+SENTRY_DSN = env("SENTRY_DSN", default="")
 
 if SENTRY_DSN:
     sentry_sdk.init(

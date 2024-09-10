@@ -9,12 +9,15 @@ from typing import Dict
 import boto3
 import redis
 import requests
+from authbroker_client.utils import TOKEN_SESSION_KEY
 from bs4 import BeautifulSoup
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.db import connections
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
+from django.shortcuts import redirect
 from django.urls import reverse
 from opensearchpy import OpenSearch
 from tenacity import RetryError
@@ -154,7 +157,7 @@ def s3_static_bucket_check():
         if response.status_code == 200:
             parsed_html = BeautifulSoup(response.text, "html.parser")
             test_text = parsed_html.body.find("p").text
-            return render_connection_info(addon_type, True,  test_text)
+            return render_connection_info(addon_type, True, test_text)
 
         raise Exception(
             f"Failed to get static asset with status code: {response.status_code}"
@@ -334,6 +337,15 @@ def test_web(request):
 
 def ipfilter(request):
     return JsonResponse({"message": f"Success"}, status=200)
+
+
+@login_required
+def sso(request):
+    if not request.user.is_authenticated and request.session.get(
+        TOKEN_SESSION_KEY, None
+    ):
+        return redirect(settings.LOGIN_URL)
+    return redirect("index")
 
 
 def ipfilter_basic_auth(request):

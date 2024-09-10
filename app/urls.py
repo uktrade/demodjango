@@ -19,5 +19,7 @@ else:
             views.ipfilter_basic_auth,
             name="ipfilter-basic-auth",
         ),
+        path("auth/", include("authbroker_client.urls")),
+        path("sso/", views.sso, name="sso"),
     ]
     urlpatterns = [path("", include(web_patterns), name="index")]
