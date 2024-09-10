@@ -253,4 +253,4 @@ if SENTRY_DSN:
         traces_sample_rate=1.0,
     )
 
-STATIC_S3_ENDPOINT = env("STATIC_S3_ENDPOINT")
+STATIC_S3_ENDPOINT = env("STATIC_S3_ENDPOINT", default="")
