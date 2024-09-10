@@ -10,19 +10,17 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
+import sys
 from pathlib import Path
 
-import sys
 import environ
 import sentry_sdk
 from dbt_copilot_python.database import database_from_env
 from dbt_copilot_python.network import setup_allowed_hosts
-from django_log_formatter_asim import ASIMFormatter
 from django.urls import reverse_lazy
+from django_log_formatter_asim import ASIMFormatter
 from dotenv import find_dotenv
-
 from sentry_sdk.integrations.django import DjangoIntegration
-
 
 env_file = find_dotenv(usecwd=True)
 
@@ -47,7 +45,9 @@ DEBUG = env.bool("DEBUG", default=False)
 
 ALLOWED_HOSTS = setup_allowed_hosts(["*"])
 
-ACTIVE_CHECKS=[el.strip() for el in env("ACTIVE_CHECKS", default="").split(",")]
+ACTIVE_CHECKS = list(
+    filter(None, [el.strip() for el in env("ACTIVE_CHECKS", default="").split(",")])
+)
 
 IS_API = env("IS_API", default="False") == "True"
 
@@ -169,7 +169,12 @@ if RDS_POSTGRES_CREDENTIALS:
     # Because it comes in from the environment as postgres, not postgresql...
     DATABASES["default"]["ENGINE"] = "django.db.backends.postgresql"
 else:
-    DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "demodjango.sqlite"}}
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "demodjango.sqlite",
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -238,7 +243,7 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "authbroker_client.backends.AuthbrokerBackend",
 ]
-LOGIN_URL = reverse_lazy('authbroker_client:login')
+LOGIN_URL = reverse_lazy("authbroker_client:login")
 LOGIN_REDIRECT_URL = reverse_lazy("index")
 
 SENTRY_DSN = env("SENTRY_DSN", default="")
