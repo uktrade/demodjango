@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.urls import include
 from django.urls import path
-
 from . import views
 
 if settings.IS_API:
@@ -19,5 +18,7 @@ else:
             views.ipfilter_basic_auth,
             name="ipfilter-basic-auth",
         ),
+        path("auth/", include("authbroker_client.urls")),
+        path("sso/", views.sso, name="sso"),
     ]
     urlpatterns = [path("", include(web_patterns), name="index")]

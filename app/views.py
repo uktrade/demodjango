@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Callable
 from typing import Dict
 
+from authbroker_client.utils import TOKEN_SESSION_KEY
 import boto3
 import redis
 import requests
@@ -13,7 +14,9 @@ from django.conf import settings
 from django.db import connections
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from opensearchpy import OpenSearch
 from tenacity import RetryError
@@ -314,6 +317,12 @@ def test_web(request):
 
 def ipfilter(request):
     return JsonResponse({"message": f"Success"}, status=200)
+
+@login_required
+def sso(request):
+    if not request.user.is_authenticated and request.session.get(TOKEN_SESSION_KEY, None):    
+        return redirect(settings.LOGIN_URL)
+    return redirect("index")
 
 
 def ipfilter_basic_auth(request):
