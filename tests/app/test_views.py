@@ -14,6 +14,7 @@ from app import views
 
 TOKEN_SESSION_KEY = "auth_token"
 
+
 @patch("app.check.check_http.requests")
 def test_http_view(patched_requests, mock_environment):
     mock_environment("HTTP_CHECK_URLS", "https://example.com")
@@ -74,7 +75,6 @@ def test_ipfilter_basic_auth_success(client):
     assert response["Authorization"] == f"Basic {encoded_credentials}"
 
 
-
 @override_settings(
     BASIC_AUTH_USERNAME="valid_user", BASIC_AUTH_PASSWORD="valid_password"
 )
@@ -117,7 +117,7 @@ def test_ipfilter_basic_auth_invalid_auth_type(client):
 
 def test_ipfilter_basic_auth_malformed_auth_header(client):
     malformed_header = "BasicMalformedHeader"
-    
+
     response = client.get(
         "/ipfilter-basic-auth/", {"HTTP_AUTHORIZATION": malformed_header}
     )
@@ -144,7 +144,6 @@ def test_sso_successfully_redirects_when_authenticated(client):
     session.save()
 
     response = client.get("/sso/")
-
     assert response.status_code == 302
     assert response.url == reverse("index")
 
@@ -154,8 +153,8 @@ def test_sso_redirects_when_not_authenticated(client):
     session = client.session
     session[TOKEN_SESSION_KEY] = None
     session.save()
-    
+
     response = client.get(reverse("sso"))
-    
+
     assert response.status_code == 302
     assert response.url == "/auth/login/?next=/sso/"

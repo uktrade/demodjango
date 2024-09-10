@@ -13,18 +13,14 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 import sys
 from pathlib import Path
 
-import sys
 import environ
 import sentry_sdk
 from dbt_copilot_python.database import database_from_env
 from dbt_copilot_python.network import setup_allowed_hosts
 from django.urls import reverse_lazy
 from django_log_formatter_asim import ASIMFormatter
-from django.urls import reverse_lazy
 from dotenv import find_dotenv
-
 from sentry_sdk.integrations.django import DjangoIntegration
-
 
 env_file = find_dotenv(usecwd=True)
 
@@ -49,11 +45,7 @@ DEBUG = env.bool("DEBUG", default=False)
 
 ALLOWED_HOSTS = setup_allowed_hosts(["*"])
 
-<<<<<<< HEAD
 ACTIVE_CHECKS = [el.strip() for el in env("ACTIVE_CHECKS", default="").split(",")]
-=======
-ACTIVE_CHECKS=[el.strip() for el in env("ACTIVE_CHECKS", default="").split(",")]
->>>>>>> a87b3de (feat: add sso endpoint for DBT-1199 (#100))
 
 IS_API = env("IS_API", default="False") == "True"
 
@@ -261,4 +253,4 @@ if SENTRY_DSN:
         traces_sample_rate=1.0,
     )
 
-STATIC_S3_ENDPOINT = os.getenv("STATIC_S3_ENDPOINT")
+STATIC_S3_ENDPOINT = env("STATIC_S3_ENDPOINT")
