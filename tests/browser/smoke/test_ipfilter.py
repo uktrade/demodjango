@@ -15,9 +15,9 @@ def setup_basic_auth(page):
 
 def test_ipfilter_endpoint(page: Page):
     landing_page_url = os.getenv("LANDING_PAGE_URL")
-    IS_CDN = os.getenv("IS_CDN")
-    if IS_CDN:
-        landing_page_url = landing_page_url.replace("https://", "https://internal.")
+    # IS_CDN = os.getenv("IS_CDN")
+    # if IS_CDN:
+    #     landing_page_url = landing_page_url.replace("https://", "https://internal.")
     page = setup_basic_auth(page)
     response = page.goto(f"{landing_page_url}/ipfilter")
 
@@ -27,9 +27,9 @@ def test_ipfilter_endpoint(page: Page):
 
 def test_ipfilter_basic_auth_endpoint(page: Page):
     landing_page_url = os.getenv("LANDING_PAGE_URL")
-    IS_CDN = os.getenv("IS_CDN")
-    if IS_CDN:
-        landing_page_url = landing_page_url.replace("https://", "https://internal.")
+    # IS_CDN = os.getenv("IS_CDN")
+    # if IS_CDN:
+    #     landing_page_url = landing_page_url.replace("https://", "https://internal.")
     response = page.goto(f"{landing_page_url}ipfilter-basic-auth")
     assert response.status == 401
     assert response.headers["www-authenticate"] == 'Basic realm="Login Required"'

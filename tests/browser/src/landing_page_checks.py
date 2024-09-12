@@ -62,5 +62,6 @@ def assert_landing_page_has_normal_content(page: Page):
     )
 
 
+# CDN domain has just the basic bootstrap page.
 def assert_landing_page_has_normal_content_cdn(page: Page):
     expect(page).to_have_title(re.compile("Service Bootstrap"))
