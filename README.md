@@ -61,6 +61,7 @@ Examples:
   - `./tests/browser/run.sh local smoke`
 - Run maintenance page tests against your local Docker Compose environment
   - `./tests/browser/run.sh local maintenance_pages`
+  - The maintenance page tests are not meant to be run in isolation, as they run as part of `platform-tools/regression_tests/stages/run_maintenance_page_tests.sh`
 
 
 ## Running the application with docker-compose
