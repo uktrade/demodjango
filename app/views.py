@@ -6,17 +6,17 @@ from datetime import datetime
 from typing import Callable
 from typing import Dict
 
-from authbroker_client.utils import TOKEN_SESSION_KEY
 import boto3
 import redis
 import requests
+from authbroker_client.utils import TOKEN_SESSION_KEY
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.db import connections
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
 from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
 from django.urls import reverse
 from opensearchpy import OpenSearch
 from tenacity import RetryError
@@ -315,12 +315,32 @@ def test_web(request):
         )
 
 
+def test_api(request):
+    index_url = reverse("index")
+    parts = index_url.split(".", 1)
+    api_url = f"{parts[0]}.api.{parts[1]}"
+    response = requests.get(api_url)
+
+    if response.status_code == 200:
+        return JsonResponse(
+            {"message": f"Frontend reached API at {api_url}"}, status=200
+        )
+    else:
+        return JsonResponse(
+            {"message": f"Frontend failed to reach API at {api_url}"},
+            status=response.status_code,
+        )
+
+
 def ipfilter(request):
     return JsonResponse({"message": f"Success"}, status=200)
 
+
 @login_required
 def sso(request):
-    if not request.user.is_authenticated and request.session.get(TOKEN_SESSION_KEY, None):    
+    if not request.user.is_authenticated and request.session.get(
+        TOKEN_SESSION_KEY, None
+    ):
         return redirect(settings.LOGIN_URL)
     return redirect("index")
 
