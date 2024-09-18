@@ -3,7 +3,7 @@ import os
 from playwright.sync_api import Page
 from playwright.sync_api import expect
 
-from tests.browser.src.landing_page_checks import assert_landing_page_has_normal_content, assert_landing_page_has_normal_content_cdn
+from tests.browser.src.landing_page_checks import assert_landing_page_has_normal_content
 
 
 def test_page_loads_ok_and_shows_default_offline_message(page: Page):
@@ -28,8 +28,8 @@ def test_with_bypass_header_page_loads_ok_with_normal_content(page: Page):
     response = page.goto(os.getenv("LANDING_PAGE_URL"))
 
     assert response.status == 200
+    assert_landing_page_has_normal_content(page)
 
-    if os.getenv("IS_CDN"):
-        assert_landing_page_has_normal_content_cdn(page)
-    else:
-        assert_landing_page_has_normal_content(page)
+
+def test_frontend_to_api(page: Page):
+    pass
