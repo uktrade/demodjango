@@ -32,4 +32,11 @@ def test_with_bypass_header_page_loads_ok_with_normal_content(page: Page):
 
 
 def test_frontend_to_api(page: Page):
-    pass
+    landing_page_url = os.getenv("LANDING_PAGE_URL")
+    test_api_url = f"{landing_page_url}/test-api"
+
+    response = page.goto(test_api_url)
+    response_data = response.json()
+
+    assert response.status == 200
+    assert response_data["message"] == f"Frontend reached API at {test_api_url}"
