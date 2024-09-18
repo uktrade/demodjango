@@ -10,6 +10,7 @@ import boto3
 import redis
 import requests
 from authbroker_client.utils import TOKEN_SESSION_KEY
+from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import connections
@@ -41,6 +42,7 @@ PRIVATE_SUBMODULE = "private_submodule"
 READ_WRITE = "read_write"
 REDIS = "redis"
 S3 = "s3"
+S3_STATIC = "s3_static"
 SERVER_TIME = "server_time"
 
 ALL_CHECKS = {
@@ -54,6 +56,7 @@ ALL_CHECKS = {
     READ_WRITE: "Filesystem read/write",
     REDIS: "Redis",
     S3: "S3 Bucket",
+    S3_STATIC: "S3 Bucket for static assets",
     SERVER_TIME: "Server Time",
 }
 
@@ -79,6 +82,7 @@ def index(request):
         READ_WRITE: read_write_check,
         REDIS: redis_check,
         S3: s3_bucket_check,
+        S3_STATIC: s3_static_bucket_check,
         OPENSEARCH: opensearch_check,
         CELERY: celery_worker_check,
         BEAT: celery_beat_check,
@@ -141,6 +145,22 @@ def s3_bucket_check():
         body = bucket.Object("sample_file.txt")
         return render_connection_info(
             addon_type, True, body.get()["Body"].read().decode()
+        )
+    except Exception as e:
+        return render_connection_info(addon_type, False, str(e))
+
+
+def s3_static_bucket_check():
+    addon_type = ALL_CHECKS[S3_STATIC]
+    try:
+        response = requests.get(f"https://{settings.STATIC_S3_ENDPOINT}/test.html")
+        if response.status_code == 200:
+            parsed_html = BeautifulSoup(response.text, "html.parser")
+            test_text = parsed_html.body.find("p").text
+            return render_connection_info(addon_type, True, test_text)
+
+        raise Exception(
+            f"Failed to get static asset with status code: {response.status_code}"
         )
     except Exception as e:
         return render_connection_info(addon_type, False, str(e))

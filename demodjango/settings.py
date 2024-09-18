@@ -254,3 +254,5 @@ if SENTRY_DSN:
         integrations=[DjangoIntegration()],
         traces_sample_rate=1.0,
     )
+
+STATIC_S3_ENDPOINT = env("STATIC_S3_ENDPOINT", default="")
