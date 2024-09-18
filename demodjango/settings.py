@@ -45,7 +45,9 @@ DEBUG = env.bool("DEBUG", default=False)
 
 ALLOWED_HOSTS = setup_allowed_hosts(["*"])
 
-ACTIVE_CHECKS = [el.strip() for el in env("ACTIVE_CHECKS", default="").split(",")]
+ACTIVE_CHECKS = list(
+    filter(None, [el.strip() for el in env("ACTIVE_CHECKS", default="").split(",")])
+)
 
 IS_API = env("IS_API", default="False") == "True"
 

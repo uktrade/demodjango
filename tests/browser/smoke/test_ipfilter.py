@@ -25,7 +25,6 @@ def test_ipfilter_endpoint(page: Page):
 def test_ipfilter_basic_auth_endpoint(page: Page):
     landing_page_url = os.getenv("LANDING_PAGE_URL")
     response = page.goto(f"{landing_page_url}ipfilter-basic-auth")
-
     assert response.status == 401
     assert response.headers["www-authenticate"] == 'Basic realm="Login Required"'
 

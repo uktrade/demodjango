@@ -348,15 +348,6 @@ def sso(request):
     return redirect("index")
 
 
-@login_required
-def sso(request):
-    if not request.user.is_authenticated and request.session.get(
-        TOKEN_SESSION_KEY, None
-    ):
-        return redirect(settings.LOGIN_URL)
-    return redirect("index")
-
-
 def ipfilter_basic_auth(request):
     auth_header = request.META.get("HTTP_AUTHORIZATION")
     if auth_header:
