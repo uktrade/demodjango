@@ -59,6 +59,24 @@ def test_test_web(mock_get, mock_reverse, client):
     assert response.status_code == 200
 
 
+@patch("app.views.reverse")
+@patch("app.views.requests.get")
+def test_test_api(mock_get, mock_reverse, client):
+    mock_reverse.return_value = "https://internal.local.demodjango.uktrade.digital/"
+    mock_response = requests.Response()
+    mock_response.status_code = 200
+    mock_get.return_value = mock_response
+
+    response = client.get("/test-api/")
+    response_data = json.loads(response.content)
+
+    assert (
+        response_data["message"]
+        == "Frontend reached API at https://internal.api.local.demodjango.uktrade.digital/"
+    )
+    assert response.status_code == 200
+
+
 @override_settings(
     BASIC_AUTH_USERNAME="valid_user", BASIC_AUTH_PASSWORD="valid_password"
 )
@@ -144,6 +162,7 @@ def test_sso_successfully_redirects_when_authenticated(client):
     session.save()
 
     response = client.get("/sso/")
+
     assert response.status_code == 302
     assert response.url == reverse("index")
 
