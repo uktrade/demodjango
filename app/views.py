@@ -337,7 +337,8 @@ def test_web(request):
 
 def test_api(request):
     index_url = reverse("index")
-    parts = index_url.split(".", 1)
+    full_index_url = request.build_absolute_uri(index_url)
+    parts = full_index_url.split(".", 1)
     api_url = f"{parts[0]}.api.{parts[1]}"
     response = requests.get(api_url)
 

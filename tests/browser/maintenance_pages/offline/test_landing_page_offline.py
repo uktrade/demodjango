@@ -32,11 +32,20 @@ def test_with_bypass_header_page_loads_ok_with_normal_content(page: Page):
 
 
 def test_frontend_to_api(page: Page):
+    MAINTENANCE_PAGE_BYPASS_VALUE = os.getenv("MAINTENANCE_PAGE_BYPASS_VALUE")
+    page.context.route(
+        "**/*",
+        lambda route, request: route.continue_(
+            headers={**request.headers, "Bypass-Key": MAINTENANCE_PAGE_BYPASS_VALUE}
+        ),
+    )
     landing_page_url = os.getenv("LANDING_PAGE_URL")
-    test_api_url = f"{landing_page_url}/test-api"
+    test_api_url = f"{landing_page_url}test-api"
+    parts = landing_page_url.split(".", 1)
+    expected_url = f"{parts[0]}.api.{parts[1]}"
 
     response = page.goto(test_api_url)
     response_data = response.json()
 
     assert response.status == 200
-    assert response_data["message"] == f"Frontend reached API at {test_api_url}"
+    assert response_data["message"] == f"Frontend reached API at {expected_url}"
