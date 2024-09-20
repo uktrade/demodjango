@@ -39,6 +39,9 @@ def test_with_bypass_header_page_loads_ok_with_normal_content(page: Page):
 
 
 def test_frontend_to_api(page: Page):
+    if os.getenv("IS_CDN"):
+        pass
+
     MAINTENANCE_PAGE_BYPASS_VALUE = os.getenv("MAINTENANCE_PAGE_BYPASS_VALUE")
     page.context.route(
         "**/*",
