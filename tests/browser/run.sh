@@ -8,6 +8,10 @@ case "${target}" in
   "" | "local")
     host="http://localhost:8080"
     ;;
+  *.*)
+    host="https://${target}/"
+    export IS_CDN=True
+    ;;
   *)
     host="https://internal.${target}.demodjango.uktrade.digital/"
     ;;
