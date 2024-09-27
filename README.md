@@ -27,10 +27,11 @@ REDIS_ENDPOINT = "rediss://example_endpoint.amazonaws.com:6379"
 
 ## S3
 
-To connect to S3, set the following env var:
+To connect to S3, set the following env vars:
 
 ```
 S3_BUCKET_NAME = "my-s3-bucket-name"
+ADDITIONAL_S3_BUCKET_NAME = "my-additional-s3-bucket-name"
 ```
 
 ## OpenSearch

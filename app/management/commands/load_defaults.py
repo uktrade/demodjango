@@ -34,6 +34,16 @@ class Command(BaseCommand):
             except ClientError as e:
                 logging.error(e)
 
+        if settings.ADDITIONAL_S3_BUCKET_NAME:
+            object_name = os.path.basename("sample_file.txt")
+            s3_client = boto3.client("s3")
+            try:
+                s3_client.upload_file(
+                    object_name, settings.ADDITIONAL_S3_BUCKET_NAME, object_name
+                )
+            except ClientError as e:
+                logging.error(e)
+
         if settings.OPENSEARCH_ENDPOINT:
             opensearch_client = OpenSearch(f"{settings.OPENSEARCH_ENDPOINT}")
 
