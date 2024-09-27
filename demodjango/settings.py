@@ -220,6 +220,7 @@ RESTRICT_ADMIN = env.bool("RESTRICT_ADMIN", default=True)
 
 REDIS_ENDPOINT = env("REDIS_ENDPOINT", default="")
 S3_BUCKET_NAME = env("S3_BUCKET_NAME", default="")
+ADDITIONAL_S3_BUCKET_NAME = env("ADDITIONAL_S3_BUCKET_NAME", default="")
 OPENSEARCH_ENDPOINT = env("OPENSEARCH_ENDPOINT", default="")
 
 # Celery
