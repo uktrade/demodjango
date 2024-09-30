@@ -1,5 +1,5 @@
 #!/bin/bash
-dockerize -wait tcp://opensearch:9200 -timeout 60s
+# dockerize -wait tcp://opensearch:9200 -timeout 60s
 
 python manage.py migrate
 python manage.py load_defaults

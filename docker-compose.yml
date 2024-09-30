@@ -8,14 +8,16 @@ services:
         - demodjango/application:latest
     image: demodjango/application:latest
     environment:
+      ACTIVE_CHECKS: s3,s3_additional
       ALLOWED_HOSTS: '*'
       AWS_ENDPOINT_URL: 'http://s3:9090'
       DEBUG: true
       DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
-      OPENSEARCH_ENDPOINT: 'http://opensearch:9200'
-      RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
-      REDIS_ENDPOINT: 'redis://redis:6379'
+      # OPENSEARCH_ENDPOINT: 'http://opensearch:9200'
+      # RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
+      # REDIS_ENDPOINT: 'redis://redis:6379'
       S3_BUCKET_NAME: test-bucket
+      ADDITIONAL_S3_BUCKET_NAME: additional-test-bucket
       AWS_ACCESS_KEY_ID: access-key-id
       AWS_SECRET_ACCESS_KEY: secret-access-key
       GIT_COMMIT: "3x4mp13"
@@ -30,85 +32,85 @@ services:
       - "8080:8080"
     volumes:
       - ./:/app
-    healthcheck:
-      test: "curl -f localhost:8080"
-      interval: 10s
-      timeout: 5s
-      retries: 2
-      start_period: 15s
+    # healthcheck:
+    #   test: "curl -f localhost:8080"
+    #   interval: 10s
+    #   timeout: 5s
+    #   retries: 2
+    #   start_period: 15s
     links:
-      - postgres-rds
-      - redis
+      # - postgres-rds
+      # - redis
       - s3
-      - opensearch
+      # - opensearch
 
-  celery-worker:
-    build:
-      context: .
-      cache_from:
-        - demodjango/application:latest
-    image: demodjango/application:latest
-    command: celery --app demodjango.celery worker --task-events --loglevel INFO
-    entrypoint: ''
-    volumes:
-      - .:/app
-    healthcheck:
-      test: [ "CMD-SHELL", "python -m dbt_copilot_python.celery_health_check.healthcheck" ]
-      interval: 10s
-      timeout: 5s
-      retries: 2
-      start_period: 5s
-    depends_on:
-      - redis
-      - postgres-rds
-    environment:
-      REDIS_ENDPOINT: redis://redis:6379
-      DEBUG: true
-      DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
-      DJANGO_SETTINGS_MODULE: demodjango.settings
-      RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
+  # celery-worker:
+  #   build:
+  #     context: .
+  #     cache_from:
+  #       - demodjango/application:latest
+  #   image: demodjango/application:latest
+  #   command: celery --app demodjango.celery worker --task-events --loglevel INFO
+  #   entrypoint: ''
+  #   volumes:
+  #     - .:/app
+  #   healthcheck:
+  #     test: [ "CMD-SHELL", "python -m dbt_copilot_python.celery_health_check.healthcheck" ]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 2
+  #     start_period: 5s
+  #   depends_on:
+  #     - redis
+  #     - postgres-rds
+  #   environment:
+  #     REDIS_ENDPOINT: redis://redis:6379
+  #     DEBUG: true
+  #     DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
+  #     DJANGO_SETTINGS_MODULE: demodjango.settings
+  #     RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
 
-  celery-beat:
-    build:
-      context: .
-      cache_from:
-        - demodjango/application:latest
-    image: demodjango/application:latest
-    command: celery --app demodjango.celery beat --loglevel INFO
-    entrypoint: ''
-    volumes:
-      - .:/app
-    depends_on:
-      - redis
-      - postgres-rds
-    environment:
-      REDIS_ENDPOINT: redis://redis:6379
-      DEBUG: true
-      DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
-      DJANGO_SETTINGS_MODULE: demodjango.settings
-      RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
+  # celery-beat:
+  #   build:
+  #     context: .
+  #     cache_from:
+  #       - demodjango/application:latest
+  #   image: demodjango/application:latest
+  #   command: celery --app demodjango.celery beat --loglevel INFO
+  #   entrypoint: ''
+  #   volumes:
+  #     - .:/app
+  #   depends_on:
+  #     - redis
+  #     - postgres-rds
+  #   environment:
+  #     REDIS_ENDPOINT: redis://redis:6379
+  #     DEBUG: true
+  #     DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
+  #     DJANGO_SETTINGS_MODULE: demodjango.settings
+  #     RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
 
-  postgres-rds:
-    image: postgres
-    environment:
-      POSTGRES_PASSWORD: pgSecretPassword
-      POSTGRES_DB: main
+  # postgres-rds:
+  #   image: postgres
+  #   environment:
+  #     POSTGRES_PASSWORD: pgSecretPassword
+  #     POSTGRES_DB: main
 
-  redis:
-    image: redis
-    # Expose port so we can query it for debugging
-    ports:
-      - "6379:6379"
+  # redis:
+  #   image: redis
+  #   # Expose port so we can query it for debugging
+  #   ports:
+  #     - "6379:6379"
 
   s3:
     image: adobe/s3mock
     environment:
-      initialBuckets: test-bucket
+      initialBuckets: test-bucket, additional-test-bucket
 
-  opensearch:
-    image: opensearchproject/opensearch
-    environment:
-      'discovery.type': single-node
-      'plugins.security.disabled': true
-      OPENSEARCH_INITIAL_ADMIN_PASSWORD: P4ssword-does-not-matter
+  # opensearch:
+  #   image: opensearchproject/opensearch
+  #   environment:
+  #     'discovery.type': single-node
+  #     'plugins.security.disabled': true
+  #     OPENSEARCH_INITIAL_ADMIN_PASSWORD: P4ssword-does-not-matter
 
