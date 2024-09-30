@@ -1,5 +1,7 @@
 #!/bin/bash
-dockerize -wait tcp://opensearch:9200 -timeout 60s
+if [[ "$OPENSEARCH_ENDPOINT" != "" ]]; then
+    dockerize -wait tcp://opensearch:9200 -timeout 60s
+fi
 
 python manage.py migrate
 python manage.py load_defaults
