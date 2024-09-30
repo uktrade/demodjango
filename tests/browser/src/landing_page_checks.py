@@ -3,6 +3,7 @@ import re
 from normality import slugify
 from playwright.sync_api import Page
 from playwright.sync_api import expect
+from django.conf import settings
 
 from app.util import STATUS_SUCCESS
 from app.views import ALL_CHECKS
@@ -41,9 +42,12 @@ def assert_landing_page_has_normal_content(page: Page):
         re.compile(STATUS_SUCCESS)
     )
 
-    expect(page.get_by_test_id(slugify(ALL_CHECKS[S3]))).to_have_text(
-        re.compile(STATUS_SUCCESS)
-    )
+   # Loop through all S3 buckets and check their status
+    for bucket_name in [settings.S3_BUCKET_NAME, settings.ADDITIONAL_S3_BUCKET_NAME]:
+        print(f"BUCKET NAME ---------- {bucket_name}")     
+        test_id = slugify(f"{ALL_CHECKS[S3]}: {bucket_name}")
+        print(f"TEST ID ---------- {test_id}") 
+        expect(page.get_by_test_id(test_id)).to_have_text(re.compile(STATUS_SUCCESS))
 
     expect(page.get_by_test_id(slugify(ALL_CHECKS[OPENSEARCH]))).to_have_text(
         re.compile(STATUS_SUCCESS)
