@@ -138,7 +138,7 @@ def redis_check():
         return render_connection_info(addon_type, True, r.get("test-data").decode())
     except Exception as e:
         return render_connection_info(addon_type, False, str(e))
-        
+
 def _s3_bucket_check(check, bucket_name):
     addon_type = ALL_CHECKS[check]
     try:
@@ -153,11 +153,11 @@ def _s3_bucket_check(check, bucket_name):
 
 
 def s3_bucket_check():
-    _s3_bucket_check(S3, settings.S3_BUCKET_NAME)
+    return _s3_bucket_check(S3, settings.S3_BUCKET_NAME)
 
 
 def s3_additional_bucket_check():
-    _s3_bucket_check(S3_ADDITIONAL_BUCKET, settings.ADDITIONAL_S3_BUCKET_NAME)
+    return _s3_bucket_check(S3_ADDITIONAL_BUCKET, settings.ADDITIONAL_S3_BUCKET_NAME)
 
 
 def s3_static_bucket_check():
