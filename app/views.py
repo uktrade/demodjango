@@ -136,27 +136,39 @@ def redis_check():
     except Exception as e:
         return render_connection_info(addon_type, False, str(e))
 
-
 def s3_bucket_check():
-    addon_type = ALL_CHECKS[S3]
-    connection_info = []
+   addon_type = ALL_CHECKS[S3]
+   try:
+       s3 = boto3.resource("s3")
+       bucket = s3.Bucket(settings.S3_BUCKET_NAME)
+       body = bucket.Object("sample_file.txt")
+       return render_connection_info(
+           addon_type, True, body.get()["Body"].read().decode()
+       )
+   except Exception as e:
+       return render_connection_info(addon_type, False, str(e))
 
-    for name in [settings.S3_BUCKET_NAME, settings.ADDITIONAL_S3_BUCKET_NAME]:
-        try:
-            s3 = boto3.resource("s3")
-            bucket = s3.Bucket(name)
-            body = bucket.Object("sample_file.txt")
-            connection_info.append(
-                render_connection_info(
-                    f"{addon_type}: {name}", True, body.get()["Body"].read().decode()
-                )
-            )
-        except Exception as e:
-            connection_info.append(
-                render_connection_info(f"{addon_type}: {name}", False, str(e))
-            )
 
-    return " ".join(connection_info)
+# def s3_bucket_check():
+#     addon_type = ALL_CHECKS[S3]
+#     connection_info = []
+
+#     for name in [settings.S3_BUCKET_NAME, settings.ADDITIONAL_S3_BUCKET_NAME]:
+#         try:
+#             s3 = boto3.resource("s3")
+#             bucket = s3.Bucket(name)
+#             body = bucket.Object("sample_file.txt")
+#             connection_info.append(
+#                 render_connection_info(
+#                     f"{addon_type}: {name}", True, body.get()["Body"].read().decode()
+#                 )
+#             )
+#         except Exception as e:
+#             connection_info.append(
+#                 render_connection_info(f"{addon_type}: {name}", False, str(e))
+#             )
+
+#     return " ".join(connection_info)
 
 
 def s3_static_bucket_check():
