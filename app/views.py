@@ -104,7 +104,7 @@ def index(request):
         f"Landing page checks completed: "
         f"{settings.ACTIVE_CHECKS if settings.ACTIVE_CHECKS else 'all'}"
     )
-    logger.info(f"STATUS CHECK RESULTS ---- {status_check_results}")
+    
     return HttpResponse(
         "<!doctype html><html><head>"
         "<title>DemoDjango</title>"
