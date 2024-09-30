@@ -42,7 +42,7 @@ PRIVATE_SUBMODULE = "private_submodule"
 READ_WRITE = "read_write"
 REDIS = "redis"
 S3 = "s3"
-S3_ADDITIONAL_BUCKET = "s3_additional"
+S3_ADDITIONAL = "s3_additional"
 S3_STATIC = "s3_static"
 SERVER_TIME = "server_time"
 
@@ -57,7 +57,7 @@ ALL_CHECKS = {
     READ_WRITE: "Filesystem read/write",
     REDIS: "Redis",
     S3: "S3 Bucket",
-    S3_ADDITIONAL_BUCKET: "S3 Additional Bucket",
+    S3_ADDITIONAL: "S3 Additional Bucket",
     S3_STATIC: "S3 Bucket for static assets",
     SERVER_TIME: "Server Time",
 }
@@ -84,7 +84,7 @@ def index(request):
         READ_WRITE: read_write_check,
         REDIS: redis_check,
         S3: s3_bucket_check,
-        S3_ADDITIONAL_BUCKET: s3_additional_bucket_check,
+        S3_ADDITIONAL: s3_additional_bucket_check,
         S3_STATIC: s3_static_bucket_check,
         OPENSEARCH: opensearch_check,
         CELERY: celery_worker_check,
@@ -157,7 +157,7 @@ def s3_bucket_check():
 
 
 def s3_additional_bucket_check():
-    return _s3_bucket_check(S3_ADDITIONAL_BUCKET, settings.ADDITIONAL_S3_BUCKET_NAME)
+    return _s3_bucket_check(S3_ADDITIONAL, settings.ADDITIONAL_S3_BUCKET_NAME)
 
 
 def s3_static_bucket_check():
