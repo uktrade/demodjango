@@ -42,6 +42,7 @@ PRIVATE_SUBMODULE = "private_submodule"
 READ_WRITE = "read_write"
 REDIS = "redis"
 S3 = "s3"
+S3_ADDITIONAL = "s3_additional"
 S3_STATIC = "s3_static"
 SERVER_TIME = "server_time"
 
@@ -56,6 +57,7 @@ ALL_CHECKS = {
     READ_WRITE: "Filesystem read/write",
     REDIS: "Redis",
     S3: "S3 Bucket",
+    S3_ADDITIONAL: "S3 Additional Bucket",
     S3_STATIC: "S3 Bucket for static assets",
     SERVER_TIME: "Server Time",
 }
@@ -82,6 +84,7 @@ def index(request):
         READ_WRITE: read_write_check,
         REDIS: redis_check,
         S3: s3_bucket_check,
+        S3_ADDITIONAL: s3_additional_bucket_check,
         S3_STATIC: s3_static_bucket_check,
         OPENSEARCH: opensearch_check,
         CELERY: celery_worker_check,
@@ -101,7 +104,7 @@ def index(request):
         f"Landing page checks completed: "
         f"{settings.ACTIVE_CHECKS if settings.ACTIVE_CHECKS else 'all'}"
     )
-
+    
     return HttpResponse(
         "<!doctype html><html><head>"
         "<title>DemoDjango</title>"
@@ -136,27 +139,25 @@ def redis_check():
     except Exception as e:
         return render_connection_info(addon_type, False, str(e))
 
+def _s3_bucket_check(check, bucket_name):
+    addon_type = ALL_CHECKS[check]
+    try:
+        s3 = boto3.resource("s3")
+        bucket = s3.Bucket(bucket_name)
+        body = bucket.Object("sample_file.txt")
+        return render_connection_info(
+            addon_type, True, body.get()["Body"].read().decode()
+        )
+    except Exception as e:
+        return render_connection_info(addon_type, False, str(e))
+
 
 def s3_bucket_check():
-    addon_type = ALL_CHECKS[S3]
-    connection_info = []
+    return _s3_bucket_check(S3, settings.S3_BUCKET_NAME)
 
-    for name in [settings.S3_BUCKET_NAME, settings.ADDITIONAL_S3_BUCKET_NAME]:
-        try:
-            s3 = boto3.resource("s3")
-            bucket = s3.Bucket(name)
-            body = bucket.Object("sample_file.txt")
-            connection_info.append(
-                render_connection_info(
-                    f"{addon_type}: {name}", True, body.get()["Body"].read().decode()
-                )
-            )
-        except Exception as e:
-            connection_info.append(
-                render_connection_info(f"{addon_type}: {name}", False, str(e))
-            )
 
-    return " ".join(connection_info)
+def s3_additional_bucket_check():
+    return _s3_bucket_check(S3_ADDITIONAL, settings.ADDITIONAL_S3_BUCKET_NAME)
 
 
 def s3_static_bucket_check():

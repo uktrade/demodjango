@@ -15,6 +15,7 @@ from app.views import POSTGRES_RDS
 from app.views import READ_WRITE
 from app.views import REDIS
 from app.views import S3
+from app.views import S3_ADDITIONAL
 from app.views import SERVER_TIME
 
 
@@ -42,6 +43,10 @@ def assert_landing_page_has_normal_content(page: Page):
     )
 
     expect(page.get_by_test_id(slugify(ALL_CHECKS[S3]))).to_have_text(
+        re.compile(STATUS_SUCCESS)
+    )
+    
+    expect(page.get_by_test_id(slugify(ALL_CHECKS[S3_ADDITIONAL]))).to_have_text(
         re.compile(STATUS_SUCCESS)
     )
 
