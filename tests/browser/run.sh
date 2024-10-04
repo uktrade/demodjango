@@ -17,9 +17,8 @@ case "${target}" in
     ;;
 esac
 
-echo -e "\nInstalling required browsers"
-poetry run playwright install
-poetry run playwright install-deps
+echo -e "\nInstall playwright browsers and dependencies"
+poetry run playwright install --with-deps
 
 echo -e "\nRunning $tests tests against ${host}"
 export LANDING_PAGE_URL=${host}
