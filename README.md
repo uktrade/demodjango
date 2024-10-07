@@ -1,5 +1,7 @@
 # Demo Django Application
 
+- Test branch-demodjango
+
 Sample basic Django app for testing purposes.
 
 Minimum variables required:
