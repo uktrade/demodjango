@@ -1,3 +1,5 @@
 export AWS_PROFILE=platform-sandbox
 export AWS_REGION=eu-west-2
 export AWS_DEFAULT_REGION=eu-west-2
+export BASIC_AUTH_USERNAME=demodjango-basic-auth-user
+export BASIC_AUTH_PASSWORD="<get_this_from_parameter_store_in_the_platform_sandbox_aws_account>"
