@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import connections
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseNotFound
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
 from django.shortcuts import redirect
@@ -104,14 +104,16 @@ def index(request):
         f"Landing page checks completed: "
         f"{settings.ACTIVE_CHECKS if settings.ACTIVE_CHECKS else 'all'}"
     )
-    
-    return HttpResponse(
-        "<!doctype html><html><head>"
-        "<title>DemoDjango</title>"
-        "</head><body>"
-        f"{''.join(status_check_results)}"
-        "</body></html>"
-    )
+
+    # return HttpResponse(
+    #     "<!doctype html><html><head>"
+    #     "<title>DemoDjango</title>"
+    #     "</head><body>"
+    #     f"{''.join(status_check_results)}"
+    #     "</body></html>"
+    # )
+
+    HttpResponseNotFound("hello")
 
 
 def server_time_check():
