@@ -8,6 +8,7 @@ if settings.IS_API:
     api_patterns = [
         path("", views.api, name="api"),
         path("test-web/", views.test_web, name="test-web"),
+        path("api/", views.api, name="api"),
     ]
     urlpatterns = [path("", include(api_patterns), name="api")]
 else:
@@ -22,7 +23,6 @@ else:
         path("auth/", include("authbroker_client.urls")),
         path("sso/", views.sso, name="sso"),
         path("test-api/", views.test_api, name="test-api"),
-        path("api/", views.api, name="api"),
         path("extensions/", views.index, name="index"),
     ]
     urlpatterns = [path("", include(web_patterns), name="index")]
