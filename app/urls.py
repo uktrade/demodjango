@@ -22,5 +22,7 @@ else:
         path("auth/", include("authbroker_client.urls")),
         path("sso/", views.sso, name="sso"),
         path("test-api/", views.test_api, name="test-api"),
+        path("api/", views.api, name="api"),
+        path("extensions/", views.index, name="index"),
     ]
     urlpatterns = [path("", include(web_patterns), name="index")]
