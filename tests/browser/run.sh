@@ -6,22 +6,21 @@ maintenace_page_bypass_value="$3"
 
 case "${target}" in
   "" | "local")
-    host="http://localhost:8080"
-    ;;
-  *.*)
-    host="https://${target}/"
-    export IS_CDN=True
+    web_service_url="http://localhost:8080"
+    # Todo api_service_url="http://localhost:8080"
     ;;
   *)
-    host="https://internal.${target}.demodjango.uktrade.digital/"
+    web_service_url="https://web.${target}.demodjango.uktrade.digital/"
+    api_service_url="https://api.${target}.demodjango.uktrade.digital/"
     ;;
 esac
 
 echo -e "\nInstall playwright browsers and dependencies"
 poetry run playwright install --with-deps
 
-echo -e "\nRunning $tests tests against ${host}"
-export LANDING_PAGE_URL=${host}
+echo -e "\nRunning $tests tests against ${target} environment"
+export WEB_SERVICE_URL=${web_service_url}
+export API_SERVICE_URL=${api_service_url}
 
 if [ -n "$maintenace_page_bypass_value" ]; then
   export MAINTENANCE_PAGE_BYPASS_VALUE=${maintenace_page_bypass_value}

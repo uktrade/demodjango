@@ -104,7 +104,7 @@ def index(request):
         f"Landing page checks completed: "
         f"{settings.ACTIVE_CHECKS if settings.ACTIVE_CHECKS else 'all'}"
     )
-    
+
     return HttpResponse(
         "<!doctype html><html><head>"
         "<title>DemoDjango</title>"
@@ -349,7 +349,7 @@ def test_api(request):
     index_url = reverse("index")
     full_index_url = request.build_absolute_uri(index_url)
     parts = full_index_url.split(".", 1)
-    api_url = f"{parts[0]}.api.{parts[1]}"
+    api_url = f"api.{parts[1]}"
     response = requests.get(api_url)
 
     if response.status_code == 200:
