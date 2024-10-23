@@ -65,8 +65,3 @@ def assert_landing_page_has_normal_content(page: Page):
     expect(page.get_by_test_id(slugify(ALL_CHECKS[HTTP_CONNECTION]))).to_have_text(
         re.compile(STATUS_SUCCESS)
     )
-
-
-# CDN domain has just the basic bootstrap page.
-def assert_landing_page_has_copilot_bootstrap_content(page: Page):
-    expect(page).to_have_title(re.compile("Service Bootstrap"))

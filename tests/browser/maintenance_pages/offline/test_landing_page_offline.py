@@ -6,9 +6,6 @@ from playwright.sync_api import Page
 from playwright.sync_api import expect
 
 from tests.browser.src.landing_page_checks import assert_landing_page_has_normal_content
-from tests.browser.src.landing_page_checks import (
-    assert_landing_page_has_copilot_bootstrap_content,
-)
 
 
 def test_page_loads_ok_and_shows_default_offline_message(page: Page):
