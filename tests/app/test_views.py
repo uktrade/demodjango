@@ -62,7 +62,7 @@ def test_test_web(mock_get, mock_reverse, client):
 @patch("app.views.reverse")
 @patch("app.views.requests.get")
 def test_test_api(mock_get, mock_reverse, client):
-    mock_reverse.return_value = "https://internal.local.demodjango.uktrade.digital/"
+    mock_reverse.return_value = "https://web.local.demodjango.uktrade.digital/"
     mock_response = requests.Response()
     mock_response.status_code = 200
     mock_get.return_value = mock_response
@@ -72,7 +72,7 @@ def test_test_api(mock_get, mock_reverse, client):
 
     assert (
         response_data["message"]
-        == "Frontend reached API at https://internal.api.local.demodjango.uktrade.digital/"
+        == "Frontend reached API at https://api.local.demodjango.uktrade.digital/"
     )
     assert response.status_code == 200
 

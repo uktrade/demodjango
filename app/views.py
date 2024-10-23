@@ -348,8 +348,7 @@ def test_web(request):
 def test_api(request):
     index_url = reverse("index")
     full_index_url = request.build_absolute_uri(index_url)
-    parts = full_index_url.split(".", 1)
-    api_url = f"api.{parts[1]}"
+    api_url = full_index_url.replace("web.", "api.")
     response = requests.get(api_url)
 
     if response.status_code == 200:
