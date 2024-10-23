@@ -7,7 +7,7 @@ maintenace_page_bypass_value="$3"
 case "${target}" in
   "" | "local")
     web_service_url="http://localhost:8080"
-    # Todo api_service_url="http://localhost:8080"
+    # Todo: If we want to be able to test this locally via Docker Compose api_service_url="http://localhost:8080"
     ;;
   *)
     web_service_url="https://web.${target}.demodjango.uktrade.digital/"
