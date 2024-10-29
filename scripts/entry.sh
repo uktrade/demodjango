@@ -10,4 +10,4 @@ echo "Loading defaults"
 python manage.py load_defaults
 
 echo "Starting web service"
-gunicorn -b 0.0.0.0:$PORT demodjango.wsgi:application
+ddtrace-run gunicorn -b 0.0.0.0:$PORT demodjango.wsgi:application
