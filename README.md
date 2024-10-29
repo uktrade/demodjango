@@ -68,6 +68,9 @@ Examples:
 - Run maintenance page tests against `toolspr` environment but public endpoint (CDN).
     - `./tests/browser/run.sh toolspr.demodjango.uktrade.digital maintenance_pages <maintenace_page_bypass_value>`
 
+### Regression/integration testing
+
+Because this codebase is only fully exercised in conjunction with several others, we have [platform-regression-tests](https://github.com/uktrade/platform-regression-tests), which orchestrates the testing of them working together.
 
 ## Running the application with docker-compose
 
