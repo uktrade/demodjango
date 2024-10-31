@@ -18,7 +18,7 @@ import sentry_sdk
 from dbt_copilot_python.database import database_from_env
 from dbt_copilot_python.network import setup_allowed_hosts
 from django.urls import reverse_lazy
-from django_log_formatter_asim import ASIMFormatter
+from .asim_formatter import DDASIMFormatter
 from dotenv import find_dotenv
 from sentry_sdk.integrations.django import DjangoIntegration
 
@@ -61,7 +61,7 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "asim_formatter": {
-            "()": ASIMFormatter,
+            "()": DDASIMFormatter,
         },
     },
     "handlers": {
@@ -76,7 +76,7 @@ LOGGING = {
         },
     },
     "root": {
-        "handlers": ["stdout"],
+        "handlers": ["asim"],
         "level": "DEBUG",
     },
     "loggers": {
