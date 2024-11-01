@@ -347,9 +347,13 @@ def test_web(request):
 
 def test_api(request):
     index_url = reverse("index")
+    logger.info({"index_url": index_url})
     full_index_url = request.build_absolute_uri(index_url)
+    logger.info({"full_index_url": full_index_url})
     api_url = full_index_url.replace("web.", "api.")
+    logger.info({"api_url": api_url})
     response = requests.get(api_url)
+    logger.info({"response.status_code":  response.status_code})
 
     if response.status_code == 200:
         return JsonResponse(
