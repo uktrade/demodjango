@@ -32,10 +32,9 @@ def test_api_response(page: Page):
 if os.getenv("IS_API"):
 
     def test_web_response(page: Page):
-        web_service_url = os.getenv("WEB_SERVICE_URL")
-        api_url = web_service_url.replace("https://internal.", "https://internal.api.")
+        api_service_url = os.getenv("API_SERVICE_URL")
 
-        response = page.goto(f"{api_url}test-web")
+        response = page.goto(f"{api_service_url}test-web")
 
         assert response.status == 200
 

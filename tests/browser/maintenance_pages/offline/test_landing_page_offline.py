@@ -43,11 +43,10 @@ def test_frontend_to_api(page: Page):
     )
     web_service_url = os.getenv("WEB_SERVICE_URL")
     test_api_url = f"{web_service_url}test-api"
-    parts = web_service_url.split(".", 1)
-    expected_url = f"{parts[0]}.api.{parts[1]}"
+    expected_api_service_url = os.getenv("API_SERVICE_URL")
 
     response = page.goto(test_api_url)
     response_data = response.json()
 
     assert response.status == 200
-    assert response_data["message"] == f"Frontend reached API at {expected_url}"
+    assert response_data["message"] == f"Frontend reached API at {expected_api_service_url}"
