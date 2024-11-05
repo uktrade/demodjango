@@ -76,7 +76,7 @@ LOGGING = {
         },
     },
     "root": {
-        "handlers": ["asim"],
+        "handlers": ["stdout"],
         "level": "DEBUG",
     },
     "loggers": {
