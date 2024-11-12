@@ -78,6 +78,3 @@ These are defined in the docker-compose.yml file.
   docker-compose build
   docker-compose up
 ```
-
-
-testing pipeline trigger

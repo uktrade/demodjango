@@ -105,15 +105,15 @@ def index(request):
         f"{settings.ACTIVE_CHECKS if settings.ACTIVE_CHECKS else 'all'}"
     )
 
-    # return HttpResponse(
-    #     "<!doctype html><html><head>"
-    #     "<title>DemoDjango</title>"
-    #     "</head><body>"
-    #     f"{''.join(status_check_results)}"
-    #     "</body></html>"
-    # )
+    return HttpResponse(
+        "<!doctype html><html><head>"
+        "<title>DemoDjango</title>"
+        "</head><body>"
+        f"{''.join(status_check_results)}"
+        "</body></html>"
+    )
 
-    HttpResponseNotFound("hello")
+    # HttpResponseNotFound("hello")
 
 
 def server_time_check():
