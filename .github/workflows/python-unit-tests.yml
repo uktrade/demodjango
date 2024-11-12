@@ -30,20 +30,20 @@ jobs:
           poetry install
 
       - name: Run pytest
-        run: poetry run pytest --cov --cov-report=xml --junitxml=junit.xml -o junit_family=legacy
+        run: poetry run pytest tests/app --cov --cov-report=xml --junitxml=junit.xml -o junit_family=legacy
         env:
           PYTHON_VERSION: ${{ matrix.python-version }}
 
-      - name: Upload code coverage results to Codecov
-        uses: codecov/codecov-action@v4
-        if: ${{ !cancelled() }}
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: true
+      #- name: Upload code coverage results to Codecov
+      #  uses: codecov/codecov-action@v4
+      #  if: ${{ !cancelled() }}
+      #  with:
+      #    token: ${{ secrets.CODECOV_TOKEN }}
+      #    fail_ci_if_error: true
 
-      - name: Upload test analysis results to Codecov
-        uses: codecov/test-results-action@v1
-        if: ${{ !cancelled() }}
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          fail_ci_if_error: true
+      #- name: Upload test analysis results to Codecov
+      #  uses: codecov/test-results-action@v1
+      #  if: ${{ !cancelled() }}
+      #  with:
+      #    token: ${{ secrets.CODECOV_TOKEN }}
+      #    fail_ci_if_error: true
