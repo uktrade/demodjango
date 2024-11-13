@@ -114,7 +114,7 @@ services:
       - "8126:8126"
     image: datadog/agent:latest
     environment:
-      DD_API_KEY: "caaa51ac9424a7ff5ff8e6e7a1c4e067"
+      DD_API_KEY: ${DD_API_KEY}
       DD_ENV: "docker"
       DD_HOSTNAME: "datadog-agent"
       DD_SITE: "datadoghq.eu"
