@@ -12,6 +12,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: trufflehog-actions-scan
-        uses: edplato/trufflehog-actions-scan@master
+        # uses: edplato/trufflehog-actions-scan@master
+        uses: WillGibson/trufflehog-actions-scan@master
         with:
           scanArguments: " --no-verification --fail --exclude-paths=.trufflehogignore"
