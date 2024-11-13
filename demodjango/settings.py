@@ -51,8 +51,6 @@ ACTIVE_CHECKS = list(
 
 IS_API = env("IS_API", default="False") == "True"
 
-DLFA_INCLUDE_RAW_LOG = True
-
 BASIC_AUTH_USERNAME = env("BASIC_AUTH_USERNAME", default="")
 BASIC_AUTH_PASSWORD = env("BASIC_AUTH_PASSWORD", default="")
 
@@ -86,6 +84,7 @@ LOGGING = {
             ],
             "level": "DEBUG",
             "propagate": True,
+            "propagate": False,
         },
         "django.request": {
             "handlers": [
@@ -93,6 +92,7 @@ LOGGING = {
             ],
             "level": "DEBUG",
             "propagate": True,
+            "propagate": False,
         },
         "requestlogs": {
             "handlers": [
