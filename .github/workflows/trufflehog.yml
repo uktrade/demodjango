@@ -5,14 +5,14 @@ on: [push]
 permissions: read-all
 
 jobs:
-  tests:
+  trufflehog:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: trufflehog-actions-scan
-        # uses: edplato/trufflehog-actions-scan@master
-        uses: WillGibson/trufflehog-actions-scan@master
+      - uses: trufflesecurity/trufflehog@main
         with:
-          scanArguments: " --no-verification --fail --exclude-paths=.trufflehogignore"
+          base: ""
+          head: ${{ github.ref_name }}
+          extra_args: --no-verification --fail --exclude-paths=.trufflehogignore
