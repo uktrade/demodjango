@@ -102,6 +102,13 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+        "ddtrace": {
+            "handlers": [
+                "asim"
+            ],
+            "level": "DEBUG",
+            "propagate": False,
+        },
     },
     "filters": {
         "request_id_context": {
