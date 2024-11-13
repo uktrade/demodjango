@@ -43,7 +43,33 @@ OPENSEARCH_ENDPOINT = "https://{domain_url}:443"
 OPENSEARCH_CREDENTIALS = "{"username":"username", "password": "password"}"
 ```
 
-## Testing
+## Working on demodjango
+
+### Install dependencies and pre-commit hook
+
+Install Trufflehog for the pre-commit hook:
+
+```shell
+# Installation on Mac
+
+brew install trufflehog
+```
+
+Alternative installation methods [here](https://github.com/trufflesecurity/trufflehog)
+
+Install dependencies:
+
+```shell
+pip install poetry && poetry install
+```
+
+Install pre-commit hook:
+
+```shell
+poetry run pre-commit install
+```
+
+### Testing
 
 To test a file which simply lives in `/tests` (such as `/tests/app/test_views.py`), ensure all the various packages are present and up to date.
 Then, run the command `poetry run pytest tests/app`.
