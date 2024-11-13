@@ -70,6 +70,7 @@ LOGGING = {
         },
         "stdout": {
             "class": "logging.StreamHandler",
+            "formatter": "asim_formatter",
             "stream": sys.stdout,
         },
     },
