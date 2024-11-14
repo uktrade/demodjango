@@ -117,7 +117,7 @@ LOGGING = {
     },
 }
 
-DLFA_INCLUDE_RAW_LOG = True
+# DLFA_INCLUDE_RAW_LOG = True
 
 # Application definition
 
