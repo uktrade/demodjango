@@ -44,6 +44,7 @@ REDIS = "redis"
 S3 = "s3"
 S3_ADDITIONAL = "s3_additional"
 S3_STATIC = "s3_static"
+S3_CROSS_ENVIRONMENT = "s3_cross_environment"
 SERVER_TIME = "server_time"
 
 ALL_CHECKS = {
@@ -59,6 +60,7 @@ ALL_CHECKS = {
     S3: "S3 Bucket",
     S3_ADDITIONAL: "S3 Additional Bucket",
     S3_STATIC: "S3 Bucket for static assets",
+    S3_CROSS_ENVIRONMENT: "Cross environment S3 Bucket",
     SERVER_TIME: "Server Time",
 }
 
@@ -86,6 +88,7 @@ def index(request):
         S3: s3_bucket_check,
         S3_ADDITIONAL: s3_additional_bucket_check,
         S3_STATIC: s3_static_bucket_check,
+        S3_CROSS_ENVIRONMENT: s3_cross_environment_bucket_check,
         OPENSEARCH: opensearch_check,
         CELERY: celery_worker_check,
         BEAT: celery_beat_check,
@@ -154,6 +157,10 @@ def _s3_bucket_check(check, bucket_name):
 
 def s3_bucket_check():
     return _s3_bucket_check(S3, settings.S3_BUCKET_NAME)
+
+
+def s3_cross_environment_bucket_check():
+    return [_s3_bucket_check(S3, bucket) for bucket in settings.S3_CROSS_ENVIRONMENT_BUCKET_NAMES]
 
 
 def s3_additional_bucket_check():
