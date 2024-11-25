@@ -149,7 +149,7 @@ def _s3_bucket_check(check, bucket_name):
         bucket = s3.Bucket(bucket_name)
         body = bucket.Object("sample_file.txt")
         return render_connection_info(
-            check_description, True, f'{body.get()["Body"].read().decode()} bucket: {bucket_name}'
+            check_description, True, f'{body.get()["Body"].read().decode()}Bucket: {bucket_name}'
         )
     except Exception as e:
         return render_connection_info(check_description, False, str(e))
