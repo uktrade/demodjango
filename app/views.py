@@ -60,7 +60,7 @@ ALL_CHECKS = {
     S3: "S3 Bucket",
     S3_ADDITIONAL: "S3 Additional Bucket",
     S3_STATIC: "S3 Bucket for static assets",
-    S3_CROSS_ENVIRONMENT: "Cross environment S3 Bucket",
+    S3_CROSS_ENVIRONMENT: "Cross environment S3 Buckets",
     SERVER_TIME: "Server Time",
 }
 
@@ -143,16 +143,16 @@ def redis_check():
         return render_connection_info(addon_type, False, str(e))
 
 def _s3_bucket_check(check, bucket_name):
-    addon_type = ALL_CHECKS[check]
+    check_description = ALL_CHECKS[check]
     try:
         s3 = boto3.resource("s3")
         bucket = s3.Bucket(bucket_name)
         body = bucket.Object("sample_file.txt")
         return render_connection_info(
-            addon_type, True, body.get()["Body"].read().decode()
+            check_description, True, f'{body.get()["Body"].read().decode()} bucket: {bucket_name}'
         )
     except Exception as e:
-        return render_connection_info(addon_type, False, str(e))
+        return render_connection_info(check_description, False, str(e))
 
 
 def s3_bucket_check():
@@ -160,7 +160,9 @@ def s3_bucket_check():
 
 
 def s3_cross_environment_bucket_check():
-    return [_s3_bucket_check(S3, bucket) for bucket in settings.S3_CROSS_ENVIRONMENT_BUCKET_NAMES]
+    return _s3_bucket_check(S3_CROSS_ENVIRONMENT, settings.S3_CROSS_ENVIRONMENT_BUCKET_NAMES)
+    # TODO should be a list
+    # return [_s3_bucket_check(S3, bucket) for bucket in settings.S3_CROSS_ENVIRONMENT_BUCKET_NAMES]
 
 
 def s3_additional_bucket_check():
@@ -170,7 +172,7 @@ def s3_additional_bucket_check():
 def s3_static_bucket_check():
     addon_type = ALL_CHECKS[S3_STATIC]
     try:
-        response = requests.get(f"https://{settings.STATIC_S3_ENDPOINT}/test.html")
+        response = requests.get(f"{settings.STATIC_S3_ENDPOINT}/test.html")
         if response.status_code == 200:
             parsed_html = BeautifulSoup(response.text, "html.parser")
             test_text = parsed_html.body.find("p").text
@@ -316,13 +318,11 @@ def private_submodule_check():
     connection_info = f"Failed to read file from private submodule at path: {file_path}"
 
     if os.path.exists(file_path):
-        pass
-
-    with open(file_path, "r") as file:
-        content = file.read()
-        if "lorem ipsum" in content.lower():
-            success = True
-            connection_info = f"Successfully built sample.txt file in private submodule at: {file_path}"
+        with open(file_path, "r") as file:
+            content = file.read()
+            if "lorem ipsum" in content.lower():
+                success = True
+                connection_info = f"Successfully built sample.txt file in private submodule at: {file_path}"
 
     return render_connection_info(
         ALL_CHECKS[PRIVATE_SUBMODULE], success, connection_info
