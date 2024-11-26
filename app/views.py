@@ -28,7 +28,7 @@ from tenacity import wait_fixed
 from celery_worker.tasks import demodjango_task
 
 from .check.check_http import HTTPCheck
-from .util import check_results_as_dict
+from .util import CheckResult
 from .util import render_connection_info
 
 logger = logging.getLogger("django")
@@ -80,7 +80,7 @@ def index(request):
         }
     )
 
-    status_check_results = [server_time_check(), git_information()]
+    status_check_results = server_time_check() + git_information()
 
     optional_checks: Dict[str, Callable] = {
         POSTGRES_RDS: postgres_rds_check,
@@ -100,9 +100,10 @@ def index(request):
     if settings.ACTIVE_CHECKS:
         for name, check in optional_checks.items():
             if name in settings.ACTIVE_CHECKS:
-                status_check_results.append(check())
+                status_check_results.extend(check())
     else:
-        status_check_results += [f() for f in optional_checks.values()]
+        for name, check in optional_checks.items():
+            status_check_results.extend(check())
 
     logger.info(
         f"Landing page checks completed: "
@@ -110,13 +111,11 @@ def index(request):
     )
 
     if request.GET.get("json", None) == "true":
-        status_check_results = [
-            check_results_as_dict(*result) for result in status_check_results
-        ]
+        status_check_results = [result.to_dict() for result in status_check_results]
         return JsonResponse({"check_results": status_check_results}, status=200)
     else:
         status_check_results = [
-            render_connection_info(*result) for result in status_check_results
+            render_connection_info(result) for result in status_check_results
         ]
         return HttpResponse(
             "<!doctype html><html><head>"
@@ -128,7 +127,7 @@ def index(request):
 
 
 def server_time_check():
-    return (ALL_CHECKS[SERVER_TIME], True, str(datetime.utcnow()))
+    return [CheckResult(ALL_CHECKS[SERVER_TIME], True, str(datetime.utcnow()))]
 
 
 def postgres_rds_check():
@@ -139,49 +138,53 @@ def postgres_rds_check():
 
         with connections["default"].cursor() as c:
             c.execute("SELECT version()")
-            return (addon_type, True, c.fetchone()[0])
+            return [CheckResult(addon_type, True, c.fetchone()[0])]
     except Exception as e:
-        return (addon_type, False, str(e))
+        return [CheckResult(addon_type, False, str(e))]
 
 
 def redis_check():
     addon_type = ALL_CHECKS[REDIS]
     try:
         r = redis.Redis.from_url(f"{settings.REDIS_ENDPOINT}")
-        return (addon_type, True, r.get("test-data").decode())
+        return [CheckResult(addon_type, True, r.get("test-data").decode())]
     except Exception as e:
-        return (addon_type, False, str(e))
+        return [CheckResult(addon_type, False, str(e))]
 
 
-def _s3_bucket_check(check, bucket_name):
-    check_description = ALL_CHECKS[check]
+def _s3_bucket_check(check_description, bucket_name):
     try:
         s3 = boto3.resource("s3")
         bucket = s3.Bucket(bucket_name)
         body = bucket.Object("sample_file.txt")
-        return (
+        return CheckResult(
             check_description,
             True,
             f'{body.get()["Body"].read().decode()}Bucket: {bucket_name}',
         )
     except Exception as e:
-        return (check_description, False, str(e))
+        return CheckResult(check_description, False, str(e))
 
 
 def s3_bucket_check():
-    return _s3_bucket_check(S3, settings.S3_BUCKET_NAME)
+    check_description = ALL_CHECKS[S3]
+    return [_s3_bucket_check(check_description, settings.S3_BUCKET_NAME)]
 
 
 def s3_cross_environment_bucket_check():
-    return _s3_bucket_check(
-        S3_CROSS_ENVIRONMENT, settings.S3_CROSS_ENVIRONMENT_BUCKET_NAMES
-    )
-    # TODO should be a list
-    # return [_s3_bucket_check(S3, bucket) for bucket in settings.S3_CROSS_ENVIRONMENT_BUCKET_NAMES]
+    buckets = settings.S3_CROSS_ENVIRONMENT_BUCKET_NAMES.split(",")
+    check_description = ALL_CHECKS[S3_CROSS_ENVIRONMENT]
+
+    return [
+        _s3_bucket_check(f"{check_description} ({bucket})", bucket)
+        for bucket in buckets
+        if bucket.strip()
+    ]
 
 
 def s3_additional_bucket_check():
-    return _s3_bucket_check(S3_ADDITIONAL, settings.ADDITIONAL_S3_BUCKET_NAME)
+    check_description = ALL_CHECKS[S3_ADDITIONAL]
+    return [_s3_bucket_check(check_description, settings.ADDITIONAL_S3_BUCKET_NAME)]
 
 
 def s3_static_bucket_check():
@@ -191,13 +194,13 @@ def s3_static_bucket_check():
         if response.status_code == 200:
             parsed_html = BeautifulSoup(response.text, "html.parser")
             test_text = parsed_html.body.find("p").text
-            return (addon_type, True, test_text)
+            return [CheckResult(addon_type, True, test_text)]
 
         raise Exception(
             f"Failed to get static asset with status code: {response.status_code}"
         )
     except Exception as e:
-        return (addon_type, False, str(e))
+        return [CheckResult(addon_type, False, str(e))]
 
 
 def opensearch_check():
@@ -212,13 +215,13 @@ def opensearch_check():
 
     try:
         results = read_content_from_opensearch()
-        return (addon_type, True, results["_source"]["text"])
+        return [CheckResult(addon_type, True, results["_source"]["text"])]
     except RetryError:
         connection_info = f"Unable to read content from {addon_type} within {get_result_timeout} seconds"
         logger.error(connection_info)
-        return (addon_type, False, connection_info)
+        return [CheckResult(addon_type, False, connection_info)]
     except Exception as e:
-        return (addon_type, False, str(e))
+        return [CheckResult(addon_type, False, str(e))]
 
 
 def celery_worker_check():
@@ -245,16 +248,16 @@ def celery_worker_check():
         task_id = str(demodjango_task.delay(f"{timestamp}"))
         backend_result = get_result_from_celery_backend()
         connection_info = f"{backend_result['result']} with task_id {task_id} was processed at {backend_result['date_done']} with status {backend_result['status']}"
-        return (addon_type, True, connection_info)
+        return [CheckResult(addon_type, True, connection_info)]
     except RetryError:
         connection_info = (
             f"task_id {task_id} was not processed within {get_result_timeout} seconds"
         )
         logger.error(connection_info)
-        return (addon_type, False, connection_info)
+        return [CheckResult(addon_type, False, connection_info)]
     except Exception as e:
         logger.error(e)
-        return (addon_type, False, str(e))
+        return [CheckResult(addon_type, False, str(e))]
 
 
 def celery_beat_check():
@@ -268,9 +271,9 @@ def celery_beat_check():
 
         latest_task = ScheduledTask.objects.all().order_by("-timestamp").first()
         connection_info = f"Latest task scheduled with task_id {latest_task.taskid} at {latest_task.timestamp}"
-        return (addon_type, True, connection_info)
+        return [CheckResult(addon_type, True, connection_info)]
     except Exception as e:
-        return (addon_type, False, str(e))
+        return [CheckResult(addon_type, False, str(e))]
 
 
 def read_write_check():
@@ -297,9 +300,9 @@ def read_write_check():
         read_write_status = (
             f"Read/write successfully completed at {from_file_timestamp}"
         )
-        return (addon_type, True, read_write_status)
+        return [CheckResult(addon_type, True, read_write_status)]
     except Exception as e:
-        return (addon_type, False, str(e))
+        return [CheckResult(addon_type, False, str(e))]
 
 
 def git_information():
@@ -307,11 +310,13 @@ def git_information():
     git_branch = os.environ.get("GIT_BRANCH", "Unknown")
     git_tag = os.environ.get("GIT_TAG", "Unknown")
 
-    return (
-        ALL_CHECKS[GIT_INFORMATION],
-        git_commit != "Unknown",
-        f"Commit: {git_commit}, Branch: {git_branch}, Tag: {git_tag}",
-    )
+    return [
+        CheckResult(
+            ALL_CHECKS[GIT_INFORMATION],
+            git_commit != "Unknown",
+            f"Commit: {git_commit}, Branch: {git_branch}, Tag: {git_tag}",
+        )
+    ]
 
 
 def http_check():
@@ -320,11 +325,13 @@ def http_check():
     check = HTTPCheck(urls)
     check.execute()
 
-    return (
-        ALL_CHECKS[HTTP_CONNECTION],
-        check.success,
-        "".join([c.render() for c in check.report]),
-    )
+    return [
+        CheckResult(
+            ALL_CHECKS[HTTP_CONNECTION],
+            check.success,
+            "".join([c.render() for c in check.report]),
+        )
+    ]
 
 
 def private_submodule_check():
@@ -339,7 +346,7 @@ def private_submodule_check():
                 success = True
                 connection_info = f"Successfully built sample.txt file in private submodule at: {file_path}"
 
-    return ALL_CHECKS[PRIVATE_SUBMODULE], success, connection_info
+    return [CheckResult(ALL_CHECKS[PRIVATE_SUBMODULE], success, connection_info)]
 
 
 def api(request):

@@ -13,6 +13,7 @@ from freezegun import freeze_time
 
 from app import views
 from app.views import ALL_CHECKS
+from app.views import S3_CROSS_ENVIRONMENT
 
 TOKEN_SESSION_KEY = "auth_token"
 
@@ -22,10 +23,10 @@ def test_http_view(patched_requests, mock_environment):
     mock_environment("HTTP_CHECK_URLS", "https://example.com")
     patched_requests.get.return_value = Mock(status_code=200)
 
-    response = views.http_check()
-    assert "HTTP Checks" == response[0]
-    assert response[1]
-    assert "https://example.com" in response[2]
+    response = views.http_check()[0]
+    assert "HTTP Checks" == response.name
+    assert response.success
+    assert "https://example.com" in response.message
 
 
 @override_settings(ROOT_URLCONF="tests.api_urls")
@@ -181,11 +182,20 @@ def test_sso_redirects_when_not_authenticated(client):
     assert response.url == "/auth/login/?next=/sso/"
 
 
-def test_index_with_json_query_string_returns_json():
-    client = Client()
+@override_settings(S3_CROSS_ENVIRONMENT_BUCKET_NAMES="xe_bucket_1,xe_bucket_2")
+def test_index_with_json_query_string_returns_json(mock_environment):
+    # mock_environment("S3_CROSS_ENVIRONMENT_BUCKET_NAMES", "xe_bucket_1,xe_bucket_2")
+    client = Client("")
     response = client.get("/?json=true")
 
     check_results = json.loads(response.content)["check_results"]
 
+    expected_checks = [*ALL_CHECKS.values()]
+
+    x_env_s3_check_name = ALL_CHECKS[S3_CROSS_ENVIRONMENT]
+    expected_checks.remove(x_env_s3_check_name)
+    expected_checks.append(f"{x_env_s3_check_name} (xe_bucket_1)")
+    expected_checks.append(f"{x_env_s3_check_name} (xe_bucket_2)")
+
     assert response.status_code == 200
-    assert set(result["check"] for result in check_results) == set(ALL_CHECKS.values())
+    assert set(result["name"] for result in check_results) == set(expected_checks)

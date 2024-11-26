@@ -9,37 +9,39 @@ STATUS_SUCCESS = "✓"
 STATUS_FAIL = "✗"
 
 
-def render_connection_info(
-    addon_type: str, success: bool, connection_info: str = False
-):
-    log_detail_base = f"Rendering {addon_type} stuff "
-    if success:
+class CheckResult:
+    def __init__(self, name: str, success: bool, message: str = ""):
+        self.name = name
+        self.success = success
+        self.message = message
+
+    def to_dict(self):
+        return {"name": self.name, "success": self.success, "message": self.message}
+
+
+def render_connection_info(check_result: CheckResult):
+    log_detail_base = f"Rendering {check_result.name} stuff "
+    if check_result.success:
         logger.info(f"{log_detail_base} successful")
         status_icon = STATUS_SUCCESS
         status_colour = "green"
     else:
-        logger.error(f"{log_detail_base} failed with error: {connection_info}")
+        logger.error(f"{log_detail_base} failed with error: {check_result.message}")
         status_icon = STATUS_FAIL
         status_colour = "red"
 
-    if connection_info:
-        page_detail = (
-            f"<pre><code style='white-space: pre-wrap'>{connection_info}</code></pre>"
-        )
+    if check_result.message:
+        page_detail = f"<pre><code style='white-space: pre-wrap'>{check_result.message}</code></pre>"
     else:
         page_detail = ""
 
     output = (
         f"<div>"
-        f"{addon_type}: "
-        f'<span data-testid="{slugify(addon_type)}" style="color: {status_colour}">'
+        f"{check_result.name}: "
+        f'<span data-testid="{slugify(check_result.name)}" style="color: {status_colour}">'
         f"{status_icon}</span> <br> "
         f"{page_detail} <hr>"
         f"</div>"
     )
 
     return output
-
-
-def check_results_as_dict(addon_type: str, success: bool, connection_info: str = ""):
-    return {"check": addon_type, "success": success, "info": connection_info}
