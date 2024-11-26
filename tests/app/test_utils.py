@@ -20,6 +20,16 @@ def test_check_result_with_message(success):
 
 
 def test_check_result_to_dict():
+    result = CheckResult("check_one", False)
+
+    assert result.to_dict() == {
+        "name": "check_one",
+        "success": False,
+        "message": "",
+    }
+
+
+def test_check_result_with_message_to_dict():
     result = CheckResult("check_one", False, "test message")
 
     assert result.to_dict() == {
