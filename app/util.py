@@ -39,3 +39,7 @@ def render_connection_info(
     )
 
     return output
+
+
+def check_results_as_dict(addon_type: str, success: bool, connection_info: str = ""):
+    return {"check": addon_type, "success": success, "info": connection_info}

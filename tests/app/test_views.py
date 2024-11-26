@@ -6,11 +6,13 @@ from unittest.mock import patch
 import pytest
 import requests
 from django.contrib.auth.models import User
+from django.test import Client
 from django.test import override_settings
 from django.urls import reverse
 from freezegun import freeze_time
 
 from app import views
+from app.views import ALL_CHECKS
 
 TOKEN_SESSION_KEY = "auth_token"
 
@@ -21,9 +23,9 @@ def test_http_view(patched_requests, mock_environment):
     patched_requests.get.return_value = Mock(status_code=200)
 
     response = views.http_check()
-    assert "HTTP Checks" in response
-    assert "✓" in response
-    assert "https://example.com" in response
+    assert "HTTP Checks" == response[0]
+    assert response[1]
+    assert "https://example.com" in response[2]
 
 
 @override_settings(ROOT_URLCONF="tests.api_urls")
@@ -177,3 +179,13 @@ def test_sso_redirects_when_not_authenticated(client):
 
     assert response.status_code == 302
     assert response.url == "/auth/login/?next=/sso/"
+
+
+def test_index_with_json_query_string_returns_json():
+    client = Client()
+    response = client.get("/?json=true")
+
+    check_results = json.loads(response.content)["check_results"]
+
+    assert response.status_code == 200
+    assert set(result["check"] for result in check_results) == set(ALL_CHECKS.values())
