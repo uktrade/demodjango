@@ -65,6 +65,8 @@ ALL_CHECKS = {
     SERVER_TIME: "Server Time",
 }
 
+MANDATORY_CHECKS = [GIT_INFORMATION, SERVER_TIME]
+
 RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")
 
 
@@ -80,7 +82,7 @@ def index(request):
         }
     )
 
-    status_check_results = server_time_check() + git_information()
+    status_checks = [server_time_check, git_information]
 
     optional_checks: Dict[str, Callable] = {
         POSTGRES_RDS: postgres_rds_check,
@@ -100,10 +102,14 @@ def index(request):
     if settings.ACTIVE_CHECKS:
         for name, check in optional_checks.items():
             if name in settings.ACTIVE_CHECKS:
-                status_check_results.extend(check())
+                status_checks.append(check)
     else:
         for name, check in optional_checks.items():
-            status_check_results.extend(check())
+            status_checks.append(check)
+
+    results = []
+    for check in status_checks:
+        results.extend(check())
 
     logger.info(
         f"Landing page checks completed: "
@@ -111,17 +117,15 @@ def index(request):
     )
 
     if request.GET.get("json", None) == "true":
-        status_check_results = [result.to_dict() for result in status_check_results]
-        return JsonResponse({"check_results": status_check_results}, status=200)
+        results = [result.to_dict() for result in results]
+        return JsonResponse({"check_results": results}, status=200)
     else:
-        status_check_results = [
-            render_connection_info(result) for result in status_check_results
-        ]
+        results = [render_connection_info(result) for result in results]
         return HttpResponse(
             "<!doctype html><html><head>"
             "<title>DemoDjango</title>"
             "</head><body>"
-            f"{''.join(status_check_results)}"
+            f"{''.join(results)}"
             "</body></html>"
         )
 

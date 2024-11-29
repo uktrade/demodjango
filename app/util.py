@@ -1,4 +1,5 @@
 import logging
+from typing import Callable
 
 from normality import slugify
 
@@ -7,6 +8,16 @@ logger = logging.getLogger("django")
 
 STATUS_SUCCESS = "✓"
 STATUS_FAIL = "✗"
+
+
+class Check:
+    def __init__(self, type: str, description: str, function: Callable):
+        self.type = type
+        self.description = description
+        self.function = function
+
+    def __call__(self):
+        return self.function()
 
 
 class CheckResult:
