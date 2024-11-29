@@ -3,7 +3,7 @@ import logging
 import os
 from datetime import datetime
 
-from app.checks import CeleryWorkerCheck, PostgresRdsCheck
+from app.checks import CeleryBeatCheck, CeleryWorkerCheck, GitInformationCheck, HttpConnectionCheck, OpensearchCheck, PostgresRdsCheck, PrivateSubmoduleCheck, ReadWriteCheck, RedisCheck, S3AdditionalBucketCheck, S3BucketCheck, S3CrossEnvironmentBucketChecks, S3StaticBucketCheck, ServerTimeCheck
 import boto3
 import redis
 import requests
@@ -37,170 +37,9 @@ logger = logging.getLogger("django")
 
     
 
-class CeleryBeatCheck(Check):
-    def __call__(self):
-        from .models import ScheduledTask
-
-        try:
-            if not RDS_POSTGRES_CREDENTIALS:
-                raise Exception("Database not found")
-
-            latest_task = ScheduledTask.objects.all().order_by("-timestamp").first()
-            connection_info = f"Latest task scheduled with task_id {latest_task.taskid} at {latest_task.timestamp}"
-            return [CheckResult(self.test_id, self.description, True, connection_info)]
-        except Exception as e:
-            return [CheckResult(self.test_id, self.description, False, str(e))]
 
 
-class RedisCheck(Check):
-    def __call__(self):
-        try:
-            r = redis.Redis.from_url(f"{settings.REDIS_ENDPOINT}")
-            return [CheckResult(self.test_id, self.description, True, r.get("test-data").decode())]
-        except Exception as e:
-            return [CheckResult(self.test_id, self.description, False, str(e), REDIS)]
-        
-class ServerTimeCheck(Check):
-    def __call__(self):
-        return [
-            CheckResult(self.test_id, self.description, True, str(datetime.utcnow()))
-        ]
 
-    
-class GitInformationCheck(Check):
-    def __call__(self):
-        git_commit = os.environ.get("GIT_COMMIT", "Unknown")
-        git_branch = os.environ.get("GIT_BRANCH", "Unknown")
-        git_tag = os.environ.get("GIT_TAG", "Unknown")
-
-        return [
-            CheckResult(
-                self.test_id,
-                self.description,
-                git_commit != "Unknown",
-                f"Commit: {git_commit}, Branch: {git_branch}, Tag: {git_tag}",
-            )
-        ]
- 
-class HttpConnectionCheck(Check):
-    def __call__(self):
-        urls = os.environ.get("HTTP_CHECK_URLS", "https://httpstat.us/200|200|GET")
-
-        check = HTTPCheck(urls)
-        check.execute()
-
-        return [
-            CheckResult(
-                self.test_id,
-                self.description,
-                check.success,
-                "".join([c.render() for c in check.report]),
-            )
-        ]
-
-
-class PrivateSubmoduleCheck(Check):
-    def __call__(self):
-        file_path = "platform-demo-private/sample.txt"
-        success = False
-        connection_info = f"Failed to read file from private submodule at path: {file_path}"
-
-        if os.path.exists(file_path):
-            with open(file_path, "r") as file:
-                content = file.read()
-                if "lorem ipsum" in content.lower():
-                    success = True
-                    connection_info = f"Successfully built sample.txt file in private submodule at: {file_path}"
-
-        return [
-            CheckResult(
-                self.test_id, self.description, success, connection_info
-            )
-        ]
- 
-class ReadWriteCheck(Check):
-    def __call__(self):       
-        import tempfile
-
-        timestamp = datetime.now()  # ensures no stale file is present
-
-        try:
-            # create a temporary file
-            temp = tempfile.NamedTemporaryFile()
-
-            # write into temporary file
-            with open(temp.name, "w") as f:
-                f.write(str(timestamp))
-
-            # read from temporary file
-            with open(temp.name, "r") as f:
-                from_file_timestamp = f.read()
-
-            # delete temporary file
-            temp.close()
-
-            read_write_status = (
-                f"Read/write successfully completed at {from_file_timestamp}"
-            )
-            return [CheckResult(self.test_id, self.description, True, read_write_status)]
-        except Exception as e:
-            return [CheckResult(self.test_id, self.description, False, str(e))]
-
-class S3AdditionalBucketCheck(Check):
-    def __call__(self):
-        return [
-            _s3_bucket_check(self.test_id, self.description, settings.ADDITIONAL_S3_BUCKET_NAME
-            )
-        ]
-        
-class S3StaticBucketCheck(Check):
-    def __call__(self):
-        try:
-            response = requests.get(f"{settings.STATIC_S3_ENDPOINT}/test.html")
-            if response.status_code == 200:
-                parsed_html = BeautifulSoup(response.text, "html.parser")
-                test_text = parsed_html.body.find("p").text
-                return [CheckResult(self.test_id, self.description, True, test_text)]
-
-            raise Exception(
-                f"Failed to get static asset with status code: {response.status_code}"
-            )
-        except Exception as e:
-            return [CheckResult(self.test_id, self.description, False, str(e))]
-        
-class S3BucketCheck(Check):
-    def __call__(self):
-        return [_s3_bucket_check(self.test_id, self.description, settings.S3_BUCKET_NAME)]
-
-
-class S3CrossEnvironmentBucketChecks(Check):
-    def __call__(self):
-        buckets = settings.S3_CROSS_ENVIRONMENT_BUCKET_NAMES.split(",")
-        check_results = []
-        for bucket in buckets:
-            if bucket.strip():
-                check_results.append(_s3_bucket_check(self.test_id, f"{self.description} ({bucket})", bucket))
-        return check_results
-    
-class OpensearchCheck(Check):
-    def __call__(self):
-        get_result_timeout = 5
-
-        @retry(stop=stop_after_delay(get_result_timeout), wait=wait_fixed(1))
-        def read_content_from_opensearch():
-            opensearch_client = OpenSearch(f"{settings.OPENSEARCH_ENDPOINT}")
-            results = opensearch_client.get(index="test-index", id=1)
-            return results
-
-        try:
-            results = read_content_from_opensearch()
-            return [CheckResult(self.test_id, self.description, True, results["_source"]["text"])]
-        except RetryError:
-            connection_info = f"Unable to read content from {self.description} within {get_result_timeout} seconds"
-            logger.error(connection_info)
-            return [CheckResult(self.test_id, self.description, False, connection_info)]
-        except Exception as e:
-            return [CheckResult(self.test_id, self.description, False, str(e))]       
 
 # TODO change optional flag to mandatory and invert values
 
@@ -214,7 +53,7 @@ OPTIONAL_CHECKS = [
     CeleryBeatCheck("beat", "Celery Worker"),
     CeleryWorkerCheck("celery", "Celery Worker", logger),
     HttpConnectionCheck("http", "HTTP Checks"),
-    OpensearchCheck("opensearch", "OpenSearch"),
+    OpensearchCheck("opensearch", "OpenSearch", logger),
     PostgresRdsCheck("postgres_rds",  "PostgreSQL (RDS)"),
     PrivateSubmoduleCheck("private_submodule", "Private submodule"),
     ReadWriteCheck("read_write", "Filesystem read/write"),
