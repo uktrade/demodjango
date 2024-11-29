@@ -34,25 +34,23 @@ from .util import render_connection_info
 logger = logging.getLogger("django")
 
 MANDATORY_CHECKS = [
-    GitInformationCheck("git_information", "Git information"),
-    ServerTimeCheck("server_time", "Server Time"),
+    GitInformationCheck(),
+    ServerTimeCheck(),
 ]
 
 OPTIONAL_CHECKS = [
-    CeleryBeatCheck("beat", "Celery Worker"),
-    CeleryWorkerCheck("celery", "Celery Worker", logger),
-    HttpConnectionCheck("http", "HTTP Checks"),
-    OpensearchCheck("opensearch", "OpenSearch", logger),
+    CeleryBeatCheck(),
+    CeleryWorkerCheck(logger=logger),
+    HttpConnectionCheck(),
+    OpensearchCheck(logger=logger),
     PostgresRdsCheck(),
-    PrivateSubmoduleCheck("private_submodule", "Private submodule"),
-    ReadWriteCheck("read_write", "Filesystem read/write"),
-    RedisCheck("redis", "Redis"),
-    S3BucketCheck("s3", "S3 Bucket"),
-    S3AdditionalBucketCheck("s3_additional", "S3 Additional Bucket"),
-    S3StaticBucketCheck("s3_static", "S3 Bucket for static assets"),
-    S3CrossEnvironmentBucketChecks(
-        "s3_cross_environment", "Cross environment S3 Buckets"
-    ),
+    PrivateSubmoduleCheck(),
+    ReadWriteCheck(),
+    RedisCheck(),
+    S3BucketCheck(),
+    S3AdditionalBucketCheck(),
+    S3StaticBucketCheck(),
+    S3CrossEnvironmentBucketChecks(),
 ]
 
 RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")

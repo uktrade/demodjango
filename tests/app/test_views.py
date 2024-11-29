@@ -19,7 +19,7 @@ TOKEN_SESSION_KEY = "auth_token"
 def test_http_view(patched_requests, mock_environment):
     mock_environment("HTTP_CHECK_URLS", "https://example.com")
     patched_requests.get.return_value = Mock(status_code=200)
-    check = HttpConnectionCheck("http", "HTTP Checks")
+    check = HttpConnectionCheck()
     response = check()[0]
     assert "HTTP Checks" == response.description
     assert "http" == response.test_id
@@ -193,6 +193,8 @@ def test_index_with_json_query_string_returns_json(client):
 
     response = client.get("/?json=true")
     check_results = json.loads(response.content)["check_results"]
+
+    print(f"RESULT:{json.dumps(check_results, indent=2)}")
 
     assert (
         len(

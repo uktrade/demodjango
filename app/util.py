@@ -1,5 +1,4 @@
 import logging
-from typing import Callable
 
 from normality import slugify
 

@@ -48,7 +48,7 @@ def _s3_bucket_check(type, description, bucket_name):
 class PostgresRdsCheck(Check):
     def __init__(self):
         super().__init__("postgres_rds", "PostgreSQL (RDS)")
-        
+
     def __call__(self):
         try:
             if not os.environ.get("RDS_POSTGRES_CREDENTIALS"):
@@ -64,6 +64,9 @@ class PostgresRdsCheck(Check):
 
 
 class CeleryWorkerCheck(Check):
+    def __init__(self, logger):
+        super().__init__("celery", "Celery Worker", logger=logger)
+
     def __call__(self):
         from demodjango import celery_app
 
@@ -98,6 +101,9 @@ class CeleryWorkerCheck(Check):
 
 
 class CeleryBeatCheck(Check):
+    def __init__(self):
+        super().__init__("beat", "Celery Worker")
+
     def __call__(self):
         from .models import ScheduledTask
 
@@ -113,6 +119,9 @@ class CeleryBeatCheck(Check):
 
 
 class RedisCheck(Check):
+    def __init__(self):
+        super().__init__("redis", "Redis")
+
     def __call__(self):
         try:
             r = redis.Redis.from_url(f"{settings.REDIS_ENDPOINT}")
@@ -126,6 +135,9 @@ class RedisCheck(Check):
 
 
 class ServerTimeCheck(Check):
+    def __init__(self):
+        super().__init__("server_time", "Server Time")
+
     def __call__(self):
         return [
             CheckResult(self.test_id, self.description, True, str(datetime.utcnow()))
@@ -133,6 +145,9 @@ class ServerTimeCheck(Check):
 
 
 class GitInformationCheck(Check):
+    def __init__(self):
+        super().__init__("git_information", "Git information")
+
     def __call__(self):
         git_commit = os.environ.get("GIT_COMMIT", "Unknown")
         git_branch = os.environ.get("GIT_BRANCH", "Unknown")
@@ -149,6 +164,9 @@ class GitInformationCheck(Check):
 
 
 class HttpConnectionCheck(Check):
+    def __init__(self):
+        super().__init__("http", "HTTP Checks")
+
     def __call__(self):
         urls = os.environ.get("HTTP_CHECK_URLS", "https://httpstat.us/200|200|GET")
 
@@ -166,6 +184,9 @@ class HttpConnectionCheck(Check):
 
 
 class PrivateSubmoduleCheck(Check):
+    def __init__(self):
+        super().__init__("private_submodule", "Private submodule")
+
     def __call__(self):
         file_path = "platform-demo-private/sample.txt"
         success = False
@@ -184,6 +205,9 @@ class PrivateSubmoduleCheck(Check):
 
 
 class ReadWriteCheck(Check):
+    def __init__(self):
+        super().__init__("read_write", "Filesystem read/write")
+
     def __call__(self):
         import tempfile
 
@@ -215,6 +239,9 @@ class ReadWriteCheck(Check):
 
 
 class S3AdditionalBucketCheck(Check):
+    def __init__(self):
+        super().__init__("s3_additional", "S3 Additional Bucket")
+
     def __call__(self):
         return [
             _s3_bucket_check(
@@ -224,6 +251,9 @@ class S3AdditionalBucketCheck(Check):
 
 
 class S3StaticBucketCheck(Check):
+    def __init__(self):
+        super().__init__("s3_static", "S3 Bucket for static assets")
+
     def __call__(self):
         try:
             response = requests.get(f"{settings.STATIC_S3_ENDPOINT}/test.html")
@@ -240,6 +270,9 @@ class S3StaticBucketCheck(Check):
 
 
 class S3BucketCheck(Check):
+    def __init__(self):
+        super().__init__("s3", "S3 Bucket")
+
     def __call__(self):
         return [
             _s3_bucket_check(self.test_id, self.description, settings.S3_BUCKET_NAME)
@@ -247,6 +280,9 @@ class S3BucketCheck(Check):
 
 
 class S3CrossEnvironmentBucketChecks(Check):
+    def __init__(self):
+        super().__init__("s3_cross_environment", "Cross environment S3 Buckets")
+
     def __call__(self):
         buckets = settings.S3_CROSS_ENVIRONMENT_BUCKET_NAMES.split(",")
         check_results = []
@@ -261,6 +297,9 @@ class S3CrossEnvironmentBucketChecks(Check):
 
 
 class OpensearchCheck(Check):
+    def __init__(self, logger):
+        super().__init__("opensearch", "OpenSearch", logger=logger)
+
     def __call__(self):
         get_result_timeout = 5
 
