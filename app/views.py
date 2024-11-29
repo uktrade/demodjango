@@ -144,6 +144,54 @@ class HttpConnectionCheck(Check):
         ]
 
 
+class PrivateSubmoduleCheck(Check):
+    def __call__(self):
+        file_path = "platform-demo-private/sample.txt"
+        success = False
+        connection_info = f"Failed to read file from private submodule at path: {file_path}"
+
+        if os.path.exists(file_path):
+            with open(file_path, "r") as file:
+                content = file.read()
+                if "lorem ipsum" in content.lower():
+                    success = True
+                    connection_info = f"Successfully built sample.txt file in private submodule at: {file_path}"
+
+        return [
+            CheckResult(
+                self.type, self.description, success, connection_info
+            )
+        ]
+ 
+class ReadWriteCheck(Check):
+    def __call__(self):       
+        import tempfile
+
+        timestamp = datetime.now()  # ensures no stale file is present
+
+        try:
+            # create a temporary file
+            temp = tempfile.NamedTemporaryFile()
+
+            # write into temporary file
+            with open(temp.name, "w") as f:
+                f.write(str(timestamp))
+
+            # read from temporary file
+            with open(temp.name, "r") as f:
+                from_file_timestamp = f.read()
+
+            # delete temporary file
+            temp.close()
+
+            read_write_status = (
+                f"Read/write successfully completed at {from_file_timestamp}"
+            )
+            return [CheckResult(self.type, self.description, True, read_write_status)]
+        except Exception as e:
+            return [CheckResult(self.type, self.description, False, str(e))]
+
+
 class OpensearchCheck(Check):
     def __call__(self):
         get_result_timeout = 5
@@ -166,8 +214,6 @@ class OpensearchCheck(Check):
 
 # TODO change optional flag to mandatory and invert values
 
-PRIVATE_SUBMODULE = Check("private_submodule", "Private submodule", dummy, True)
-READ_WRITE = Check("read_write", "Filesystem read/write", dummy, True)
 S3 = Check("s3", dummy, True)
 S3_ADDITIONAL = Check("s3_additional", "S3 Additional Bucket", dummy, True)
 S3_STATIC = Check("s3_static", "S3 Bucket for static assets", dummy, True)
@@ -184,8 +230,8 @@ OPTIONAL_CHECKS = [
     HttpConnectionCheck("http", "HTTP Checks", dummy, True),
     OpensearchCheck("opensearch", "OpenSearch", dummy, True),
     PostgresRdsCheck("postgres_rds",  "PostgreSQL (RDS)", dummy, True),
-    PRIVATE_SUBMODULE,
-    READ_WRITE,
+    PrivateSubmoduleCheck("private_submodule", "Private submodule", dummy, True),
+    ReadWriteCheck("read_write", "Filesystem read/write", dummy, True),
     RedisCheck("redis", "Redis", dummy, True),
     S3,
     S3_ADDITIONAL,
@@ -293,79 +339,6 @@ def s3_static_bucket_check():
     except Exception as e:
         return [CheckResult(self.type, self.description, False, str(e), S3_STATIC)]
 
-
-
-
-
-
-
-
-
-
-
-def read_write_check():
-    import tempfile
-
-    timestamp = datetime.now()  # ensures no stale file is present
-
-    try:
-        # create a temporary file
-        temp = tempfile.NamedTemporaryFile()
-
-        # write into temporary file
-        with open(temp.name, "w") as f:
-            f.write(str(timestamp))
-
-        # read from temporary file
-        with open(temp.name, "r") as f:
-            from_file_timestamp = f.read()
-
-        # delete temporary file
-        temp.close()
-
-        read_write_status = (
-            f"Read/write successfully completed at {from_file_timestamp}"
-        )
-        return [CheckResult(self.type, self.description, True, read_write_status, READ_WRITE)]
-    except Exception as e:
-        return [CheckResult(self.type, self.description, False, str(e), READ_WRITE)]
-
-
-def git_information():
-    git_commit = os.environ.get("GIT_COMMIT", "Unknown")
-    git_branch = os.environ.get("GIT_BRANCH", "Unknown")
-    git_tag = os.environ.get("GIT_TAG", "Unknown")
-
-    return [
-        CheckResult(
-            None,
-            None,
-            git_commit != "Unknown",
-            f"Commit: {git_commit}, Branch: {git_branch}, Tag: {git_tag}",
-            GIT_INFORMATION
-        )
-    ]
-
-
-
-
-def private_submodule_check():
-    file_path = "platform-demo-private/sample.txt"
-    success = False
-    connection_info = f"Failed to read file from private submodule at path: {file_path}"
-
-    if os.path.exists(file_path):
-        with open(file_path, "r") as file:
-            content = file.read()
-            if "lorem ipsum" in content.lower():
-                success = True
-                connection_info = f"Successfully built sample.txt file in private submodule at: {file_path}"
-
-    return [
-        CheckResult(
-            self.type, self.description, success, connection_info, PRIVATE_SUBMODULE
-        )
-    ]
 
 
 def api(request):
