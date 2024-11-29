@@ -15,12 +15,12 @@ class Check:
     def __init__(self, type: str, description: str, function: Callable, optional: bool=False):
         self.type = type
         self.description = description
+        # remove the function argument
         self.function = function
         self.optional = optional
 
     def __call__(self):
-        return self.function()
-
+        raise NotImplementedError("Call function needs to be implemented in the subclass")
 
 class CheckResult:
     def __init__(self, type: str, description: str, success: bool, message: str = "", check: Check=Check(None,None,dummy)):

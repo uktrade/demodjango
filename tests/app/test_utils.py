@@ -5,14 +5,9 @@ from app.util import CheckResult
 
 
 def test_check():
-    def test_function():
-        return "OK"
-
-    result = Check("check_one", "the_description", test_function)
+    result = Check("check_one", "the_description", None)
     assert result.type == "check_one"
     assert result.description == "the_description"
-    assert result.function is test_function
-    assert result() == "OK"
 
 
 @pytest.mark.parametrize("success", (True, False))

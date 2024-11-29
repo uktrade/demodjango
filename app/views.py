@@ -36,40 +36,55 @@ logger = logging.getLogger("django")
 def dummy():
     return "OK"
 
+class PostgresRdsCheck(Check):
+    def __call__(self):
+        try:
+            if not RDS_POSTGRES_CREDENTIALS:
+                raise Exception("No RDS database")
+
+            with connections["default"].cursor() as c:
+                c.execute("SELECT version()")
+                return [CheckResult(self.type, self.description, True, c.fetchone()[0])]
+        except Exception as e:
+            return [CheckResult(self.type, self.description, False, str(e))]
+
+
 CELERY = Check("celery", "Celery Worker", dummy, True)
 BEAT = Check("beat", "Celery Worker", dummy, True)
 GIT_INFORMATION = Check("git_information", "Git information", dummy, True)
 HTTP_CONNECTION = Check("http", "HTTP Checks", dummy, True)
 OPENSEARCH = Check("opensearch", "OpenSearch", dummy, True)
-POSTGRES_RDS = Check("postgres_rds",  "PostgreSQL (RDS)", dummy, True)
 PRIVATE_SUBMODULE = Check("private_submodule", "Private submodule", dummy, True)
 READ_WRITE = Check("read_write", "Filesystem read/write", dummy, True)
 REDIS = Check("redis", "Redis", dummy, True)
-SERVER_TIME = Check("server_time", "Server Time", dummy)
-S3 = "s3"
-S3_ADDITIONAL = "s3_additional"
-S3_STATIC = "s3_static"
-S3_CROSS_ENVIRONMENT = "s3_cross_environment"
+# TODO change optional flag to mandatory and invert values
+SERVER_TIME = Check("server_time", "Server Time", dummy) 
+S3 = Check("s3", dummy, True)
+S3_ADDITIONAL = Check("s3_additional", "S3 Additional Bucket", dummy, True)
+S3_STATIC = Check("s3_static", "S3 Bucket for static assets", dummy, True)
+S3_CROSS_ENVIRONMENT = Check("s3_cross_environment", "Cross environment S3 Buckets", dummy, True)
 
+MANDATORY_CHECKS = [
+    GIT_INFORMATION,
+    SERVER_TIME,
+]
 
-ALL_CHECKS = {
-    BEAT: "Celery Beat",
-    CELERY: "Celery Worker",
-    GIT_INFORMATION: "Git information",
-    HTTP_CONNECTION: "HTTP Checks",
-    OPENSEARCH: "OpenSearch",
-    POSTGRES_RDS: "PostgreSQL (RDS)",
-    PRIVATE_SUBMODULE: "Private submodule",
-    READ_WRITE: "Filesystem read/write",
-    REDIS: "Redis",
-    S3: "S3 Bucket",
-    S3_ADDITIONAL: "S3 Additional Bucket",
-    S3_STATIC: "S3 Bucket for static assets",
-    S3_CROSS_ENVIRONMENT: "Cross environment S3 Buckets",
-    SERVER_TIME: "Server Time",
-}
-
-MANDATORY_CHECKS = [GIT_INFORMATION.type, SERVER_TIME.type]
+OPTIONAL_CHECKS = [
+    BEAT,
+    CELERY,
+    GIT_INFORMATION,
+    HTTP_CONNECTION,
+    OPENSEARCH,
+    PostgresRdsCheck("postgres_rds",  "PostgreSQL (RDS)", dummy, True),
+    PRIVATE_SUBMODULE,
+    READ_WRITE,
+    REDIS,
+    S3,
+    S3_ADDITIONAL,
+    S3_STATIC,
+    S3_CROSS_ENVIRONMENT,
+    SERVER_TIME,
+]
 
 RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")
 
@@ -86,33 +101,11 @@ def index(request):
         }
     )
 
-    status_checks = [server_time_check, git_information]
-
-    optional_checks: Dict[str, Callable] = {
-        POSTGRES_RDS.type: postgres_rds_check,
-        READ_WRITE.type: read_write_check,
-        REDIS.type: redis_check,
-        S3: s3_bucket_check,
-        S3_ADDITIONAL: s3_additional_bucket_check,
-        S3_STATIC: s3_static_bucket_check,
-        S3_CROSS_ENVIRONMENT: s3_cross_environment_bucket_check,
-        OPENSEARCH.type: opensearch_check,
-        CELERY.type: celery_worker_check,
-        BEAT.type: celery_beat_check,
-        HTTP_CONNECTION.type: http_check,
-        PRIVATE_SUBMODULE.type: private_submodule_check,
-    }
-
-    if settings.ACTIVE_CHECKS:
-        for name, check in optional_checks.items():
-            if name in settings.ACTIVE_CHECKS:
-                status_checks.append(check)
-    else:
-        for name, check in optional_checks.items():
-            status_checks.append(check)
+    active_checks = MANDATORY_CHECKS + [check for check in OPTIONAL_CHECKS if settings.ACTIVE_CHECKS and check.type in settings.ACTIVE_CHECKS]
 
     results = []
-    for check in status_checks:
+    
+    for check in active_checks:
         results.extend(check())
 
     logger.info(
@@ -140,16 +133,7 @@ def server_time_check():
     ]
 
 
-def postgres_rds_check():
-    try:
-        if not RDS_POSTGRES_CREDENTIALS:
-            raise Exception("No RDS database")
 
-        with connections["default"].cursor() as c:
-            c.execute("SELECT version()")
-            return [CheckResult(None, None, True, c.fetchone()[0], POSTGRES_RDS)]
-    except Exception as e:
-        return [CheckResult(None, None, False, str(e), POSTGRES_RDS)]
 
 
 def redis_check():
@@ -160,41 +144,39 @@ def redis_check():
         return [CheckResult(None, None, False, str(e), REDIS)]
 
 
-def _s3_bucket_check(check_type, check_description, bucket_name):
+def _s3_bucket_check(check, bucket_name):
     try:
         s3 = boto3.resource("s3")
         bucket = s3.Bucket(bucket_name)
         body = bucket.Object("sample_file.txt")
         return CheckResult(
-            check_type,
-            check_description,
+            None,
+            None,
             True,
             f'{body.get()["Body"].read().decode()}Bucket: {bucket_name}',
+            check
         )
     except Exception as e:
-        return CheckResult(check_type, check_description, False, str(e))
+        return CheckResult(None, None, False, str(e), check)
 
 
 def s3_bucket_check():
-    return [_s3_bucket_check(S3, ALL_CHECKS[S3], settings.S3_BUCKET_NAME)]
+    return [_s3_bucket_check(S3, settings.S3_BUCKET_NAME)]
 
 
 def s3_cross_environment_bucket_check():
     buckets = settings.S3_CROSS_ENVIRONMENT_BUCKET_NAMES.split(",")
-
-    return [
-        _s3_bucket_check(
-            S3_CROSS_ENVIRONMENT, f"{ALL_CHECKS[S3_CROSS_ENVIRONMENT]} ({bucket})", bucket
-        )
-        for bucket in buckets
-        if bucket.strip()
-    ]
+    check_results = []
+    for bucket in buckets:
+        if bucket.strip():
+            check = Check(S3_CROSS_ENVIRONMENT.type, f"{S3_CROSS_ENVIRONMENT.description} ({bucket})", dummy, True)
+            check_results.append(_s3_bucket_check(check, bucket))
+    return check_results
 
 
 def s3_additional_bucket_check():
     return [
-        _s3_bucket_check(
-            S3_ADDITIONAL, ALL_CHECKS[S3_ADDITIONAL], settings.ADDITIONAL_S3_BUCKET_NAME
+        _s3_bucket_check(S3_ADDITIONAL, settings.ADDITIONAL_S3_BUCKET_NAME
         )
     ]
 
@@ -205,13 +187,13 @@ def s3_static_bucket_check():
         if response.status_code == 200:
             parsed_html = BeautifulSoup(response.text, "html.parser")
             test_text = parsed_html.body.find("p").text
-            return [CheckResult(S3_STATIC, ALL_CHECKS[S3_STATIC], True, test_text)]
+            return [CheckResult(None, None, True, test_text, S3_STATIC)]
 
         raise Exception(
             f"Failed to get static asset with status code: {response.status_code}"
         )
     except Exception as e:
-        return [CheckResult(S3_STATIC, ALL_CHECKS[S3_STATIC], False, str(e))]
+        return [CheckResult(None, None, False, str(e), S3_STATIC)]
 
 
 def opensearch_check():
@@ -227,7 +209,7 @@ def opensearch_check():
         results = read_content_from_opensearch()
         return [CheckResult(None, None, True, results["_source"]["text"], OPENSEARCH)]
     except RetryError:
-        connection_info = f"Unable to read content from {ALL_CHECKS[OPENSEARCH]} within {get_result_timeout} seconds"
+        connection_info = f"Unable to read content from {OPENSEARCH.description} within {get_result_timeout} seconds"
         logger.error(connection_info)
         return [CheckResult(None, None, False, connection_info, OPENSEARCH)]
     except Exception as e:
