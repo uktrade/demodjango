@@ -31,8 +31,6 @@ from .util import render_connection_info
 
 logger = logging.getLogger("django")
 
-def dummy():
-    return "OK"
 
 class PostgresRdsCheck(Check):
     def __call__(self):
@@ -251,23 +249,23 @@ class OpensearchCheck(Check):
 
 
 MANDATORY_CHECKS = [
-    GitInformationCheck("git_information", "Git information", dummy, True),
-    ServerTimeCheck("server_time", "Server Time", dummy),
+    GitInformationCheck("git_information", "Git information"),
+    ServerTimeCheck("server_time", "Server Time"),
 ]
 
 OPTIONAL_CHECKS = [
-    CeleryBeatCheck("beat", "Celery Worker", dummy, True),
-    CeleryWorkerCheck("celery", "Celery Worker", dummy, True),
-    HttpConnectionCheck("http", "HTTP Checks", dummy, True),
-    OpensearchCheck("opensearch", "OpenSearch", dummy, True),
-    PostgresRdsCheck("postgres_rds",  "PostgreSQL (RDS)", dummy, True),
-    PrivateSubmoduleCheck("private_submodule", "Private submodule", dummy, True),
-    ReadWriteCheck("read_write", "Filesystem read/write", dummy, True),
-    RedisCheck("redis", "Redis", dummy, True),
-    S3BucketCheck("s3", dummy, True),
-    S3AdditionalBucketCheck("s3_additional", "S3 Additional Bucket", dummy, True),
-    S3StaticBucketCheck("s3_static", "S3 Bucket for static assets", dummy, True),
-    S3CrossEnvironmentBucketChecks("s3_cross_environment", "Cross environment S3 Buckets", dummy, True),
+    CeleryBeatCheck("beat", "Celery Worker", True),
+    CeleryWorkerCheck("celery", "Celery Worker", True),
+    HttpConnectionCheck("http", "HTTP Checks", True),
+    OpensearchCheck("opensearch", "OpenSearch", True),
+    PostgresRdsCheck("postgres_rds",  "PostgreSQL (RDS)", True),
+    PrivateSubmoduleCheck("private_submodule", "Private submodule", True),
+    ReadWriteCheck("read_write", "Filesystem read/write", True),
+    RedisCheck("redis", "Redis", True),
+    S3BucketCheck("s3", True),
+    S3AdditionalBucketCheck("s3_additional", "S3 Additional Bucket", True),
+    S3StaticBucketCheck("s3_static", "S3 Bucket for static assets", True),
+    S3CrossEnvironmentBucketChecks("s3_cross_environment", "Cross environment S3 Buckets", True),
 ]
 
 RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")

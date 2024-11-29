@@ -9,31 +9,27 @@ logger = logging.getLogger("django")
 STATUS_SUCCESS = "✓"
 STATUS_FAIL = "✗"
 
-def dummy():
-    return "OK"
+
 class Check:
-    def __init__(self, type: str, description: str, function: Callable, optional: bool=False):
+    def __init__(self, type: str, description: str, optional: bool=False):
         self.type = type
         self.description = description
-        # remove the function argument
-        self.function = function
         self.optional = optional
 
     def __call__(self):
         raise NotImplementedError("Call function needs to be implemented in the subclass")
 
 class CheckResult:
-    def __init__(self, type: str, description: str, success: bool, message: str = "", check: Check=Check(None,None,dummy)):
-        self.check = check
-        self.type = type or check.type
-        self.description = description or check.description
+    def __init__(self, type: str, description: str, success: bool, message: str = ""):
+        self.type = type
+        self.description = description
         self.success = success
         self.message = message
 
     def to_dict(self):
         return {
-            "type": self.check.type or self.type,
-            "description": self.check.description or self.description,
+            "type": self.type,
+            "description": self.description,
             "success": self.success,
             "message": self.message,
         }
