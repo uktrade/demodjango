@@ -5,7 +5,7 @@ from app.util import CheckResult
 
 
 def test_check():
-    result = Check("check_one", "the_description", None)
+    result = Check("check_one", "the_description")
     assert result.test_id == "check_one"
     assert result.description == "the_description"
 

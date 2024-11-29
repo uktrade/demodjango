@@ -254,18 +254,18 @@ MANDATORY_CHECKS = [
 ]
 
 OPTIONAL_CHECKS = [
-    CeleryBeatCheck("beat", "Celery Worker", True),
-    CeleryWorkerCheck("celery", "Celery Worker", True),
-    HttpConnectionCheck("http", "HTTP Checks", True),
-    OpensearchCheck("opensearch", "OpenSearch", True),
-    PostgresRdsCheck("postgres_rds",  "PostgreSQL (RDS)", True),
-    PrivateSubmoduleCheck("private_submodule", "Private submodule", True),
-    ReadWriteCheck("read_write", "Filesystem read/write", True),
-    RedisCheck("redis", "Redis", True),
-    S3BucketCheck("s3", True),
-    S3AdditionalBucketCheck("s3_additional", "S3 Additional Bucket", True),
-    S3StaticBucketCheck("s3_static", "S3 Bucket for static assets", True),
-    S3CrossEnvironmentBucketChecks("s3_cross_environment", "Cross environment S3 Buckets", True),
+    CeleryBeatCheck("beat", "Celery Worker"),
+    CeleryWorkerCheck("celery", "Celery Worker"),
+    HttpConnectionCheck("http", "HTTP Checks"),
+    OpensearchCheck("opensearch", "OpenSearch"),
+    PostgresRdsCheck("postgres_rds",  "PostgreSQL (RDS)"),
+    PrivateSubmoduleCheck("private_submodule", "Private submodule"),
+    ReadWriteCheck("read_write", "Filesystem read/write"),
+    RedisCheck("redis", "Redis"),
+    S3BucketCheck("s3", "S3 Bucket"),
+    S3AdditionalBucketCheck("s3_additional", "S3 Additional Bucket"),
+    S3StaticBucketCheck("s3_static", "S3 Bucket for static assets"),
+    S3CrossEnvironmentBucketChecks("s3_cross_environment", "Cross environment S3 Buckets"),
 ]
 
 RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")

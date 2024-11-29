@@ -11,10 +11,9 @@ STATUS_FAIL = "✗"
 
 
 class Check:
-    def __init__(self, test_id: str, description: str, optional: bool=False):
+    def __init__(self, test_id: str, description: str):
         self.test_id = test_id
         self.description = description
-        self.optional = optional
 
     def __call__(self):
         raise NotImplementedError("Call function needs to be implemented in the subclass")
