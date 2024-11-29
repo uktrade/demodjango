@@ -52,6 +52,13 @@ class CeleryCheck(Check):
     def __call__(self):
         pass
     
+class ServerTimeCheck(Check):
+    def __call__(self):
+        return [
+            CheckResult(self.type, self.description, True, str(datetime.utcnow()))
+        ]
+
+    
 class GitInformationCheck(Check):
     def __call__(self):
         git_commit = os.environ.get("GIT_COMMIT", "Unknown")
@@ -68,6 +75,7 @@ class GitInformationCheck(Check):
         ]
         
 
+# TODO change optional flag to mandatory and invert values
 
 CELERY = Check("celery", "Celery Worker", dummy, True)
 BEAT = Check("beat", "Celery Worker", dummy, True)
@@ -76,8 +84,6 @@ OPENSEARCH = Check("opensearch", "OpenSearch", dummy, True)
 PRIVATE_SUBMODULE = Check("private_submodule", "Private submodule", dummy, True)
 READ_WRITE = Check("read_write", "Filesystem read/write", dummy, True)
 REDIS = Check("redis", "Redis", dummy, True)
-# TODO change optional flag to mandatory and invert values
-SERVER_TIME = Check("server_time", "Server Time", dummy) 
 S3 = Check("s3", dummy, True)
 S3_ADDITIONAL = Check("s3_additional", "S3 Additional Bucket", dummy, True)
 S3_STATIC = Check("s3_static", "S3 Bucket for static assets", dummy, True)
@@ -85,7 +91,7 @@ S3_CROSS_ENVIRONMENT = Check("s3_cross_environment", "Cross environment S3 Bucke
 
 MANDATORY_CHECKS = [
     GitInformationCheck("git_information", "Git information", dummy, True),
-    SERVER_TIME,
+    ServerTimeCheck("server_time", "Server Time", dummy),
 ]
 
 OPTIONAL_CHECKS = [
@@ -144,10 +150,6 @@ def index(request):
         )
 
 
-def server_time_check():
-    return [
-        CheckResult(None, None, True, str(datetime.utcnow()), SERVER_TIME)
-    ]
 
 
 
