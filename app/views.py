@@ -48,10 +48,24 @@ class PostgresRdsCheck(Check):
         except Exception as e:
             return [CheckResult(self.type, self.description, False, str(e))]
         
-class CeleryCheck(Check):
+class CeleryWorkerCheck(Check):
     def __call__(self):
         pass
     
+
+class CeleryBeatCheck(Check):
+    def __call__(self):
+        pass
+
+
+class RedisCheck(Check):
+    def __call__(self):
+        try:
+            r = redis.Redis.from_url(f"{settings.REDIS_ENDPOINT}")
+            return [CheckResult(self.type, self.description, True, r.get("test-data").decode())]
+        except Exception as e:
+            return [CheckResult(self.type, self.description, False, str(e), REDIS)]
+        
 class ServerTimeCheck(Check):
     def __call__(self):
         return [
@@ -83,7 +97,6 @@ HTTP_CONNECTION = Check("http", "HTTP Checks", dummy, True)
 OPENSEARCH = Check("opensearch", "OpenSearch", dummy, True)
 PRIVATE_SUBMODULE = Check("private_submodule", "Private submodule", dummy, True)
 READ_WRITE = Check("read_write", "Filesystem read/write", dummy, True)
-REDIS = Check("redis", "Redis", dummy, True)
 S3 = Check("s3", dummy, True)
 S3_ADDITIONAL = Check("s3_additional", "S3 Additional Bucket", dummy, True)
 S3_STATIC = Check("s3_static", "S3 Bucket for static assets", dummy, True)
@@ -102,7 +115,7 @@ OPTIONAL_CHECKS = [
     PostgresRdsCheck("postgres_rds",  "PostgreSQL (RDS)", dummy, True),
     PRIVATE_SUBMODULE,
     READ_WRITE,
-    REDIS,
+    RedisCheck("redis", "Redis", dummy, True),
     S3,
     S3_ADDITIONAL,
     S3_STATIC,
@@ -155,12 +168,7 @@ def index(request):
 
 
 
-def redis_check():
-    try:
-        r = redis.Redis.from_url(f"{settings.REDIS_ENDPOINT}")
-        return [CheckResult(None, None, True, r.get("test-data").decode(), REDIS)]
-    except Exception as e:
-        return [CheckResult(None, None, False, str(e), REDIS)]
+
 
 
 def _s3_bucket_check(check, bucket_name):
