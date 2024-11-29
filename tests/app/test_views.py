@@ -12,7 +12,15 @@ from freezegun import freeze_time
 
 from app import views
 from app.views import ALL_CHECKS
+from app.views import GIT_INFORMATION
+from app.views import POSTGRES_RDS
+from app.views import READ_WRITE
+from app.views import REDIS
+from app.views import S3
+from app.views import S3_ADDITIONAL
 from app.views import S3_CROSS_ENVIRONMENT
+from app.views import S3_STATIC
+from app.views import SERVER_TIME
 
 TOKEN_SESSION_KEY = "auth_token"
 
@@ -182,8 +190,20 @@ def test_sso_redirects_when_not_authenticated(client):
     assert response.url == "/auth/login/?next=/sso/"
 
 
+JSON_CHECKS = [
+    POSTGRES_RDS,
+    READ_WRITE,
+    REDIS,
+    S3,
+    S3_ADDITIONAL,
+    S3_STATIC,
+    S3_CROSS_ENVIRONMENT,
+]
+
+
 @pytest.mark.django_db
 @override_settings(S3_CROSS_ENVIRONMENT_BUCKET_NAMES="xe_bucket_1,xe_bucket_2")
+@override_settings(ACTIVE_CHECKS=",".join(JSON_CHECKS))
 def test_index_with_json_query_string_returns_json(client):
     session = client.session
     session[TOKEN_SESSION_KEY] = None
@@ -193,7 +213,10 @@ def test_index_with_json_query_string_returns_json(client):
 
     check_results = json.loads(response.content)["check_results"]
 
-    expected_checks = [*ALL_CHECKS.values()]
+    expected_checks = [ALL_CHECKS[check] for check in JSON_CHECKS]
+
+    expected_checks.append(ALL_CHECKS[SERVER_TIME])
+    expected_checks.append(ALL_CHECKS[GIT_INFORMATION])
 
     x_env_s3_check_name = ALL_CHECKS[S3_CROSS_ENVIRONMENT]
     expected_checks.remove(x_env_s3_check_name)
