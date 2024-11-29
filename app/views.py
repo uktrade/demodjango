@@ -1,9 +1,9 @@
 import base64
-import json
 import logging
 import os
 from datetime import datetime
 
+from app.checks import CeleryWorkerCheck, PostgresRdsCheck
 import boto3
 import redis
 import requests
@@ -32,52 +32,9 @@ from .util import render_connection_info
 logger = logging.getLogger("django")
 
 
-class PostgresRdsCheck(Check):
-    def __call__(self):
-        try:
-            if not RDS_POSTGRES_CREDENTIALS:
-                raise Exception("No RDS database")
 
-            with connections["default"].cursor() as c:
-                c.execute("SELECT version()")
-                return [CheckResult(self.test_id, self.description, True, c.fetchone()[0])]
-        except Exception as e:
-            return [CheckResult(self.test_id, self.description, False, str(e))]
         
-class CeleryWorkerCheck(Check):
-    def __call__(self):
-        from demodjango import celery_app
 
-        get_result_timeout = 2
-
-        @retry(stop=stop_after_delay(get_result_timeout), wait=wait_fixed(1))
-        def get_result_from_celery_backend():
-            logger.info("Getting result from Celery backend")
-            backend_result = json.loads(
-                celery_app.backend.get(f"celery-task-meta-{task_id}")
-            )
-            logger.debug("backend_result")
-            logger.debug(backend_result)
-            if backend_result["status"] != "SUCCESS":
-                raise Exception
-            return backend_result
-
-        try:
-            timestamp = datetime.utcnow()
-            logger.info("Adding debug task to Celery queue")
-            task_id = str(demodjango_task.delay(f"{timestamp}"))
-            backend_result = get_result_from_celery_backend()
-            connection_info = f"{backend_result['result']} with task_id {task_id} was processed at {backend_result['date_done']} with status {backend_result['status']}"
-            return [CheckResult(self.test_id, self.description, True, connection_info)]
-        except RetryError:
-            connection_info = (
-                f"task_id {task_id} was not processed within {get_result_timeout} seconds"
-            )
-            logger.error(connection_info)
-            return [CheckResult(self.test_id, self.description, False, connection_info)]
-        except Exception as e:
-            logger.error(e)
-            return [CheckResult(self.test_id, self.description, False, str(e))]
     
 
 class CeleryBeatCheck(Check):
@@ -255,7 +212,7 @@ MANDATORY_CHECKS = [
 
 OPTIONAL_CHECKS = [
     CeleryBeatCheck("beat", "Celery Worker"),
-    CeleryWorkerCheck("celery", "Celery Worker"),
+    CeleryWorkerCheck("celery", "Celery Worker", logger),
     HttpConnectionCheck("http", "HTTP Checks"),
     OpensearchCheck("opensearch", "OpenSearch"),
     PostgresRdsCheck("postgres_rds",  "PostgreSQL (RDS)"),
@@ -283,7 +240,7 @@ def index(request):
         }
     )
 
-    active_checks = MANDATORY_CHECKS + [check for check in OPTIONAL_CHECKS if settings.ACTIVE_CHECKS and check.test_id in settings.ACTIVE_CHECKS]
+    active_checks = MANDATORY_CHECKS + [check for check in OPTIONAL_CHECKS if not settings.ACTIVE_CHECKS or check.test_id in settings.ACTIVE_CHECKS]
 
     results = []
     
