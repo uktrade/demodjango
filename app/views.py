@@ -127,7 +127,9 @@ def index(request):
 
 
 def server_time_check():
-    return [CheckResult(ALL_CHECKS[SERVER_TIME], True, str(datetime.utcnow()))]
+    return [
+        CheckResult(SERVER_TIME, ALL_CHECKS[SERVER_TIME], True, str(datetime.utcnow()))
+    ]
 
 
 def postgres_rds_check():
@@ -138,26 +140,27 @@ def postgres_rds_check():
 
         with connections["default"].cursor() as c:
             c.execute("SELECT version()")
-            return [CheckResult(addon_type, True, c.fetchone()[0])]
+            return [CheckResult(POSTGRES_RDS, addon_type, True, c.fetchone()[0])]
     except Exception as e:
-        return [CheckResult(addon_type, False, str(e))]
+        return [CheckResult(POSTGRES_RDS, addon_type, False, str(e))]
 
 
 def redis_check():
     addon_type = ALL_CHECKS[REDIS]
     try:
         r = redis.Redis.from_url(f"{settings.REDIS_ENDPOINT}")
-        return [CheckResult(addon_type, True, r.get("test-data").decode())]
+        return [CheckResult(REDIS, addon_type, True, r.get("test-data").decode())]
     except Exception as e:
-        return [CheckResult(addon_type, False, str(e))]
+        return [CheckResult(REDIS, addon_type, False, str(e))]
 
 
-def _s3_bucket_check(check_description, bucket_name):
+def _s3_bucket_check(check_type, check_description, bucket_name):
     try:
         s3 = boto3.resource("s3")
         bucket = s3.Bucket(bucket_name)
         body = bucket.Object("sample_file.txt")
         return CheckResult(
+            check_type,
             check_description,
             True,
             f'{body.get()["Body"].read().decode()}Bucket: {bucket_name}',
@@ -168,7 +171,7 @@ def _s3_bucket_check(check_description, bucket_name):
 
 def s3_bucket_check():
     check_description = ALL_CHECKS[S3]
-    return [_s3_bucket_check(check_description, settings.S3_BUCKET_NAME)]
+    return [_s3_bucket_check(S3, check_description, settings.S3_BUCKET_NAME)]
 
 
 def s3_cross_environment_bucket_check():
@@ -176,7 +179,9 @@ def s3_cross_environment_bucket_check():
     check_description = ALL_CHECKS[S3_CROSS_ENVIRONMENT]
 
     return [
-        _s3_bucket_check(f"{check_description} ({bucket})", bucket)
+        _s3_bucket_check(
+            S3_CROSS_ENVIRONMENT, f"{check_description} ({bucket})", bucket
+        )
         for bucket in buckets
         if bucket.strip()
     ]
@@ -184,7 +189,11 @@ def s3_cross_environment_bucket_check():
 
 def s3_additional_bucket_check():
     check_description = ALL_CHECKS[S3_ADDITIONAL]
-    return [_s3_bucket_check(check_description, settings.ADDITIONAL_S3_BUCKET_NAME)]
+    return [
+        _s3_bucket_check(
+            S3_ADDITIONAL, check_description, settings.ADDITIONAL_S3_BUCKET_NAME
+        )
+    ]
 
 
 def s3_static_bucket_check():
@@ -194,13 +203,13 @@ def s3_static_bucket_check():
         if response.status_code == 200:
             parsed_html = BeautifulSoup(response.text, "html.parser")
             test_text = parsed_html.body.find("p").text
-            return [CheckResult(addon_type, True, test_text)]
+            return [CheckResult(S3_STATIC, addon_type, True, test_text)]
 
         raise Exception(
             f"Failed to get static asset with status code: {response.status_code}"
         )
     except Exception as e:
-        return [CheckResult(addon_type, False, str(e))]
+        return [CheckResult(S3_STATIC, addon_type, False, str(e))]
 
 
 def opensearch_check():
@@ -215,13 +224,13 @@ def opensearch_check():
 
     try:
         results = read_content_from_opensearch()
-        return [CheckResult(addon_type, True, results["_source"]["text"])]
+        return [CheckResult(OPENSEARCH, addon_type, True, results["_source"]["text"])]
     except RetryError:
         connection_info = f"Unable to read content from {addon_type} within {get_result_timeout} seconds"
         logger.error(connection_info)
-        return [CheckResult(addon_type, False, connection_info)]
+        return [CheckResult(OPENSEARCH, addon_type, False, connection_info)]
     except Exception as e:
-        return [CheckResult(addon_type, False, str(e))]
+        return [CheckResult(OPENSEARCH, addon_type, False, str(e))]
 
 
 def celery_worker_check():
@@ -248,16 +257,16 @@ def celery_worker_check():
         task_id = str(demodjango_task.delay(f"{timestamp}"))
         backend_result = get_result_from_celery_backend()
         connection_info = f"{backend_result['result']} with task_id {task_id} was processed at {backend_result['date_done']} with status {backend_result['status']}"
-        return [CheckResult(addon_type, True, connection_info)]
+        return [CheckResult(CELERY, addon_type, True, connection_info)]
     except RetryError:
         connection_info = (
             f"task_id {task_id} was not processed within {get_result_timeout} seconds"
         )
         logger.error(connection_info)
-        return [CheckResult(addon_type, False, connection_info)]
+        return [CheckResult(CELERY, addon_type, False, connection_info)]
     except Exception as e:
         logger.error(e)
-        return [CheckResult(addon_type, False, str(e))]
+        return [CheckResult(CELERY, addon_type, False, str(e))]
 
 
 def celery_beat_check():
@@ -271,9 +280,9 @@ def celery_beat_check():
 
         latest_task = ScheduledTask.objects.all().order_by("-timestamp").first()
         connection_info = f"Latest task scheduled with task_id {latest_task.taskid} at {latest_task.timestamp}"
-        return [CheckResult(addon_type, True, connection_info)]
+        return [CheckResult(BEAT, addon_type, True, connection_info)]
     except Exception as e:
-        return [CheckResult(addon_type, False, str(e))]
+        return [CheckResult(BEAT, addon_type, False, str(e))]
 
 
 def read_write_check():
@@ -300,9 +309,9 @@ def read_write_check():
         read_write_status = (
             f"Read/write successfully completed at {from_file_timestamp}"
         )
-        return [CheckResult(addon_type, True, read_write_status)]
+        return [CheckResult(READ_WRITE, addon_type, True, read_write_status)]
     except Exception as e:
-        return [CheckResult(addon_type, False, str(e))]
+        return [CheckResult(READ_WRITE, addon_type, False, str(e))]
 
 
 def git_information():
@@ -312,6 +321,7 @@ def git_information():
 
     return [
         CheckResult(
+            GIT_INFORMATION,
             ALL_CHECKS[GIT_INFORMATION],
             git_commit != "Unknown",
             f"Commit: {git_commit}, Branch: {git_branch}, Tag: {git_tag}",
@@ -327,6 +337,7 @@ def http_check():
 
     return [
         CheckResult(
+            HTTP_CONNECTION,
             ALL_CHECKS[HTTP_CONNECTION],
             check.success,
             "".join([c.render() for c in check.report]),
@@ -346,7 +357,11 @@ def private_submodule_check():
                 success = True
                 connection_info = f"Successfully built sample.txt file in private submodule at: {file_path}"
 
-    return [CheckResult(ALL_CHECKS[PRIVATE_SUBMODULE], success, connection_info)]
+    return [
+        CheckResult(
+            PRIVATE_SUBMODULE, ALL_CHECKS[PRIVATE_SUBMODULE], success, connection_info
+        )
+    ]
 
 
 def api(request):
