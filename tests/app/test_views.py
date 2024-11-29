@@ -10,12 +10,7 @@ from django.test import override_settings
 from django.urls import reverse
 from freezegun import freeze_time
 
-from app import views
-# from app.views import GIT_INFORMATION
-# from app.views import READ_WRITE
-# from app.views import REDIS
-from app.views import HttpConnectionCheck
-# from app.views import SERVER_TIME
+from app.views import MANDATORY_CHECKS, HttpConnectionCheck
 
 TOKEN_SESSION_KEY = "auth_token"
 
@@ -27,7 +22,7 @@ def test_http_view(patched_requests, mock_environment):
     check = HttpConnectionCheck("http", "HTTP Checks", True)
     response = check()[0]
     assert "HTTP Checks" == response.description
-    assert "http" == response.type
+    assert "http" == response.test_id
     assert response.success
     assert "https://example.com" in response.message
 
@@ -184,38 +179,19 @@ def test_sso_redirects_when_not_authenticated(client):
     assert response.status_code == 302
     assert response.url == "/auth/login/?next=/sso/"
 
+FAST_CHECK_SUBSET = ["s3", "s3_cross_environment"]
 
-# JSON_CHECKS = [
-#     S3.type,
-#     S3_ADDITIONAL.type,
-#     S3_STATIC.type,
-#     S3_CROSS_ENVIRONMENT.type,
-# ]
+@pytest.mark.django_db
+@override_settings(S3_CROSS_ENVIRONMENT_BUCKET_NAMES="xe_bucket_1,xe_bucket_2")
+@override_settings(ACTIVE_CHECKS=",".join(FAST_CHECK_SUBSET))
+def test_index_with_json_query_string_returns_json(client):
+    session = client.session
+    session[TOKEN_SESSION_KEY] = None
+    session.save()
 
+    expected_checks = FAST_CHECK_SUBSET + MANDATORY_CHECKS
 
-# @pytest.mark.django_db
-# @override_settings(S3_CROSS_ENVIRONMENT_BUCKET_NAMES="xe_bucket_1,xe_bucket_2")
-# @override_settings(ACTIVE_CHECKS=",".join(JSON_CHECKS))
-# def test_index_with_json_query_string_returns_json(client):
-#     session = client.session
-#     session[TOKEN_SESSION_KEY] = None
-#     session.save()
+    response = client.get("/?json=true")
+    check_results = json.loads(response.content)["check_results"]
 
-#     response = client.get("/?json=true")
-
-#     check_results = json.loads(response.content)["check_results"]
-
-#     expected_checks = [ALL_CHECKS[check] for check in JSON_CHECKS]
-
-#     expected_checks.append(ALL_CHECKS[SERVER_TIME])
-#     expected_checks.append(ALL_CHECKS[GIT_INFORMATION])
-
-#     x_env_s3_check_name = ALL_CHECKS[S3_CROSS_ENVIRONMENT]
-#     expected_checks.remove(x_env_s3_check_name)
-#     expected_checks.append(f"{x_env_s3_check_name} (xe_bucket_1)")
-#     expected_checks.append(f"{x_env_s3_check_name} (xe_bucket_2)")
-
-#     assert response.status_code == 200
-#     assert set(result["description"] for result in check_results) == set(
-#         expected_checks
-#     )
+    assert response.status_code == 200

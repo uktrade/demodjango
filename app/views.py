@@ -40,9 +40,9 @@ class PostgresRdsCheck(Check):
 
             with connections["default"].cursor() as c:
                 c.execute("SELECT version()")
-                return [CheckResult(self.type, self.description, True, c.fetchone()[0])]
+                return [CheckResult(self.test_id, self.description, True, c.fetchone()[0])]
         except Exception as e:
-            return [CheckResult(self.type, self.description, False, str(e))]
+            return [CheckResult(self.test_id, self.description, False, str(e))]
         
 class CeleryWorkerCheck(Check):
     def __call__(self):
@@ -68,16 +68,16 @@ class CeleryWorkerCheck(Check):
             task_id = str(demodjango_task.delay(f"{timestamp}"))
             backend_result = get_result_from_celery_backend()
             connection_info = f"{backend_result['result']} with task_id {task_id} was processed at {backend_result['date_done']} with status {backend_result['status']}"
-            return [CheckResult(self.type, self.description, True, connection_info)]
+            return [CheckResult(self.test_id, self.description, True, connection_info)]
         except RetryError:
             connection_info = (
                 f"task_id {task_id} was not processed within {get_result_timeout} seconds"
             )
             logger.error(connection_info)
-            return [CheckResult(self.type, self.description, False, connection_info)]
+            return [CheckResult(self.test_id, self.description, False, connection_info)]
         except Exception as e:
             logger.error(e)
-            return [CheckResult(self.type, self.description, False, str(e))]
+            return [CheckResult(self.test_id, self.description, False, str(e))]
     
 
 class CeleryBeatCheck(Check):
@@ -90,23 +90,23 @@ class CeleryBeatCheck(Check):
 
             latest_task = ScheduledTask.objects.all().order_by("-timestamp").first()
             connection_info = f"Latest task scheduled with task_id {latest_task.taskid} at {latest_task.timestamp}"
-            return [CheckResult(self.type, self.description, True, connection_info)]
+            return [CheckResult(self.test_id, self.description, True, connection_info)]
         except Exception as e:
-            return [CheckResult(self.type, self.description, False, str(e))]
+            return [CheckResult(self.test_id, self.description, False, str(e))]
 
 
 class RedisCheck(Check):
     def __call__(self):
         try:
             r = redis.Redis.from_url(f"{settings.REDIS_ENDPOINT}")
-            return [CheckResult(self.type, self.description, True, r.get("test-data").decode())]
+            return [CheckResult(self.test_id, self.description, True, r.get("test-data").decode())]
         except Exception as e:
-            return [CheckResult(self.type, self.description, False, str(e), REDIS)]
+            return [CheckResult(self.test_id, self.description, False, str(e), REDIS)]
         
 class ServerTimeCheck(Check):
     def __call__(self):
         return [
-            CheckResult(self.type, self.description, True, str(datetime.utcnow()))
+            CheckResult(self.test_id, self.description, True, str(datetime.utcnow()))
         ]
 
     
@@ -118,7 +118,7 @@ class GitInformationCheck(Check):
 
         return [
             CheckResult(
-                self.type,
+                self.test_id,
                 self.description,
                 git_commit != "Unknown",
                 f"Commit: {git_commit}, Branch: {git_branch}, Tag: {git_tag}",
@@ -134,7 +134,7 @@ class HttpConnectionCheck(Check):
 
         return [
             CheckResult(
-                self.type,
+                self.test_id,
                 self.description,
                 check.success,
                 "".join([c.render() for c in check.report]),
@@ -157,7 +157,7 @@ class PrivateSubmoduleCheck(Check):
 
         return [
             CheckResult(
-                self.type, self.description, success, connection_info
+                self.test_id, self.description, success, connection_info
             )
         ]
  
@@ -185,14 +185,14 @@ class ReadWriteCheck(Check):
             read_write_status = (
                 f"Read/write successfully completed at {from_file_timestamp}"
             )
-            return [CheckResult(self.type, self.description, True, read_write_status)]
+            return [CheckResult(self.test_id, self.description, True, read_write_status)]
         except Exception as e:
-            return [CheckResult(self.type, self.description, False, str(e))]
+            return [CheckResult(self.test_id, self.description, False, str(e))]
 
 class S3AdditionalBucketCheck(Check):
     def __call__(self):
         return [
-            _s3_bucket_check(self.type, self.description, settings.ADDITIONAL_S3_BUCKET_NAME
+            _s3_bucket_check(self.test_id, self.description, settings.ADDITIONAL_S3_BUCKET_NAME
             )
         ]
         
@@ -203,17 +203,17 @@ class S3StaticBucketCheck(Check):
             if response.status_code == 200:
                 parsed_html = BeautifulSoup(response.text, "html.parser")
                 test_text = parsed_html.body.find("p").text
-                return [CheckResult(self.type, self.description, True, test_text)]
+                return [CheckResult(self.test_id, self.description, True, test_text)]
 
             raise Exception(
                 f"Failed to get static asset with status code: {response.status_code}"
             )
         except Exception as e:
-            return [CheckResult(self.type, self.description, False, str(e))]
+            return [CheckResult(self.test_id, self.description, False, str(e))]
         
 class S3BucketCheck(Check):
     def __call__(self):
-        return [_s3_bucket_check(self.type, self.description, settings.S3_BUCKET_NAME)]
+        return [_s3_bucket_check(self.test_id, self.description, settings.S3_BUCKET_NAME)]
 
 
 class S3CrossEnvironmentBucketChecks(Check):
@@ -222,7 +222,7 @@ class S3CrossEnvironmentBucketChecks(Check):
         check_results = []
         for bucket in buckets:
             if bucket.strip():
-                check_results.append(_s3_bucket_check(self.type, f"{S3_CROSS_ENVIRONMENT.description} ({bucket})", bucket))
+                check_results.append(_s3_bucket_check(self.test_id, f"{self.description} ({bucket})", bucket))
         return check_results
     
 class OpensearchCheck(Check):
@@ -237,13 +237,13 @@ class OpensearchCheck(Check):
 
         try:
             results = read_content_from_opensearch()
-            return [CheckResult(self.type, self.description, True, results["_source"]["text"])]
+            return [CheckResult(self.test_id, self.description, True, results["_source"]["text"])]
         except RetryError:
             connection_info = f"Unable to read content from {self.description} within {get_result_timeout} seconds"
             logger.error(connection_info)
-            return [CheckResult(self.type, self.description, False, connection_info)]
+            return [CheckResult(self.test_id, self.description, False, connection_info)]
         except Exception as e:
-            return [CheckResult(self.type, self.description, False, str(e))]       
+            return [CheckResult(self.test_id, self.description, False, str(e))]       
 
 # TODO change optional flag to mandatory and invert values
 
@@ -283,7 +283,7 @@ def index(request):
         }
     )
 
-    active_checks = MANDATORY_CHECKS + [check for check in OPTIONAL_CHECKS if settings.ACTIVE_CHECKS and check.type in settings.ACTIVE_CHECKS]
+    active_checks = MANDATORY_CHECKS + [check for check in OPTIONAL_CHECKS if settings.ACTIVE_CHECKS and check.test_id in settings.ACTIVE_CHECKS]
 
     results = []
     

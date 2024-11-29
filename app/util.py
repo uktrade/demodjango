@@ -11,8 +11,8 @@ STATUS_FAIL = "✗"
 
 
 class Check:
-    def __init__(self, type: str, description: str, optional: bool=False):
-        self.type = type
+    def __init__(self, test_id: str, description: str, optional: bool=False):
+        self.test_id = test_id
         self.description = description
         self.optional = optional
 
@@ -20,15 +20,15 @@ class Check:
         raise NotImplementedError("Call function needs to be implemented in the subclass")
 
 class CheckResult:
-    def __init__(self, type: str, description: str, success: bool, message: str = ""):
-        self.type = type
+    def __init__(self, test_id: str, description: str, success: bool, message: str = ""):
+        self.test_id = test_id
         self.description = description
         self.success = success
         self.message = message
 
     def to_dict(self):
         return {
-            "type": self.type,
+            "test_id": self.test_id,
             "description": self.description,
             "success": self.success,
             "message": self.message,
