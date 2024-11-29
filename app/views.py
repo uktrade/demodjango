@@ -3,8 +3,6 @@ import json
 import logging
 import os
 from datetime import datetime
-from typing import Callable
-from typing import Dict
 
 import boto3
 import redis
@@ -50,7 +48,38 @@ class PostgresRdsCheck(Check):
         
 class CeleryWorkerCheck(Check):
     def __call__(self):
-        pass
+        from demodjango import celery_app
+
+        get_result_timeout = 2
+
+        @retry(stop=stop_after_delay(get_result_timeout), wait=wait_fixed(1))
+        def get_result_from_celery_backend():
+            logger.info("Getting result from Celery backend")
+            backend_result = json.loads(
+                celery_app.backend.get(f"celery-task-meta-{task_id}")
+            )
+            logger.debug("backend_result")
+            logger.debug(backend_result)
+            if backend_result["status"] != "SUCCESS":
+                raise Exception
+            return backend_result
+
+        try:
+            timestamp = datetime.utcnow()
+            logger.info("Adding debug task to Celery queue")
+            task_id = str(demodjango_task.delay(f"{timestamp}"))
+            backend_result = get_result_from_celery_backend()
+            connection_info = f"{backend_result['result']} with task_id {task_id} was processed at {backend_result['date_done']} with status {backend_result['status']}"
+            return [CheckResult(self.type, self.description, True, connection_info)]
+        except RetryError:
+            connection_info = (
+                f"task_id {task_id} was not processed within {get_result_timeout} seconds"
+            )
+            logger.error(connection_info)
+            return [CheckResult(self.type, self.description, False, connection_info)]
+        except Exception as e:
+            logger.error(e)
+            return [CheckResult(self.type, self.description, False, str(e))]
     
 
 class CeleryBeatCheck(Check):
@@ -111,7 +140,6 @@ class OpensearchCheck(Check):
 
 # TODO change optional flag to mandatory and invert values
 
-CELERY = Check("celery", "Celery Worker", dummy, True)
 BEAT = Check("beat", "Celery Worker", dummy, True)
 HTTP_CONNECTION = Check("http", "HTTP Checks", dummy, True)
 PRIVATE_SUBMODULE = Check("private_submodule", "Private submodule", dummy, True)
@@ -128,7 +156,7 @@ MANDATORY_CHECKS = [
 
 OPTIONAL_CHECKS = [
     BEAT,
-    CELERY,
+    CeleryWorkerCheck("celery", "Celery Worker", dummy, True),
     HTTP_CONNECTION,
     OpensearchCheck("opensearch", "OpenSearch", dummy, True),
     PostgresRdsCheck("postgres_rds",  "PostgreSQL (RDS)", dummy, True),
@@ -203,7 +231,7 @@ def _s3_bucket_check(check, bucket_name):
             check
         )
     except Exception as e:
-        return CheckResult(None, None, False, str(e), check)
+        return CheckResult(self.type, self.description, False, str(e), check)
 
 
 def s3_bucket_check():
@@ -233,51 +261,19 @@ def s3_static_bucket_check():
         if response.status_code == 200:
             parsed_html = BeautifulSoup(response.text, "html.parser")
             test_text = parsed_html.body.find("p").text
-            return [CheckResult(None, None, True, test_text, S3_STATIC)]
+            return [CheckResult(self.type, self.description, True, test_text, S3_STATIC)]
 
         raise Exception(
             f"Failed to get static asset with status code: {response.status_code}"
         )
     except Exception as e:
-        return [CheckResult(None, None, False, str(e), S3_STATIC)]
+        return [CheckResult(self.type, self.description, False, str(e), S3_STATIC)]
 
 
 
 
 
-def celery_worker_check():
-    from demodjango import celery_app
 
-    get_result_timeout = 2
-
-    @retry(stop=stop_after_delay(get_result_timeout), wait=wait_fixed(1))
-    def get_result_from_celery_backend():
-        logger.info("Getting result from Celery backend")
-        backend_result = json.loads(
-            celery_app.backend.get(f"celery-task-meta-{task_id}")
-        )
-        logger.debug("backend_result")
-        logger.debug(backend_result)
-        if backend_result["status"] != "SUCCESS":
-            raise Exception
-        return backend_result
-
-    try:
-        timestamp = datetime.utcnow()
-        logger.info("Adding debug task to Celery queue")
-        task_id = str(demodjango_task.delay(f"{timestamp}"))
-        backend_result = get_result_from_celery_backend()
-        connection_info = f"{backend_result['result']} with task_id {task_id} was processed at {backend_result['date_done']} with status {backend_result['status']}"
-        return [CheckResult(None, None, True, connection_info, CELERY)]
-    except RetryError:
-        connection_info = (
-            f"task_id {task_id} was not processed within {get_result_timeout} seconds"
-        )
-        logger.error(connection_info)
-        return [CheckResult(None, None, False, connection_info, CELERY)]
-    except Exception as e:
-        logger.error(e)
-        return [CheckResult(None, None, False, str(e), CELERY)]
 
 
 def celery_beat_check():
@@ -289,9 +285,9 @@ def celery_beat_check():
 
         latest_task = ScheduledTask.objects.all().order_by("-timestamp").first()
         connection_info = f"Latest task scheduled with task_id {latest_task.taskid} at {latest_task.timestamp}"
-        return [CheckResult(None, None, True, connection_info, BEAT)]
+        return [CheckResult(self.type, self.description, True, connection_info, BEAT)]
     except Exception as e:
-        return [CheckResult(None, None, False, str(e), BEAT)]
+        return [CheckResult(self.type, self.description, False, str(e), BEAT)]
 
 
 def read_write_check():
@@ -317,9 +313,9 @@ def read_write_check():
         read_write_status = (
             f"Read/write successfully completed at {from_file_timestamp}"
         )
-        return [CheckResult(None, None, True, read_write_status, READ_WRITE)]
+        return [CheckResult(self.type, self.description, True, read_write_status, READ_WRITE)]
     except Exception as e:
-        return [CheckResult(None, None, False, str(e), READ_WRITE)]
+        return [CheckResult(self.type, self.description, False, str(e), READ_WRITE)]
 
 
 def git_information():
@@ -369,7 +365,7 @@ def private_submodule_check():
 
     return [
         CheckResult(
-            None, None, success, connection_info, PRIVATE_SUBMODULE
+            self.type, self.description, success, connection_info, PRIVATE_SUBMODULE
         )
     ]
 
