@@ -47,11 +47,30 @@ class PostgresRdsCheck(Check):
                 return [CheckResult(self.type, self.description, True, c.fetchone()[0])]
         except Exception as e:
             return [CheckResult(self.type, self.description, False, str(e))]
+        
+class CeleryCheck(Check):
+    def __call__(self):
+        pass
+    
+class GitInformationCheck(Check):
+    def __call__(self):
+        git_commit = os.environ.get("GIT_COMMIT", "Unknown")
+        git_branch = os.environ.get("GIT_BRANCH", "Unknown")
+        git_tag = os.environ.get("GIT_TAG", "Unknown")
+
+        return [
+            CheckResult(
+                self.type,
+                self.description,
+                git_commit != "Unknown",
+                f"Commit: {git_commit}, Branch: {git_branch}, Tag: {git_tag}",
+            )
+        ]
+        
 
 
 CELERY = Check("celery", "Celery Worker", dummy, True)
 BEAT = Check("beat", "Celery Worker", dummy, True)
-GIT_INFORMATION = Check("git_information", "Git information", dummy, True)
 HTTP_CONNECTION = Check("http", "HTTP Checks", dummy, True)
 OPENSEARCH = Check("opensearch", "OpenSearch", dummy, True)
 PRIVATE_SUBMODULE = Check("private_submodule", "Private submodule", dummy, True)
@@ -65,14 +84,13 @@ S3_STATIC = Check("s3_static", "S3 Bucket for static assets", dummy, True)
 S3_CROSS_ENVIRONMENT = Check("s3_cross_environment", "Cross environment S3 Buckets", dummy, True)
 
 MANDATORY_CHECKS = [
-    GIT_INFORMATION,
+    GitInformationCheck("git_information", "Git information", dummy, True),
     SERVER_TIME,
 ]
 
 OPTIONAL_CHECKS = [
     BEAT,
     CELERY,
-    GIT_INFORMATION,
     HTTP_CONNECTION,
     OPENSEARCH,
     PostgresRdsCheck("postgres_rds",  "PostgreSQL (RDS)", dummy, True),
@@ -83,7 +101,6 @@ OPTIONAL_CHECKS = [
     S3_ADDITIONAL,
     S3_STATIC,
     S3_CROSS_ENVIRONMENT,
-    SERVER_TIME,
 ]
 
 RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")
