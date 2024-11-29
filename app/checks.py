@@ -53,10 +53,12 @@ class PostgresRdsCheck(Check):
 
             with connections["default"].cursor() as c:
                 c.execute("SELECT version()")
-                return [CheckResult(self.test_id, self.description, True, c.fetchone()[0])]
+                return [
+                    CheckResult(self.test_id, self.description, True, c.fetchone()[0])
+                ]
         except Exception as e:
             return [CheckResult(self.test_id, self.description, False, str(e))]
-        
+
 
 class CeleryWorkerCheck(Check):
     def __call__(self):
@@ -84,16 +86,14 @@ class CeleryWorkerCheck(Check):
             connection_info = f"{backend_result['result']} with task_id {task_id} was processed at {backend_result['date_done']} with status {backend_result['status']}"
             return [CheckResult(self.test_id, self.description, True, connection_info)]
         except RetryError:
-            connection_info = (
-                f"task_id {task_id} was not processed within {get_result_timeout} seconds"
-            )
+            connection_info = f"task_id {task_id} was not processed within {get_result_timeout} seconds"
             self.logger.error(connection_info)
             return [CheckResult(self.test_id, self.description, False, connection_info)]
         except Exception as e:
             self.logger.error(e)
             return [CheckResult(self.test_id, self.description, False, str(e))]
-        
-        
+
+
 class CeleryBeatCheck(Check):
     def __call__(self):
         from .models import ScheduledTask
@@ -107,22 +107,28 @@ class CeleryBeatCheck(Check):
             return [CheckResult(self.test_id, self.description, True, connection_info)]
         except Exception as e:
             return [CheckResult(self.test_id, self.description, False, str(e))]
-        
+
+
 class RedisCheck(Check):
     def __call__(self):
         try:
             r = redis.Redis.from_url(f"{settings.REDIS_ENDPOINT}")
-            return [CheckResult(self.test_id, self.description, True, r.get("test-data").decode())]
+            return [
+                CheckResult(
+                    self.test_id, self.description, True, r.get("test-data").decode()
+                )
+            ]
         except Exception as e:
             return [CheckResult(self.test_id, self.description, False, str(e), REDIS)]
-        
+
+
 class ServerTimeCheck(Check):
     def __call__(self):
         return [
             CheckResult(self.test_id, self.description, True, str(datetime.utcnow()))
         ]
 
-    
+
 class GitInformationCheck(Check):
     def __call__(self):
         git_commit = os.environ.get("GIT_COMMIT", "Unknown")
@@ -137,7 +143,8 @@ class GitInformationCheck(Check):
                 f"Commit: {git_commit}, Branch: {git_branch}, Tag: {git_tag}",
             )
         ]
- 
+
+
 class HttpConnectionCheck(Check):
     def __call__(self):
         urls = os.environ.get("HTTP_CHECK_URLS", "https://httpstat.us/200|200|GET")
@@ -159,7 +166,9 @@ class PrivateSubmoduleCheck(Check):
     def __call__(self):
         file_path = "platform-demo-private/sample.txt"
         success = False
-        connection_info = f"Failed to read file from private submodule at path: {file_path}"
+        connection_info = (
+            f"Failed to read file from private submodule at path: {file_path}"
+        )
 
         if os.path.exists(file_path):
             with open(file_path, "r") as file:
@@ -168,14 +177,11 @@ class PrivateSubmoduleCheck(Check):
                     success = True
                     connection_info = f"Successfully built sample.txt file in private submodule at: {file_path}"
 
-        return [
-            CheckResult(
-                self.test_id, self.description, success, connection_info
-            )
-        ]
- 
+        return [CheckResult(self.test_id, self.description, success, connection_info)]
+
+
 class ReadWriteCheck(Check):
-    def __call__(self):       
+    def __call__(self):
         import tempfile
 
         timestamp = datetime.now()  # ensures no stale file is present
@@ -198,17 +204,22 @@ class ReadWriteCheck(Check):
             read_write_status = (
                 f"Read/write successfully completed at {from_file_timestamp}"
             )
-            return [CheckResult(self.test_id, self.description, True, read_write_status)]
+            return [
+                CheckResult(self.test_id, self.description, True, read_write_status)
+            ]
         except Exception as e:
             return [CheckResult(self.test_id, self.description, False, str(e))]
+
 
 class S3AdditionalBucketCheck(Check):
     def __call__(self):
         return [
-            _s3_bucket_check(self.test_id, self.description, settings.ADDITIONAL_S3_BUCKET_NAME
+            _s3_bucket_check(
+                self.test_id, self.description, settings.ADDITIONAL_S3_BUCKET_NAME
             )
         ]
-        
+
+
 class S3StaticBucketCheck(Check):
     def __call__(self):
         try:
@@ -223,10 +234,13 @@ class S3StaticBucketCheck(Check):
             )
         except Exception as e:
             return [CheckResult(self.test_id, self.description, False, str(e))]
-        
+
+
 class S3BucketCheck(Check):
     def __call__(self):
-        return [_s3_bucket_check(self.test_id, self.description, settings.S3_BUCKET_NAME)]
+        return [
+            _s3_bucket_check(self.test_id, self.description, settings.S3_BUCKET_NAME)
+        ]
 
 
 class S3CrossEnvironmentBucketChecks(Check):
@@ -235,9 +249,14 @@ class S3CrossEnvironmentBucketChecks(Check):
         check_results = []
         for bucket in buckets:
             if bucket.strip():
-                check_results.append(_s3_bucket_check(self.test_id, f"{self.description} ({bucket})", bucket))
+                check_results.append(
+                    _s3_bucket_check(
+                        self.test_id, f"{self.description} ({bucket})", bucket
+                    )
+                )
         return check_results
-    
+
+
 class OpensearchCheck(Check):
     def __call__(self):
         get_result_timeout = 5
@@ -250,10 +269,14 @@ class OpensearchCheck(Check):
 
         try:
             results = read_content_from_opensearch()
-            return [CheckResult(self.test_id, self.description, True, results["_source"]["text"])]
+            return [
+                CheckResult(
+                    self.test_id, self.description, True, results["_source"]["text"]
+                )
+            ]
         except RetryError:
             connection_info = f"Unable to read content from {self.description} within {get_result_timeout} seconds"
             self.logger.error(connection_info)
             return [CheckResult(self.test_id, self.description, False, connection_info)]
         except Exception as e:
-            return [CheckResult(self.test_id, self.description, False, str(e))]       
+            return [CheckResult(self.test_id, self.description, False, str(e))]

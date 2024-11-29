@@ -17,10 +17,15 @@ class Check:
         self.logger = logger
 
     def __call__(self):
-        raise NotImplementedError("Call function needs to be implemented in the subclass")
+        raise NotImplementedError(
+            "Call function needs to be implemented in the subclass"
+        )
+
 
 class CheckResult:
-    def __init__(self, test_id: str, description: str, success: bool, message: str = ""):
+    def __init__(
+        self, test_id: str, description: str, success: bool, message: str = ""
+    ):
         self.test_id = test_id
         self.description = description
         self.success = success

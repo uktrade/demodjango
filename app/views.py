@@ -3,46 +3,35 @@ import logging
 import os
 from datetime import datetime
 
-from app.checks import CeleryBeatCheck, CeleryWorkerCheck, GitInformationCheck, HttpConnectionCheck, OpensearchCheck, PostgresRdsCheck, PrivateSubmoduleCheck, ReadWriteCheck, RedisCheck, S3AdditionalBucketCheck, S3BucketCheck, S3CrossEnvironmentBucketChecks, S3StaticBucketCheck, ServerTimeCheck
-import boto3
-import redis
+from app.checks import (
+    CeleryBeatCheck,
+    CeleryWorkerCheck,
+    GitInformationCheck,
+    HttpConnectionCheck,
+    OpensearchCheck,
+    PostgresRdsCheck,
+    PrivateSubmoduleCheck,
+    ReadWriteCheck,
+    RedisCheck,
+    S3AdditionalBucketCheck,
+    S3BucketCheck,
+    S3CrossEnvironmentBucketChecks,
+    S3StaticBucketCheck,
+    ServerTimeCheck,
+)
 import requests
 from authbroker_client.utils import TOKEN_SESSION_KEY
-from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.db import connections
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
-from opensearchpy import OpenSearch
-from tenacity import RetryError
-from tenacity import retry
-from tenacity import stop_after_delay
-from tenacity import wait_fixed
 
-from celery_worker.tasks import demodjango_task
-
-from .check.check_http import HTTPCheck
-from .util import Check, CheckResult
 from .util import render_connection_info
 
 logger = logging.getLogger("django")
-
-
-
-        
-
-    
-
-
-
-
-
-# TODO change optional flag to mandatory and invert values
-
 
 MANDATORY_CHECKS = [
     GitInformationCheck("git_information", "Git information"),
@@ -54,14 +43,16 @@ OPTIONAL_CHECKS = [
     CeleryWorkerCheck("celery", "Celery Worker", logger),
     HttpConnectionCheck("http", "HTTP Checks"),
     OpensearchCheck("opensearch", "OpenSearch", logger),
-    PostgresRdsCheck("postgres_rds",  "PostgreSQL (RDS)"),
+    PostgresRdsCheck("postgres_rds", "PostgreSQL (RDS)"),
     PrivateSubmoduleCheck("private_submodule", "Private submodule"),
     ReadWriteCheck("read_write", "Filesystem read/write"),
     RedisCheck("redis", "Redis"),
     S3BucketCheck("s3", "S3 Bucket"),
     S3AdditionalBucketCheck("s3_additional", "S3 Additional Bucket"),
     S3StaticBucketCheck("s3_static", "S3 Bucket for static assets"),
-    S3CrossEnvironmentBucketChecks("s3_cross_environment", "Cross environment S3 Buckets"),
+    S3CrossEnvironmentBucketChecks(
+        "s3_cross_environment", "Cross environment S3 Buckets"
+    ),
 ]
 
 RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")
@@ -79,10 +70,14 @@ def index(request):
         }
     )
 
-    active_checks = MANDATORY_CHECKS + [check for check in OPTIONAL_CHECKS if not settings.ACTIVE_CHECKS or check.test_id in settings.ACTIVE_CHECKS]
+    active_checks = MANDATORY_CHECKS + [
+        check
+        for check in OPTIONAL_CHECKS
+        if not settings.ACTIVE_CHECKS or check.test_id in settings.ACTIVE_CHECKS
+    ]
 
     results = []
-    
+
     for check in active_checks:
         results.extend(check())
 
@@ -103,42 +98,6 @@ def index(request):
             f"{''.join(results)}"
             "</body></html>"
         )
-
-
-
-
-
-
-
-
-
-
-def _s3_bucket_check(type, description, bucket_name):
-    try:
-        s3 = boto3.resource("s3")
-        bucket = s3.Bucket(bucket_name)
-        body = bucket.Object("sample_file.txt")
-        return CheckResult(
-            type,
-            description,
-            True,
-            f'{body.get()["Body"].read().decode()}Bucket: {bucket_name}',
-        )
-    except Exception as e:
-        return CheckResult(type, description, False, str(e))
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def api(request):

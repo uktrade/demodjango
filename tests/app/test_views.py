@@ -179,7 +179,9 @@ def test_sso_redirects_when_not_authenticated(client):
     assert response.status_code == 302
     assert response.url == "/auth/login/?next=/sso/"
 
+
 FAST_CHECK_SUBSET = ["s3", "s3_cross_environment"]
+
 
 @pytest.mark.django_db
 @override_settings(S3_CROSS_ENVIRONMENT_BUCKET_NAMES="xe_bucket_1,xe_bucket_2")
@@ -191,9 +193,32 @@ def test_index_with_json_query_string_returns_json(client):
 
     response = client.get("/?json=true")
     check_results = json.loads(response.content)["check_results"]
-    
-    assert len([res for res in check_results if res["description"]=="Cross environment S3 Buckets (xe_bucket_1)"]) == 1
-    assert len([res for res in check_results if res["description"]=="Cross environment S3 Buckets (xe_bucket_2)"]) == 1
-    assert len([res for res in check_results if res["description"]=="Git information"]) == 1
-    assert len([res for res in check_results if res["description"]=="Server Time"]) == 1
+
+    assert (
+        len(
+            [
+                res
+                for res in check_results
+                if res["description"] == "Cross environment S3 Buckets (xe_bucket_1)"
+            ]
+        )
+        == 1
+    )
+    assert (
+        len(
+            [
+                res
+                for res in check_results
+                if res["description"] == "Cross environment S3 Buckets (xe_bucket_2)"
+            ]
+        )
+        == 1
+    )
+    assert (
+        len([res for res in check_results if res["description"] == "Git information"])
+        == 1
+    )
+    assert (
+        len([res for res in check_results if res["description"] == "Server Time"]) == 1
+    )
     assert response.status_code == 200

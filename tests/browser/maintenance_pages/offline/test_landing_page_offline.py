@@ -49,4 +49,7 @@ def test_frontend_to_api(page: Page):
     response_data = response.json()
 
     assert response.status == 200
-    assert response_data["message"] == f"Frontend reached API at {expected_api_service_url}"
+    assert (
+        response_data["message"]
+        == f"Frontend reached API at {expected_api_service_url}"
+    )
