@@ -28,10 +28,13 @@ from tenacity import wait_fixed
 from celery_worker.tasks import demodjango_task
 
 from .check.check_http import HTTPCheck
-from .util import CheckResult
+from .util import Check, CheckResult
 from .util import render_connection_info
 
 logger = logging.getLogger("django")
+
+def dummy():
+    return "OK"
 
 CELERY = "celery"
 BEAT = "beat"
@@ -46,7 +49,7 @@ S3 = "s3"
 S3_ADDITIONAL = "s3_additional"
 S3_STATIC = "s3_static"
 S3_CROSS_ENVIRONMENT = "s3_cross_environment"
-SERVER_TIME = "server_time"
+SERVER_TIME = Check("server_time", "Server Time", dummy)
 
 ALL_CHECKS = {
     BEAT: "Celery Beat",
@@ -132,7 +135,7 @@ def index(request):
 
 def server_time_check():
     return [
-        CheckResult(SERVER_TIME, ALL_CHECKS[SERVER_TIME], True, str(datetime.utcnow()))
+        CheckResult(None, None, True, str(datetime.utcnow()), SERVER_TIME)
     ]
 
 

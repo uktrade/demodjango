@@ -9,19 +9,22 @@ logger = logging.getLogger("django")
 STATUS_SUCCESS = "✓"
 STATUS_FAIL = "✗"
 
-
+def dummy():
+    return "OK"
 class Check:
-    def __init__(self, type: str, description: str, function: Callable):
+    def __init__(self, type: str, description: str, function: Callable, optional: bool=False):
         self.type = type
         self.description = description
         self.function = function
+        self.optional = optional
 
     def __call__(self):
         return self.function()
 
 
 class CheckResult:
-    def __init__(self, type: str, description: str, success: bool, message: str = ""):
+    def __init__(self, type: str, description: str, success: bool, message: str = "", check: Check=Check(None,None,dummy)):
+        self.check = check
         self.type = type
         self.description = description
         self.success = success
@@ -29,8 +32,8 @@ class CheckResult:
 
     def to_dict(self):
         return {
-            "type": self.type,
-            "description": self.description,
+            "type": self.check.type or self.type,
+            "description": self.check.description or self.description,
             "success": self.success,
             "message": self.message,
         }
