@@ -14,7 +14,7 @@ from app import views
 # from app.views import GIT_INFORMATION
 # from app.views import READ_WRITE
 # from app.views import REDIS
-from app.views import S3
+from app.views import S3, HttpConnectionCheck
 from app.views import S3_ADDITIONAL
 from app.views import S3_CROSS_ENVIRONMENT
 from app.views import S3_STATIC
@@ -27,8 +27,8 @@ TOKEN_SESSION_KEY = "auth_token"
 def test_http_view(patched_requests, mock_environment):
     mock_environment("HTTP_CHECK_URLS", "https://example.com")
     patched_requests.get.return_value = Mock(status_code=200)
-
-    response = views.http_check()[0]
+    check = HttpConnectionCheck("http", "HTTP Checks", None, True)
+    response = check()[0]
     assert "HTTP Checks" == response.description
     assert "http" == response.type
     assert response.success

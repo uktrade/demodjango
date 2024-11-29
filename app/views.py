@@ -84,7 +84,17 @@ class CeleryWorkerCheck(Check):
 
 class CeleryBeatCheck(Check):
     def __call__(self):
-        pass
+        from .models import ScheduledTask
+
+        try:
+            if not RDS_POSTGRES_CREDENTIALS:
+                raise Exception("Database not found")
+
+            latest_task = ScheduledTask.objects.all().order_by("-timestamp").first()
+            connection_info = f"Latest task scheduled with task_id {latest_task.taskid} at {latest_task.timestamp}"
+            return [CheckResult(self.type, self.description, True, connection_info)]
+        except Exception as e:
+            return [CheckResult(self.type, self.description, False, str(e))]
 
 
 class RedisCheck(Check):
@@ -117,7 +127,23 @@ class GitInformationCheck(Check):
             )
         ]
  
- 
+class HttpConnectionCheck(Check):
+    def __call__(self):
+        urls = os.environ.get("HTTP_CHECK_URLS", "https://httpstat.us/200|200|GET")
+
+        check = HTTPCheck(urls)
+        check.execute()
+
+        return [
+            CheckResult(
+                self.type,
+                self.description,
+                check.success,
+                "".join([c.render() for c in check.report]),
+            )
+        ]
+
+
 class OpensearchCheck(Check):
     def __call__(self):
         get_result_timeout = 5
@@ -140,8 +166,6 @@ class OpensearchCheck(Check):
 
 # TODO change optional flag to mandatory and invert values
 
-BEAT = Check("beat", "Celery Worker", dummy, True)
-HTTP_CONNECTION = Check("http", "HTTP Checks", dummy, True)
 PRIVATE_SUBMODULE = Check("private_submodule", "Private submodule", dummy, True)
 READ_WRITE = Check("read_write", "Filesystem read/write", dummy, True)
 S3 = Check("s3", dummy, True)
@@ -155,9 +179,9 @@ MANDATORY_CHECKS = [
 ]
 
 OPTIONAL_CHECKS = [
-    BEAT,
+    CeleryBeatCheck("beat", "Celery Worker", dummy, True),
     CeleryWorkerCheck("celery", "Celery Worker", dummy, True),
-    HTTP_CONNECTION,
+    HttpConnectionCheck("http", "HTTP Checks", dummy, True),
     OpensearchCheck("opensearch", "OpenSearch", dummy, True),
     PostgresRdsCheck("postgres_rds",  "PostgreSQL (RDS)", dummy, True),
     PRIVATE_SUBMODULE,
@@ -276,18 +300,7 @@ def s3_static_bucket_check():
 
 
 
-def celery_beat_check():
-    from .models import ScheduledTask
 
-    try:
-        if not RDS_POSTGRES_CREDENTIALS:
-            raise Exception("Database not found")
-
-        latest_task = ScheduledTask.objects.all().order_by("-timestamp").first()
-        connection_info = f"Latest task scheduled with task_id {latest_task.taskid} at {latest_task.timestamp}"
-        return [CheckResult(self.type, self.description, True, connection_info, BEAT)]
-    except Exception as e:
-        return [CheckResult(self.type, self.description, False, str(e), BEAT)]
 
 
 def read_write_check():
@@ -334,21 +347,6 @@ def git_information():
     ]
 
 
-def http_check():
-    urls = os.environ.get("HTTP_CHECK_URLS", "https://httpstat.us/200|200|GET")
-
-    check = HTTPCheck(urls)
-    check.execute()
-
-    return [
-        CheckResult(
-            None,
-            None,
-            check.success,
-            "".join([c.render() for c in check.report]),
-            HTTP_CONNECTION
-        )
-    ]
 
 
 def private_submodule_check():
