@@ -231,6 +231,7 @@ class S3AdditionalBucketCheck(Check):
         except Exception as e:
             return [CheckResult(self.test_id, self.description, False, str(e))]
 
+
 class S3StaticBucketCheck(Check):
     def __init__(self):
         super().__init__("s3_static", "S3 Bucket for static assets")
@@ -259,7 +260,7 @@ class S3BucketCheck(Check):
             result = read_from_bucket(settings.S3_BUCKET_NAME)
             return [CheckResult(self.test_id, self.description, True, result)]
         except Exception as e:
-            return [CheckResult(self.test_id, self.description, False, str(e))]    
+            return [CheckResult(self.test_id, self.description, False, str(e))]
 
 
 class S3CrossEnvironmentBucketChecks(Check):
@@ -273,10 +274,22 @@ class S3CrossEnvironmentBucketChecks(Check):
             if bucket.strip():
                 try:
                     result = read_from_bucket(bucket)
-                    check_results.append(CheckResult(self.test_id, f"{self.description} ({bucket})", True, result))
+                    check_results.append(
+                        CheckResult(
+                            self.test_id, f"{self.description} ({bucket})", True, result
+                        )
+                    )
                 except Exception as e:
-                    check_results.append(CheckResult(self.test_id, f"{self.description} ({bucket})", False, f"Error reading {bucket}: {str(e)}"))
+                    check_results.append(
+                        CheckResult(
+                            self.test_id,
+                            f"{self.description} ({bucket})",
+                            False,
+                            f"Error reading {bucket}: {str(e)}",
+                        )
+                    )
         return check_results
+
 
 class OpensearchCheck(Check):
     def __init__(self, logger):
