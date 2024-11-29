@@ -28,106 +28,9 @@ from tenacity import wait_fixed
 from celery_worker.tasks import demodjango_task
 
 from .check.check_http import HTTPCheck
+from .util import Check
 from .util import CheckResult
 from .util import render_connection_info
-
-logger = logging.getLogger("django")
-
-CELERY = "celery"
-BEAT = "beat"
-GIT_INFORMATION = "git_information"
-HTTP_CONNECTION = "http"
-OPENSEARCH = "opensearch"
-POSTGRES_RDS = "postgres_rds"
-PRIVATE_SUBMODULE = "private_submodule"
-READ_WRITE = "read_write"
-REDIS = "redis"
-S3 = "s3"
-S3_ADDITIONAL = "s3_additional"
-S3_STATIC = "s3_static"
-S3_CROSS_ENVIRONMENT = "s3_cross_environment"
-SERVER_TIME = "server_time"
-
-ALL_CHECKS = {
-    BEAT: "Celery Beat",
-    CELERY: "Celery Worker",
-    GIT_INFORMATION: "Git information",
-    HTTP_CONNECTION: "HTTP Checks",
-    OPENSEARCH: "OpenSearch",
-    POSTGRES_RDS: "PostgreSQL (RDS)",
-    PRIVATE_SUBMODULE: "Private submodule",
-    READ_WRITE: "Filesystem read/write",
-    REDIS: "Redis",
-    S3: "S3 Bucket",
-    S3_ADDITIONAL: "S3 Additional Bucket",
-    S3_STATIC: "S3 Bucket for static assets",
-    S3_CROSS_ENVIRONMENT: "Cross environment S3 Buckets",
-    SERVER_TIME: "Server Time",
-}
-
-MANDATORY_CHECKS = [GIT_INFORMATION, SERVER_TIME]
-
-RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")
-
-
-def index(request):
-    logger.info("Rendering landing page")
-    logger.info(
-        {
-            "method": request.method,
-            "path": request.path,
-            "GET": dict(request.GET),
-            "POST": dict(request.POST),
-            "headers": dict(request.headers),
-        }
-    )
-
-    status_checks = [server_time_check, git_information]
-
-    optional_checks: Dict[str, Callable] = {
-        POSTGRES_RDS: postgres_rds_check,
-        READ_WRITE: read_write_check,
-        REDIS: redis_check,
-        S3: s3_bucket_check,
-        S3_ADDITIONAL: s3_additional_bucket_check,
-        S3_STATIC: s3_static_bucket_check,
-        S3_CROSS_ENVIRONMENT: s3_cross_environment_bucket_check,
-        OPENSEARCH: opensearch_check,
-        CELERY: celery_worker_check,
-        BEAT: celery_beat_check,
-        HTTP_CONNECTION: http_check,
-        PRIVATE_SUBMODULE: private_submodule_check,
-    }
-
-    if settings.ACTIVE_CHECKS:
-        for name, check in optional_checks.items():
-            if name in settings.ACTIVE_CHECKS:
-                status_checks.append(check)
-    else:
-        for name, check in optional_checks.items():
-            status_checks.append(check)
-
-    results = []
-    for check in status_checks:
-        results.extend(check())
-
-    logger.info(
-        f"Landing page checks completed: "
-        f"{settings.ACTIVE_CHECKS if settings.ACTIVE_CHECKS else 'all'}"
-    )
-
-    if request.GET.get("json", None) == "true":
-        results = [result.to_dict() for result in results]
-        return JsonResponse({"check_results": results}, status=200)
-    else:
-        results = [render_connection_info(result) for result in results]
-        return HttpResponse(
-            "<!doctype html><html><head>"
-            "<title>DemoDjango</title>"
-            "</head><body>"
-            f"{''.join(results)}"
-            "</body></html>"
-        )
 
 
 def server_time_check():
@@ -273,20 +176,26 @@ def celery_worker_check():
         return [CheckResult(CELERY, addon_type, False, str(e))]
 
 
-def celery_beat_check():
-    from .models import ScheduledTask
+class BeatCheck(Check):
+    def __init__(self):
+        super.__init__(self, "beat", "beat desc")
 
-    addon_type = ALL_CHECKS[BEAT]
+    def __call__(self):
+        # def celery_beat_check():
+        from .models import ScheduledTask
 
-    try:
-        if not RDS_POSTGRES_CREDENTIALS:
-            raise Exception("Database not found")
+        addon_type = ALL_CHECKS[BEAT]
 
-        latest_task = ScheduledTask.objects.all().order_by("-timestamp").first()
-        connection_info = f"Latest task scheduled with task_id {latest_task.taskid} at {latest_task.timestamp}"
-        return [CheckResult(BEAT, addon_type, True, connection_info)]
-    except Exception as e:
-        return [CheckResult(BEAT, addon_type, False, str(e))]
+        try:
+            if not RDS_POSTGRES_CREDENTIALS:
+                raise Exception("Database not found")
+
+            latest_task = ScheduledTask.objects.all().order_by("-timestamp").first()
+            connection_info = f"Latest task scheduled with task_id {latest_task.taskid} at {latest_task.timestamp}"
+            return self.success(connection_info)
+            return [CheckResult(BEAT, addon_type, True, connection_info)]
+        except Exception as e:
+            return [CheckResult(BEAT, addon_type, False, str(e))]
 
 
 def read_write_check():
@@ -366,6 +275,106 @@ def private_submodule_check():
             PRIVATE_SUBMODULE, ALL_CHECKS[PRIVATE_SUBMODULE], success, connection_info
         )
     ]
+
+
+logger = logging.getLogger("django")
+
+CELERY = "celery"
+BEAT = "beat"
+GIT_INFORMATION = "git_information"
+HTTP_CONNECTION = "http"
+OPENSEARCH = "opensearch"
+POSTGRES_RDS = "postgres_rds"
+PRIVATE_SUBMODULE = "private_submodule"
+READ_WRITE = "read_write"
+REDIS = "redis"
+S3 = "s3"
+S3_ADDITIONAL = "s3_additional"
+S3_STATIC = "s3_static"
+S3_CROSS_ENVIRONMENT = "s3_cross_environment"
+SERVER_TIME = "server_time"
+
+ALL_CHECKS = {
+    BEAT: Check(BEAT, "Celery Beat", celery_beat_check),
+    CELERY: "Celery Worker",
+    GIT_INFORMATION: "Git information",
+    HTTP_CONNECTION: "HTTP Checks",
+    OPENSEARCH: "OpenSearch",
+    POSTGRES_RDS: "PostgreSQL (RDS)",
+    PRIVATE_SUBMODULE: "Private submodule",
+    READ_WRITE: "Filesystem read/write",
+    REDIS: "Redis",
+    S3: "S3 Bucket",
+    S3_ADDITIONAL: "S3 Additional Bucket",
+    S3_STATIC: "S3 Bucket for static assets",
+    S3_CROSS_ENVIRONMENT: "Cross environment S3 Buckets",
+    SERVER_TIME: "Server Time",
+}
+
+MANDATORY_CHECKS = [GitInformation(), SERVER_TIME]
+OPTIONAL_CHECKS = []
+
+RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")
+
+
+def index(request):
+    logger.info("Rendering landing page")
+    logger.info(
+        {
+            "method": request.method,
+            "path": request.path,
+            "GET": dict(request.GET),
+            "POST": dict(request.POST),
+            "headers": dict(request.headers),
+        }
+    )
+
+    status_checks = [server_time_check, git_information]
+
+    optional_checks: Dict[str, Callable] = {
+        POSTGRES_RDS: postgres_rds_check,
+        READ_WRITE: read_write_check,
+        REDIS: redis_check,
+        S3: s3_bucket_check,
+        S3_ADDITIONAL: s3_additional_bucket_check,
+        S3_STATIC: s3_static_bucket_check,
+        S3_CROSS_ENVIRONMENT: s3_cross_environment_bucket_check,
+        OPENSEARCH: opensearch_check,
+        CELERY: celery_worker_check,
+        BEAT: celery_beat_check,
+        HTTP_CONNECTION: http_check,
+        PRIVATE_SUBMODULE: private_submodule_check,
+    }
+
+    if settings.ACTIVE_CHECKS:
+        for name, check in optional_checks.items():
+            if name in settings.ACTIVE_CHECKS:
+                status_checks.append(check)
+    else:
+        for name, check in optional_checks.items():
+            status_checks.append(check)
+
+    results = []
+    for check in status_checks:
+        results.extend(check())
+
+    logger.info(
+        f"Landing page checks completed: "
+        f"{settings.ACTIVE_CHECKS if settings.ACTIVE_CHECKS else 'all'}"
+    )
+
+    if request.GET.get("json", None) == "true":
+        results = [result.to_dict() for result in results]
+        return JsonResponse({"check_results": results}, status=200)
+    else:
+        results = [render_connection_info(result) for result in results]
+        return HttpResponse(
+            "<!doctype html><html><head>"
+            "<title>DemoDjango</title>"
+            "</head><body>"
+            f"{''.join(results)}"
+            "</body></html>"
+        )
 
 
 def api(request):
