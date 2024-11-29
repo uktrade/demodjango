@@ -182,10 +182,9 @@ def test_sso_redirects_when_not_authenticated(client):
     assert response.url == "/auth/login/?next=/sso/"
 
 
-# @pytest.mark.django_db
-# @override_settings(S3_CROSS_ENVIRONMENT_BUCKET_NAMES="xe_bucket_1,xe_bucket_2")
+@pytest.mark.django_db
+@override_settings(S3_CROSS_ENVIRONMENT_BUCKET_NAMES="xe_bucket_1,xe_bucket_2")
 def test_index_with_json_query_string_returns_json(client):
-    # mock_environment("S3_CROSS_ENVIRONMENT_BUCKET_NAMES", "xe_bucket_1,xe_bucket_2")
     session = client.session
     session[TOKEN_SESSION_KEY] = None
     session.save()

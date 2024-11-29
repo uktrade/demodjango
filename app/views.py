@@ -166,7 +166,7 @@ def _s3_bucket_check(check_type, check_description, bucket_name):
             f'{body.get()["Body"].read().decode()}Bucket: {bucket_name}',
         )
     except Exception as e:
-        return CheckResult(check_description, False, str(e))
+        return CheckResult(check_type, check_description, False, str(e))
 
 
 def s3_bucket_check():
