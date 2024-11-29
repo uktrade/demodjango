@@ -37,19 +37,20 @@ def dummy():
     return "OK"
 
 CELERY = Check("celery", "Celery Worker", dummy, True)
-BEAT = "beat"
-GIT_INFORMATION = "git_information"
-HTTP_CONNECTION = "http"
-OPENSEARCH = "opensearch"
-POSTGRES_RDS = "postgres_rds"
-PRIVATE_SUBMODULE = "private_submodule"
-READ_WRITE = "read_write"
-REDIS = "redis"
+BEAT = Check("beat", "Celery Worker", dummy, True)
+GIT_INFORMATION = Check("git_information", "Git information", dummy, True)
+HTTP_CONNECTION = Check("http", "HTTP Checks", dummy, True)
+OPENSEARCH = Check("opensearch", "OpenSearch", dummy, True)
+POSTGRES_RDS = Check("postgres_rds",  "PostgreSQL (RDS)", dummy, True)
+PRIVATE_SUBMODULE = Check("private_submodule", "Private submodule", dummy, True)
+READ_WRITE = Check("read_write", "Filesystem read/write", dummy, True)
+REDIS = Check("redis", "Redis", dummy, True)
+SERVER_TIME = Check("server_time", "Server Time", dummy)
 S3 = "s3"
 S3_ADDITIONAL = "s3_additional"
 S3_STATIC = "s3_static"
 S3_CROSS_ENVIRONMENT = "s3_cross_environment"
-SERVER_TIME = Check("server_time", "Server Time", dummy)
+
 
 ALL_CHECKS = {
     BEAT: "Celery Beat",
@@ -68,7 +69,7 @@ ALL_CHECKS = {
     SERVER_TIME: "Server Time",
 }
 
-MANDATORY_CHECKS = [GIT_INFORMATION, SERVER_TIME]
+MANDATORY_CHECKS = [GIT_INFORMATION.type, SERVER_TIME.type]
 
 RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")
 
@@ -88,18 +89,18 @@ def index(request):
     status_checks = [server_time_check, git_information]
 
     optional_checks: Dict[str, Callable] = {
-        POSTGRES_RDS: postgres_rds_check,
-        READ_WRITE: read_write_check,
-        REDIS: redis_check,
+        POSTGRES_RDS.type: postgres_rds_check,
+        READ_WRITE.type: read_write_check,
+        REDIS.type: redis_check,
         S3: s3_bucket_check,
         S3_ADDITIONAL: s3_additional_bucket_check,
         S3_STATIC: s3_static_bucket_check,
         S3_CROSS_ENVIRONMENT: s3_cross_environment_bucket_check,
-        OPENSEARCH: opensearch_check,
+        OPENSEARCH.type: opensearch_check,
         CELERY.type: celery_worker_check,
-        BEAT: celery_beat_check,
-        HTTP_CONNECTION: http_check,
-        PRIVATE_SUBMODULE: private_submodule_check,
+        BEAT.type: celery_beat_check,
+        HTTP_CONNECTION.type: http_check,
+        PRIVATE_SUBMODULE.type: private_submodule_check,
     }
 
     if settings.ACTIVE_CHECKS:
@@ -146,17 +147,17 @@ def postgres_rds_check():
 
         with connections["default"].cursor() as c:
             c.execute("SELECT version()")
-            return [CheckResult(POSTGRES_RDS, ALL_CHECKS[POSTGRES_RDS], True, c.fetchone()[0])]
+            return [CheckResult(None, None, True, c.fetchone()[0], POSTGRES_RDS)]
     except Exception as e:
-        return [CheckResult(POSTGRES_RDS, ALL_CHECKS[POSTGRES_RDS], False, str(e))]
+        return [CheckResult(None, None, False, str(e), POSTGRES_RDS)]
 
 
 def redis_check():
     try:
         r = redis.Redis.from_url(f"{settings.REDIS_ENDPOINT}")
-        return [CheckResult(REDIS, ALL_CHECKS[REDIS], True, r.get("test-data").decode())]
+        return [CheckResult(None, None, True, r.get("test-data").decode(), REDIS)]
     except Exception as e:
-        return [CheckResult(REDIS, ALL_CHECKS[REDIS], False, str(e))]
+        return [CheckResult(None, None, False, str(e), REDIS)]
 
 
 def _s3_bucket_check(check_type, check_description, bucket_name):
@@ -224,13 +225,13 @@ def opensearch_check():
 
     try:
         results = read_content_from_opensearch()
-        return [CheckResult(OPENSEARCH, ALL_CHECKS[OPENSEARCH], True, results["_source"]["text"])]
+        return [CheckResult(None, None, True, results["_source"]["text"], OPENSEARCH)]
     except RetryError:
         connection_info = f"Unable to read content from {ALL_CHECKS[OPENSEARCH]} within {get_result_timeout} seconds"
         logger.error(connection_info)
-        return [CheckResult(OPENSEARCH, ALL_CHECKS[OPENSEARCH], False, connection_info)]
+        return [CheckResult(None, None, False, connection_info, OPENSEARCH)]
     except Exception as e:
-        return [CheckResult(OPENSEARCH, ALL_CHECKS[OPENSEARCH], False, str(e))]
+        return [CheckResult(None, None, False, str(e), OPENSEARCH)]
 
 
 def celery_worker_check():
@@ -277,9 +278,9 @@ def celery_beat_check():
 
         latest_task = ScheduledTask.objects.all().order_by("-timestamp").first()
         connection_info = f"Latest task scheduled with task_id {latest_task.taskid} at {latest_task.timestamp}"
-        return [CheckResult(BEAT, ALL_CHECKS[BEAT], True, connection_info)]
+        return [CheckResult(None, None, True, connection_info, BEAT)]
     except Exception as e:
-        return [CheckResult(BEAT, ALL_CHECKS[BEAT], False, str(e))]
+        return [CheckResult(None, None, False, str(e), BEAT)]
 
 
 def read_write_check():
@@ -305,9 +306,9 @@ def read_write_check():
         read_write_status = (
             f"Read/write successfully completed at {from_file_timestamp}"
         )
-        return [CheckResult(READ_WRITE, ALL_CHECKS[READ_WRITE], True, read_write_status)]
+        return [CheckResult(None, None, True, read_write_status, READ_WRITE)]
     except Exception as e:
-        return [CheckResult(READ_WRITE, ALL_CHECKS[READ_WRITE], False, str(e))]
+        return [CheckResult(None, None, False, str(e), READ_WRITE)]
 
 
 def git_information():
@@ -317,10 +318,11 @@ def git_information():
 
     return [
         CheckResult(
-            GIT_INFORMATION,
-            ALL_CHECKS[GIT_INFORMATION],
+            None,
+            None,
             git_commit != "Unknown",
             f"Commit: {git_commit}, Branch: {git_branch}, Tag: {git_tag}",
+            GIT_INFORMATION
         )
     ]
 
@@ -333,10 +335,11 @@ def http_check():
 
     return [
         CheckResult(
-            HTTP_CONNECTION,
-            ALL_CHECKS[HTTP_CONNECTION],
+            None,
+            None,
             check.success,
             "".join([c.render() for c in check.report]),
+            HTTP_CONNECTION
         )
     ]
 
@@ -355,7 +358,7 @@ def private_submodule_check():
 
     return [
         CheckResult(
-            PRIVATE_SUBMODULE, ALL_CHECKS[PRIVATE_SUBMODULE], success, connection_info
+            None, None, success, connection_info, PRIVATE_SUBMODULE
         )
     ]
 

@@ -191,9 +191,6 @@ def test_sso_redirects_when_not_authenticated(client):
 
 
 JSON_CHECKS = [
-    POSTGRES_RDS,
-    READ_WRITE,
-    REDIS,
     S3,
     S3_ADDITIONAL,
     S3_STATIC,

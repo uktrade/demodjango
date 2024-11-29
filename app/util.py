@@ -25,8 +25,8 @@ class Check:
 class CheckResult:
     def __init__(self, type: str, description: str, success: bool, message: str = "", check: Check=Check(None,None,dummy)):
         self.check = check
-        self.type = type
-        self.description = description
+        self.type = type or check.type
+        self.description = description or check.description
         self.success = success
         self.message = message
 
