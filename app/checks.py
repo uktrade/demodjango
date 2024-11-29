@@ -20,19 +20,11 @@ from .check.check_http import HTTPCheck
 from .util import Check, CheckResult
 
 
-def _s3_bucket_check(type, description, bucket_name):
-    try:
-        s3 = boto3.resource("s3")
-        bucket = s3.Bucket(bucket_name)
-        body = bucket.Object("sample_file.txt")
-        return CheckResult(
-            type,
-            description,
-            True,
-            f'{body.get()["Body"].read().decode()}Bucket: {bucket_name}',
-        )
-    except Exception as e:
-        return CheckResult(type, description, False, str(e))
+def read_from_bucket(bucket_name):
+    s3 = boto3.resource("s3")
+    bucket = s3.Bucket(bucket_name)
+    body = bucket.Object("sample_file.txt")
+    return f'{body.get()["Body"].read().decode()}Bucket: {bucket_name}'
 
 
 class PostgresRdsCheck(Check):
@@ -92,7 +84,7 @@ class CeleryWorkerCheck(Check):
 
 class CeleryBeatCheck(Check):
     def __init__(self):
-        super().__init__("beat", "Celery Worker")
+        super().__init__("beat", "Celery Beat")
 
     def __call__(self):
         from .models import ScheduledTask
@@ -233,12 +225,11 @@ class S3AdditionalBucketCheck(Check):
         super().__init__("s3_additional", "S3 Additional Bucket")
 
     def __call__(self):
-        return [
-            _s3_bucket_check(
-                self.test_id, self.description, settings.ADDITIONAL_S3_BUCKET_NAME
-            )
-        ]
-
+        try:
+            result = read_from_bucket(settings.ADDITIONAL_S3_BUCKET_NAME)
+            return [CheckResult(self.test_id, self.description, True, result)]
+        except Exception as e:
+            return [CheckResult(self.test_id, self.description, False, str(e))]
 
 class S3StaticBucketCheck(Check):
     def __init__(self):
@@ -264,9 +255,11 @@ class S3BucketCheck(Check):
         super().__init__("s3", "S3 Bucket")
 
     def __call__(self):
-        return [
-            _s3_bucket_check(self.test_id, self.description, settings.S3_BUCKET_NAME)
-        ]
+        try:
+            result = read_from_bucket(settings.S3_BUCKET_NAME)
+            return [CheckResult(self.test_id, self.description, True, result)]
+        except Exception as e:
+            return [CheckResult(self.test_id, self.description, False, str(e))]    
 
 
 class S3CrossEnvironmentBucketChecks(Check):
@@ -278,13 +271,12 @@ class S3CrossEnvironmentBucketChecks(Check):
         check_results = []
         for bucket in buckets:
             if bucket.strip():
-                check_results.append(
-                    _s3_bucket_check(
-                        self.test_id, f"{self.description} ({bucket})", bucket
-                    )
-                )
+                try:
+                    result = read_from_bucket(bucket)
+                    check_results.append(CheckResult(self.test_id, f"{self.description} ({bucket})", True, result))
+                except Exception as e:
+                    check_results.append(CheckResult(self.test_id, f"{self.description} ({bucket})", False, f"Error reading {bucket}: {str(e)}"))
         return check_results
-
 
 class OpensearchCheck(Check):
     def __init__(self, logger):
