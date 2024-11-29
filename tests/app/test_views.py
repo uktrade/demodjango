@@ -194,8 +194,6 @@ def test_index_with_json_query_string_returns_json(client):
     response = client.get("/?json=true")
     check_results = json.loads(response.content)["check_results"]
 
-    print(f"RESULT:{json.dumps(check_results, indent=2)}")
-
     assert (
         len(
             [

@@ -1,6 +1,5 @@
 import base64
 import logging
-import os
 from datetime import datetime
 
 from app.checks import (
@@ -52,8 +51,6 @@ OPTIONAL_CHECKS = [
     S3StaticBucketCheck(),
     S3CrossEnvironmentBucketChecks(),
 ]
-
-RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")
 
 
 def index(request):

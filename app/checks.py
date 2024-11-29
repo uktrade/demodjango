@@ -113,7 +113,7 @@ class RedisCheck(Check):
                 )
             ]
         except Exception as e:
-            return [CheckResult(self.test_id, self.description, False, str(e), REDIS)]
+            return [CheckResult(self.test_id, self.description, False, str(e))]
 
 
 class ServerTimeCheck(Check):
