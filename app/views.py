@@ -137,25 +137,23 @@ def server_time_check():
 
 
 def postgres_rds_check():
-    addon_type = ALL_CHECKS[POSTGRES_RDS]
     try:
         if not RDS_POSTGRES_CREDENTIALS:
             raise Exception("No RDS database")
 
         with connections["default"].cursor() as c:
             c.execute("SELECT version()")
-            return [CheckResult(POSTGRES_RDS, addon_type, True, c.fetchone()[0])]
+            return [CheckResult(POSTGRES_RDS, ALL_CHECKS[POSTGRES_RDS], True, c.fetchone()[0])]
     except Exception as e:
-        return [CheckResult(POSTGRES_RDS, addon_type, False, str(e))]
+        return [CheckResult(POSTGRES_RDS, ALL_CHECKS[POSTGRES_RDS], False, str(e))]
 
 
 def redis_check():
-    addon_type = ALL_CHECKS[REDIS]
     try:
         r = redis.Redis.from_url(f"{settings.REDIS_ENDPOINT}")
-        return [CheckResult(REDIS, addon_type, True, r.get("test-data").decode())]
+        return [CheckResult(REDIS, ALL_CHECKS[REDIS], True, r.get("test-data").decode())]
     except Exception as e:
-        return [CheckResult(REDIS, addon_type, False, str(e))]
+        return [CheckResult(REDIS, ALL_CHECKS[REDIS], False, str(e))]
 
 
 def _s3_bucket_check(check_type, check_description, bucket_name):
@@ -174,17 +172,15 @@ def _s3_bucket_check(check_type, check_description, bucket_name):
 
 
 def s3_bucket_check():
-    check_description = ALL_CHECKS[S3]
-    return [_s3_bucket_check(S3, check_description, settings.S3_BUCKET_NAME)]
+    return [_s3_bucket_check(S3, ALL_CHECKS[S3], settings.S3_BUCKET_NAME)]
 
 
 def s3_cross_environment_bucket_check():
     buckets = settings.S3_CROSS_ENVIRONMENT_BUCKET_NAMES.split(",")
-    check_description = ALL_CHECKS[S3_CROSS_ENVIRONMENT]
 
     return [
         _s3_bucket_check(
-            S3_CROSS_ENVIRONMENT, f"{check_description} ({bucket})", bucket
+            S3_CROSS_ENVIRONMENT, f"{ALL_CHECKS[S3_CROSS_ENVIRONMENT]} ({bucket})", bucket
         )
         for bucket in buckets
         if bucket.strip()
@@ -192,32 +188,29 @@ def s3_cross_environment_bucket_check():
 
 
 def s3_additional_bucket_check():
-    check_description = ALL_CHECKS[S3_ADDITIONAL]
     return [
         _s3_bucket_check(
-            S3_ADDITIONAL, check_description, settings.ADDITIONAL_S3_BUCKET_NAME
+            S3_ADDITIONAL, ALL_CHECKS[S3_ADDITIONAL], settings.ADDITIONAL_S3_BUCKET_NAME
         )
     ]
 
 
 def s3_static_bucket_check():
-    addon_type = ALL_CHECKS[S3_STATIC]
     try:
         response = requests.get(f"{settings.STATIC_S3_ENDPOINT}/test.html")
         if response.status_code == 200:
             parsed_html = BeautifulSoup(response.text, "html.parser")
             test_text = parsed_html.body.find("p").text
-            return [CheckResult(S3_STATIC, addon_type, True, test_text)]
+            return [CheckResult(S3_STATIC, ALL_CHECKS[S3_STATIC], True, test_text)]
 
         raise Exception(
             f"Failed to get static asset with status code: {response.status_code}"
         )
     except Exception as e:
-        return [CheckResult(S3_STATIC, addon_type, False, str(e))]
+        return [CheckResult(S3_STATIC, ALL_CHECKS[S3_STATIC], False, str(e))]
 
 
 def opensearch_check():
-    addon_type = ALL_CHECKS[OPENSEARCH]
     get_result_timeout = 5
 
     @retry(stop=stop_after_delay(get_result_timeout), wait=wait_fixed(1))
@@ -228,19 +221,18 @@ def opensearch_check():
 
     try:
         results = read_content_from_opensearch()
-        return [CheckResult(OPENSEARCH, addon_type, True, results["_source"]["text"])]
+        return [CheckResult(OPENSEARCH, ALL_CHECKS[OPENSEARCH], True, results["_source"]["text"])]
     except RetryError:
-        connection_info = f"Unable to read content from {addon_type} within {get_result_timeout} seconds"
+        connection_info = f"Unable to read content from {ALL_CHECKS[OPENSEARCH]} within {get_result_timeout} seconds"
         logger.error(connection_info)
-        return [CheckResult(OPENSEARCH, addon_type, False, connection_info)]
+        return [CheckResult(OPENSEARCH, ALL_CHECKS[OPENSEARCH], False, connection_info)]
     except Exception as e:
-        return [CheckResult(OPENSEARCH, addon_type, False, str(e))]
+        return [CheckResult(OPENSEARCH, ALL_CHECKS[OPENSEARCH], False, str(e))]
 
 
 def celery_worker_check():
     from demodjango import celery_app
 
-    addon_type = ALL_CHECKS[CELERY]
     get_result_timeout = 2
 
     @retry(stop=stop_after_delay(get_result_timeout), wait=wait_fixed(1))
@@ -261,22 +253,20 @@ def celery_worker_check():
         task_id = str(demodjango_task.delay(f"{timestamp}"))
         backend_result = get_result_from_celery_backend()
         connection_info = f"{backend_result['result']} with task_id {task_id} was processed at {backend_result['date_done']} with status {backend_result['status']}"
-        return [CheckResult(CELERY, addon_type, True, connection_info)]
+        return [CheckResult(CELERY, ALL_CHECKS[CELERY], True, connection_info)]
     except RetryError:
         connection_info = (
             f"task_id {task_id} was not processed within {get_result_timeout} seconds"
         )
         logger.error(connection_info)
-        return [CheckResult(CELERY, addon_type, False, connection_info)]
+        return [CheckResult(CELERY, ALL_CHECKS[CELERY], False, connection_info)]
     except Exception as e:
         logger.error(e)
-        return [CheckResult(CELERY, addon_type, False, str(e))]
+        return [CheckResult(CELERY, ALL_CHECKS[CELERY], False, str(e))]
 
 
 def celery_beat_check():
     from .models import ScheduledTask
-
-    addon_type = ALL_CHECKS[BEAT]
 
     try:
         if not RDS_POSTGRES_CREDENTIALS:
@@ -284,15 +274,14 @@ def celery_beat_check():
 
         latest_task = ScheduledTask.objects.all().order_by("-timestamp").first()
         connection_info = f"Latest task scheduled with task_id {latest_task.taskid} at {latest_task.timestamp}"
-        return [CheckResult(BEAT, addon_type, True, connection_info)]
+        return [CheckResult(BEAT, ALL_CHECKS[BEAT], True, connection_info)]
     except Exception as e:
-        return [CheckResult(BEAT, addon_type, False, str(e))]
+        return [CheckResult(BEAT, ALL_CHECKS[BEAT], False, str(e))]
 
 
 def read_write_check():
     import tempfile
 
-    addon_type = ALL_CHECKS[READ_WRITE]
     timestamp = datetime.now()  # ensures no stale file is present
 
     try:
@@ -313,9 +302,9 @@ def read_write_check():
         read_write_status = (
             f"Read/write successfully completed at {from_file_timestamp}"
         )
-        return [CheckResult(READ_WRITE, addon_type, True, read_write_status)]
+        return [CheckResult(READ_WRITE, ALL_CHECKS[READ_WRITE], True, read_write_status)]
     except Exception as e:
-        return [CheckResult(READ_WRITE, addon_type, False, str(e))]
+        return [CheckResult(READ_WRITE, ALL_CHECKS[READ_WRITE], False, str(e))]
 
 
 def git_information():
