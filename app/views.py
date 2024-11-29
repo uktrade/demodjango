@@ -87,14 +87,33 @@ class GitInformationCheck(Check):
                 f"Commit: {git_commit}, Branch: {git_branch}, Tag: {git_tag}",
             )
         ]
-        
+ 
+ 
+class OpensearchCheck(Check):
+    def __call__(self):
+        get_result_timeout = 5
+
+        @retry(stop=stop_after_delay(get_result_timeout), wait=wait_fixed(1))
+        def read_content_from_opensearch():
+            opensearch_client = OpenSearch(f"{settings.OPENSEARCH_ENDPOINT}")
+            results = opensearch_client.get(index="test-index", id=1)
+            return results
+
+        try:
+            results = read_content_from_opensearch()
+            return [CheckResult(self.type, self.description, True, results["_source"]["text"])]
+        except RetryError:
+            connection_info = f"Unable to read content from {self.description} within {get_result_timeout} seconds"
+            logger.error(connection_info)
+            return [CheckResult(self.type, self.description, False, connection_info)]
+        except Exception as e:
+            return [CheckResult(self.type, self.description, False, str(e))]       
 
 # TODO change optional flag to mandatory and invert values
 
 CELERY = Check("celery", "Celery Worker", dummy, True)
 BEAT = Check("beat", "Celery Worker", dummy, True)
 HTTP_CONNECTION = Check("http", "HTTP Checks", dummy, True)
-OPENSEARCH = Check("opensearch", "OpenSearch", dummy, True)
 PRIVATE_SUBMODULE = Check("private_submodule", "Private submodule", dummy, True)
 READ_WRITE = Check("read_write", "Filesystem read/write", dummy, True)
 S3 = Check("s3", dummy, True)
@@ -111,7 +130,7 @@ OPTIONAL_CHECKS = [
     BEAT,
     CELERY,
     HTTP_CONNECTION,
-    OPENSEARCH,
+    OpensearchCheck("opensearch", "OpenSearch", dummy, True),
     PostgresRdsCheck("postgres_rds",  "PostgreSQL (RDS)", dummy, True),
     PRIVATE_SUBMODULE,
     READ_WRITE,
@@ -223,24 +242,7 @@ def s3_static_bucket_check():
         return [CheckResult(None, None, False, str(e), S3_STATIC)]
 
 
-def opensearch_check():
-    get_result_timeout = 5
 
-    @retry(stop=stop_after_delay(get_result_timeout), wait=wait_fixed(1))
-    def read_content_from_opensearch():
-        opensearch_client = OpenSearch(f"{settings.OPENSEARCH_ENDPOINT}")
-        results = opensearch_client.get(index="test-index", id=1)
-        return results
-
-    try:
-        results = read_content_from_opensearch()
-        return [CheckResult(None, None, True, results["_source"]["text"], OPENSEARCH)]
-    except RetryError:
-        connection_info = f"Unable to read content from {OPENSEARCH.description} within {get_result_timeout} seconds"
-        logger.error(connection_info)
-        return [CheckResult(None, None, False, connection_info, OPENSEARCH)]
-    except Exception as e:
-        return [CheckResult(None, None, False, str(e), OPENSEARCH)]
 
 
 def celery_worker_check():
