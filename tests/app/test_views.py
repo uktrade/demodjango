@@ -14,10 +14,7 @@ from app import views
 # from app.views import GIT_INFORMATION
 # from app.views import READ_WRITE
 # from app.views import REDIS
-from app.views import S3, HttpConnectionCheck
-from app.views import S3_ADDITIONAL
-from app.views import S3_CROSS_ENVIRONMENT
-from app.views import S3_STATIC
+from app.views import HttpConnectionCheck
 # from app.views import SERVER_TIME
 
 TOKEN_SESSION_KEY = "auth_token"
@@ -188,12 +185,12 @@ def test_sso_redirects_when_not_authenticated(client):
     assert response.url == "/auth/login/?next=/sso/"
 
 
-JSON_CHECKS = [
-    S3.type,
-    S3_ADDITIONAL.type,
-    S3_STATIC.type,
-    S3_CROSS_ENVIRONMENT.type,
-]
+# JSON_CHECKS = [
+#     S3.type,
+#     S3_ADDITIONAL.type,
+#     S3_STATIC.type,
+#     S3_CROSS_ENVIRONMENT.type,
+# ]
 
 
 # @pytest.mark.django_db

@@ -191,7 +191,42 @@ class ReadWriteCheck(Check):
         except Exception as e:
             return [CheckResult(self.type, self.description, False, str(e))]
 
+class S3AdditionalBucketCheck(Check):
+    def __call__(self):
+        return [
+            _s3_bucket_check(self.type, self.description, settings.ADDITIONAL_S3_BUCKET_NAME
+            )
+        ]
+        
+class S3StaticBucketCheck(Check):
+    def __call__(self):
+        try:
+            response = requests.get(f"{settings.STATIC_S3_ENDPOINT}/test.html")
+            if response.status_code == 200:
+                parsed_html = BeautifulSoup(response.text, "html.parser")
+                test_text = parsed_html.body.find("p").text
+                return [CheckResult(self.type, self.description, True, test_text)]
 
+            raise Exception(
+                f"Failed to get static asset with status code: {response.status_code}"
+            )
+        except Exception as e:
+            return [CheckResult(self.type, self.description, False, str(e))]
+        
+class S3BucketCheck(Check):
+    def __call__(self):
+        return [_s3_bucket_check(self.type, self.description, settings.S3_BUCKET_NAME)]
+
+
+class S3CrossEnvironmentBucketChecks(Check):
+    def __call__(self):
+        buckets = settings.S3_CROSS_ENVIRONMENT_BUCKET_NAMES.split(",")
+        check_results = []
+        for bucket in buckets:
+            if bucket.strip():
+                check_results.append(_s3_bucket_check(self.type, f"{S3_CROSS_ENVIRONMENT.description} ({bucket})", bucket))
+        return check_results
+    
 class OpensearchCheck(Check):
     def __call__(self):
         get_result_timeout = 5
@@ -214,10 +249,6 @@ class OpensearchCheck(Check):
 
 # TODO change optional flag to mandatory and invert values
 
-S3 = Check("s3", dummy, True)
-S3_ADDITIONAL = Check("s3_additional", "S3 Additional Bucket", dummy, True)
-S3_STATIC = Check("s3_static", "S3 Bucket for static assets", dummy, True)
-S3_CROSS_ENVIRONMENT = Check("s3_cross_environment", "Cross environment S3 Buckets", dummy, True)
 
 MANDATORY_CHECKS = [
     GitInformationCheck("git_information", "Git information", dummy, True),
@@ -233,10 +264,10 @@ OPTIONAL_CHECKS = [
     PrivateSubmoduleCheck("private_submodule", "Private submodule", dummy, True),
     ReadWriteCheck("read_write", "Filesystem read/write", dummy, True),
     RedisCheck("redis", "Redis", dummy, True),
-    S3,
-    S3_ADDITIONAL,
-    S3_STATIC,
-    S3_CROSS_ENVIRONMENT,
+    S3BucketCheck("s3", dummy, True),
+    S3AdditionalBucketCheck("s3_additional", "S3 Additional Bucket", dummy, True),
+    S3StaticBucketCheck("s3_static", "S3 Bucket for static assets", dummy, True),
+    S3CrossEnvironmentBucketChecks("s3_cross_environment", "Cross environment S3 Buckets", dummy, True),
 ]
 
 RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")
@@ -288,56 +319,31 @@ def index(request):
 
 
 
-def _s3_bucket_check(check, bucket_name):
+def _s3_bucket_check(type, description, bucket_name):
     try:
         s3 = boto3.resource("s3")
         bucket = s3.Bucket(bucket_name)
         body = bucket.Object("sample_file.txt")
         return CheckResult(
-            None,
-            None,
+            type,
+            description,
             True,
             f'{body.get()["Body"].read().decode()}Bucket: {bucket_name}',
-            check
         )
     except Exception as e:
-        return CheckResult(self.type, self.description, False, str(e), check)
+        return CheckResult(type, description, False, str(e))
 
 
-def s3_bucket_check():
-    return [_s3_bucket_check(S3, settings.S3_BUCKET_NAME)]
 
 
-def s3_cross_environment_bucket_check():
-    buckets = settings.S3_CROSS_ENVIRONMENT_BUCKET_NAMES.split(",")
-    check_results = []
-    for bucket in buckets:
-        if bucket.strip():
-            check = Check(S3_CROSS_ENVIRONMENT.type, f"{S3_CROSS_ENVIRONMENT.description} ({bucket})", dummy, True)
-            check_results.append(_s3_bucket_check(check, bucket))
-    return check_results
 
 
-def s3_additional_bucket_check():
-    return [
-        _s3_bucket_check(S3_ADDITIONAL, settings.ADDITIONAL_S3_BUCKET_NAME
-        )
-    ]
 
 
-def s3_static_bucket_check():
-    try:
-        response = requests.get(f"{settings.STATIC_S3_ENDPOINT}/test.html")
-        if response.status_code == 200:
-            parsed_html = BeautifulSoup(response.text, "html.parser")
-            test_text = parsed_html.body.find("p").text
-            return [CheckResult(self.type, self.description, True, test_text, S3_STATIC)]
 
-        raise Exception(
-            f"Failed to get static asset with status code: {response.status_code}"
-        )
-    except Exception as e:
-        return [CheckResult(self.type, self.description, False, str(e), S3_STATIC)]
+
+
+
 
 
 
