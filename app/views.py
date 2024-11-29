@@ -36,7 +36,7 @@ logger = logging.getLogger("django")
 def dummy():
     return "OK"
 
-CELERY = "celery"
+CELERY = Check("celery", "Celery Worker", dummy, True)
 BEAT = "beat"
 GIT_INFORMATION = "git_information"
 HTTP_CONNECTION = "http"
@@ -96,7 +96,7 @@ def index(request):
         S3_STATIC: s3_static_bucket_check,
         S3_CROSS_ENVIRONMENT: s3_cross_environment_bucket_check,
         OPENSEARCH: opensearch_check,
-        CELERY: celery_worker_check,
+        CELERY.type: celery_worker_check,
         BEAT: celery_beat_check,
         HTTP_CONNECTION: http_check,
         PRIVATE_SUBMODULE: private_submodule_check,
@@ -256,16 +256,16 @@ def celery_worker_check():
         task_id = str(demodjango_task.delay(f"{timestamp}"))
         backend_result = get_result_from_celery_backend()
         connection_info = f"{backend_result['result']} with task_id {task_id} was processed at {backend_result['date_done']} with status {backend_result['status']}"
-        return [CheckResult(CELERY, ALL_CHECKS[CELERY], True, connection_info)]
+        return [CheckResult(None, None, True, connection_info, CELERY)]
     except RetryError:
         connection_info = (
             f"task_id {task_id} was not processed within {get_result_timeout} seconds"
         )
         logger.error(connection_info)
-        return [CheckResult(CELERY, ALL_CHECKS[CELERY], False, connection_info)]
+        return [CheckResult(None, None, False, connection_info, CELERY)]
     except Exception as e:
         logger.error(e)
-        return [CheckResult(CELERY, ALL_CHECKS[CELERY], False, str(e))]
+        return [CheckResult(None, None, False, str(e), CELERY)]
 
 
 def celery_beat_check():
