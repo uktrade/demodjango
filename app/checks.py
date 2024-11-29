@@ -1,22 +1,13 @@
-import base64
 import json
-import logging
 import os
 from datetime import datetime
 
 import boto3
 import redis
 import requests
-from authbroker_client.utils import TOKEN_SESSION_KEY
 from bs4 import BeautifulSoup
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
 from django.db import connections
-from django.http import HttpResponse
-from django.http import HttpResponseRedirect
-from django.http import JsonResponse
-from django.shortcuts import redirect
-from django.urls import reverse
 from opensearchpy import OpenSearch
 from tenacity import RetryError
 from tenacity import retry
@@ -27,7 +18,6 @@ from celery_worker.tasks import demodjango_task
 
 from .check.check_http import HTTPCheck
 from .util import Check, CheckResult
-from .util import render_connection_info
 
 
 def _s3_bucket_check(type, description, bucket_name):
