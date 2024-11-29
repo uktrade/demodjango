@@ -43,7 +43,7 @@ OPTIONAL_CHECKS = [
     CeleryWorkerCheck("celery", "Celery Worker", logger),
     HttpConnectionCheck("http", "HTTP Checks"),
     OpensearchCheck("opensearch", "OpenSearch", logger),
-    PostgresRdsCheck("postgres_rds", "PostgreSQL (RDS)"),
+    PostgresRdsCheck(),
     PrivateSubmoduleCheck("private_submodule", "Private submodule"),
     ReadWriteCheck("read_write", "Filesystem read/write"),
     RedisCheck("redis", "Redis"),

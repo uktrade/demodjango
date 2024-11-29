@@ -46,6 +46,9 @@ def _s3_bucket_check(type, description, bucket_name):
 
 
 class PostgresRdsCheck(Check):
+    def __init__(self):
+        super().__init__("postgres_rds", "PostgreSQL (RDS)")
+        
     def __call__(self):
         try:
             if not os.environ.get("RDS_POSTGRES_CREDENTIALS"):
