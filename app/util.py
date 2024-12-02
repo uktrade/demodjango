@@ -20,6 +20,9 @@ class Check:
             "Call function needs to be implemented in the subclass"
         )
 
+    def result(self, success, message):
+        return CheckResult(self.test_id, self.description, success, message)
+
 
 class CheckResult:
     def __init__(

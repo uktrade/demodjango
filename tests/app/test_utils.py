@@ -11,7 +11,25 @@ def test_check():
 
 
 @pytest.mark.parametrize("success", (True, False))
+def test_check_prepare_result(success):
+    result = Check("check_one", "the_description").result(success, "a description")
+    assert result.test_id == "check_one"
+    assert result.description == "the_description"
+    assert result.success is success
+    assert result.message == "a description"
+
+
+@pytest.mark.parametrize("success", (True, False))
 def test_check_result(success):
+    result = CheckResult("check_one", "the_description", success)
+    assert result.test_id == "check_one"
+    assert result.description == "the_description"
+    assert result.success is success
+    assert result.message == ""
+
+
+@pytest.mark.parametrize("success", (True, False))
+def test_check_result_(success):
     result = CheckResult("check_one", "the_description", success)
     assert result.test_id == "check_one"
     assert result.description == "the_description"
