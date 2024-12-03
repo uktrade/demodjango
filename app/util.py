@@ -1,5 +1,4 @@
 import logging
-from typing import Callable
 
 from normality import slugify
 
@@ -11,25 +10,32 @@ STATUS_FAIL = "✗"
 
 
 class Check:
-    def __init__(self, type: str, description: str, function: Callable):
-        self.type = type
+    def __init__(self, test_id: str, description: str, logger=None):
+        self.test_id = test_id
         self.description = description
-        self.function = function
+        self.logger = logger
 
     def __call__(self):
-        return self.function()
+        raise NotImplementedError(
+            "Call function needs to be implemented in the subclass"
+        )
+
+    def result(self, success, message):
+        return CheckResult(self.test_id, self.description, success, message)
 
 
 class CheckResult:
-    def __init__(self, type: str, description: str, success: bool, message: str = ""):
-        self.type = type
+    def __init__(
+        self, test_id: str, description: str, success: bool, message: str = ""
+    ):
+        self.test_id = test_id
         self.description = description
         self.success = success
         self.message = message
 
     def to_dict(self):
         return {
-            "type": self.type,
+            "test_id": self.test_id,
             "description": self.description,
             "success": self.success,
             "message": self.message,

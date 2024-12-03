@@ -1,73 +1,56 @@
 import base64
-import json
 import logging
-import os
 from datetime import datetime
-from typing import Callable
-from typing import Dict
 
-import boto3
-import redis
+from app.checks import (
+    CeleryBeatCheck,
+    CeleryWorkerCheck,
+    GitInformationCheck,
+    HttpConnectionCheck,
+    OpensearchCheck,
+    PostgresRdsCheck,
+    PrivateSubmoduleCheck,
+    ReadWriteCheck,
+    RedisCheck,
+    S3AdditionalBucketCheck,
+    S3BucketCheck,
+    S3CrossEnvironmentBucketChecks,
+    S3StaticBucketCheck,
+    ServerTimeCheck,
+)
 import requests
 from authbroker_client.utils import TOKEN_SESSION_KEY
-from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.db import connections
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
-from opensearchpy import OpenSearch
-from tenacity import RetryError
-from tenacity import retry
-from tenacity import stop_after_delay
-from tenacity import wait_fixed
 
-from celery_worker.tasks import demodjango_task
-
-from .check.check_http import HTTPCheck
-from .util import CheckResult
 from .util import render_connection_info
 
 logger = logging.getLogger("django")
 
-CELERY = "celery"
-BEAT = "beat"
-GIT_INFORMATION = "git_information"
-HTTP_CONNECTION = "http"
-OPENSEARCH = "opensearch"
-POSTGRES_RDS = "postgres_rds"
-PRIVATE_SUBMODULE = "private_submodule"
-READ_WRITE = "read_write"
-REDIS = "redis"
-S3 = "s3"
-S3_ADDITIONAL = "s3_additional"
-S3_STATIC = "s3_static"
-S3_CROSS_ENVIRONMENT = "s3_cross_environment"
-SERVER_TIME = "server_time"
+MANDATORY_CHECKS = [
+    GitInformationCheck(),
+    ServerTimeCheck(),
+]
 
-ALL_CHECKS = {
-    BEAT: "Celery Beat",
-    CELERY: "Celery Worker",
-    GIT_INFORMATION: "Git information",
-    HTTP_CONNECTION: "HTTP Checks",
-    OPENSEARCH: "OpenSearch",
-    POSTGRES_RDS: "PostgreSQL (RDS)",
-    PRIVATE_SUBMODULE: "Private submodule",
-    READ_WRITE: "Filesystem read/write",
-    REDIS: "Redis",
-    S3: "S3 Bucket",
-    S3_ADDITIONAL: "S3 Additional Bucket",
-    S3_STATIC: "S3 Bucket for static assets",
-    S3_CROSS_ENVIRONMENT: "Cross environment S3 Buckets",
-    SERVER_TIME: "Server Time",
-}
-
-MANDATORY_CHECKS = [GIT_INFORMATION, SERVER_TIME]
-
-RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")
+OPTIONAL_CHECKS = [
+    CeleryBeatCheck(),
+    CeleryWorkerCheck(logger=logger),
+    HttpConnectionCheck(),
+    OpensearchCheck(logger=logger),
+    PostgresRdsCheck(),
+    PrivateSubmoduleCheck(),
+    ReadWriteCheck(),
+    RedisCheck(),
+    S3BucketCheck(),
+    S3AdditionalBucketCheck(),
+    S3StaticBucketCheck(),
+    S3CrossEnvironmentBucketChecks(),
+]
 
 
 def index(request):
@@ -82,33 +65,15 @@ def index(request):
         }
     )
 
-    status_checks = [server_time_check, git_information]
-
-    optional_checks: Dict[str, Callable] = {
-        POSTGRES_RDS: postgres_rds_check,
-        READ_WRITE: read_write_check,
-        REDIS: redis_check,
-        S3: s3_bucket_check,
-        S3_ADDITIONAL: s3_additional_bucket_check,
-        S3_STATIC: s3_static_bucket_check,
-        S3_CROSS_ENVIRONMENT: s3_cross_environment_bucket_check,
-        OPENSEARCH: opensearch_check,
-        CELERY: celery_worker_check,
-        BEAT: celery_beat_check,
-        HTTP_CONNECTION: http_check,
-        PRIVATE_SUBMODULE: private_submodule_check,
-    }
-
-    if settings.ACTIVE_CHECKS:
-        for name, check in optional_checks.items():
-            if name in settings.ACTIVE_CHECKS:
-                status_checks.append(check)
-    else:
-        for name, check in optional_checks.items():
-            status_checks.append(check)
+    active_checks = MANDATORY_CHECKS + [
+        check
+        for check in OPTIONAL_CHECKS
+        if not settings.ACTIVE_CHECKS or check.test_id in settings.ACTIVE_CHECKS
+    ]
 
     results = []
-    for check in status_checks:
+
+    for check in active_checks:
         results.extend(check())
 
     logger.info(
@@ -128,244 +93,6 @@ def index(request):
             f"{''.join(results)}"
             "</body></html>"
         )
-
-
-def server_time_check():
-    return [
-        CheckResult(SERVER_TIME, ALL_CHECKS[SERVER_TIME], True, str(datetime.utcnow()))
-    ]
-
-
-def postgres_rds_check():
-    addon_type = ALL_CHECKS[POSTGRES_RDS]
-    try:
-        if not RDS_POSTGRES_CREDENTIALS:
-            raise Exception("No RDS database")
-
-        with connections["default"].cursor() as c:
-            c.execute("SELECT version()")
-            return [CheckResult(POSTGRES_RDS, addon_type, True, c.fetchone()[0])]
-    except Exception as e:
-        return [CheckResult(POSTGRES_RDS, addon_type, False, str(e))]
-
-
-def redis_check():
-    addon_type = ALL_CHECKS[REDIS]
-    try:
-        r = redis.Redis.from_url(f"{settings.REDIS_ENDPOINT}")
-        return [CheckResult(REDIS, addon_type, True, r.get("test-data").decode())]
-    except Exception as e:
-        return [CheckResult(REDIS, addon_type, False, str(e))]
-
-
-def _s3_bucket_check(check_type, check_description, bucket_name):
-    try:
-        s3 = boto3.resource("s3")
-        bucket = s3.Bucket(bucket_name)
-        body = bucket.Object("sample_file.txt")
-        return CheckResult(
-            check_type,
-            check_description,
-            True,
-            f'{body.get()["Body"].read().decode()}Bucket: {bucket_name}',
-        )
-    except Exception as e:
-        return CheckResult(check_type, check_description, False, str(e))
-
-
-def s3_bucket_check():
-    check_description = ALL_CHECKS[S3]
-    return [_s3_bucket_check(S3, check_description, settings.S3_BUCKET_NAME)]
-
-
-def s3_cross_environment_bucket_check():
-    buckets = settings.S3_CROSS_ENVIRONMENT_BUCKET_NAMES.split(",")
-    check_description = ALL_CHECKS[S3_CROSS_ENVIRONMENT]
-
-    return [
-        _s3_bucket_check(
-            S3_CROSS_ENVIRONMENT, f"{check_description} ({bucket})", bucket
-        )
-        for bucket in buckets
-        if bucket.strip()
-    ]
-
-
-def s3_additional_bucket_check():
-    check_description = ALL_CHECKS[S3_ADDITIONAL]
-    return [
-        _s3_bucket_check(
-            S3_ADDITIONAL, check_description, settings.ADDITIONAL_S3_BUCKET_NAME
-        )
-    ]
-
-
-def s3_static_bucket_check():
-    addon_type = ALL_CHECKS[S3_STATIC]
-    try:
-        response = requests.get(f"{settings.STATIC_S3_ENDPOINT}/test.html")
-        if response.status_code == 200:
-            parsed_html = BeautifulSoup(response.text, "html.parser")
-            test_text = parsed_html.body.find("p").text
-            return [CheckResult(S3_STATIC, addon_type, True, test_text)]
-
-        raise Exception(
-            f"Failed to get static asset with status code: {response.status_code}"
-        )
-    except Exception as e:
-        return [CheckResult(S3_STATIC, addon_type, False, str(e))]
-
-
-def opensearch_check():
-    addon_type = ALL_CHECKS[OPENSEARCH]
-    get_result_timeout = 5
-
-    @retry(stop=stop_after_delay(get_result_timeout), wait=wait_fixed(1))
-    def read_content_from_opensearch():
-        opensearch_client = OpenSearch(f"{settings.OPENSEARCH_ENDPOINT}")
-        results = opensearch_client.get(index="test-index", id=1)
-        return results
-
-    try:
-        results = read_content_from_opensearch()
-        return [CheckResult(OPENSEARCH, addon_type, True, results["_source"]["text"])]
-    except RetryError:
-        connection_info = f"Unable to read content from {addon_type} within {get_result_timeout} seconds"
-        logger.error(connection_info)
-        return [CheckResult(OPENSEARCH, addon_type, False, connection_info)]
-    except Exception as e:
-        return [CheckResult(OPENSEARCH, addon_type, False, str(e))]
-
-
-def celery_worker_check():
-    from demodjango import celery_app
-
-    addon_type = ALL_CHECKS[CELERY]
-    get_result_timeout = 2
-
-    @retry(stop=stop_after_delay(get_result_timeout), wait=wait_fixed(1))
-    def get_result_from_celery_backend():
-        logger.info("Getting result from Celery backend")
-        backend_result = json.loads(
-            celery_app.backend.get(f"celery-task-meta-{task_id}")
-        )
-        logger.debug("backend_result")
-        logger.debug(backend_result)
-        if backend_result["status"] != "SUCCESS":
-            raise Exception
-        return backend_result
-
-    try:
-        timestamp = datetime.utcnow()
-        logger.info("Adding debug task to Celery queue")
-        task_id = str(demodjango_task.delay(f"{timestamp}"))
-        backend_result = get_result_from_celery_backend()
-        connection_info = f"{backend_result['result']} with task_id {task_id} was processed at {backend_result['date_done']} with status {backend_result['status']}"
-        return [CheckResult(CELERY, addon_type, True, connection_info)]
-    except RetryError:
-        connection_info = (
-            f"task_id {task_id} was not processed within {get_result_timeout} seconds"
-        )
-        logger.error(connection_info)
-        return [CheckResult(CELERY, addon_type, False, connection_info)]
-    except Exception as e:
-        logger.error(e)
-        return [CheckResult(CELERY, addon_type, False, str(e))]
-
-
-def celery_beat_check():
-    from .models import ScheduledTask
-
-    addon_type = ALL_CHECKS[BEAT]
-
-    try:
-        if not RDS_POSTGRES_CREDENTIALS:
-            raise Exception("Database not found")
-
-        latest_task = ScheduledTask.objects.all().order_by("-timestamp").first()
-        connection_info = f"Latest task scheduled with task_id {latest_task.taskid} at {latest_task.timestamp}"
-        return [CheckResult(BEAT, addon_type, True, connection_info)]
-    except Exception as e:
-        return [CheckResult(BEAT, addon_type, False, str(e))]
-
-
-def read_write_check():
-    import tempfile
-
-    addon_type = ALL_CHECKS[READ_WRITE]
-    timestamp = datetime.now()  # ensures no stale file is present
-
-    try:
-        # create a temporary file
-        temp = tempfile.NamedTemporaryFile()
-
-        # write into temporary file
-        with open(temp.name, "w") as f:
-            f.write(str(timestamp))
-
-        # read from temporary file
-        with open(temp.name, "r") as f:
-            from_file_timestamp = f.read()
-
-        # delete temporary file
-        temp.close()
-
-        read_write_status = (
-            f"Read/write successfully completed at {from_file_timestamp}"
-        )
-        return [CheckResult(READ_WRITE, addon_type, True, read_write_status)]
-    except Exception as e:
-        return [CheckResult(READ_WRITE, addon_type, False, str(e))]
-
-
-def git_information():
-    git_commit = os.environ.get("GIT_COMMIT", "Unknown")
-    git_branch = os.environ.get("GIT_BRANCH", "Unknown")
-    git_tag = os.environ.get("GIT_TAG", "Unknown")
-
-    return [
-        CheckResult(
-            GIT_INFORMATION,
-            ALL_CHECKS[GIT_INFORMATION],
-            git_commit != "Unknown",
-            f"Commit: {git_commit}, Branch: {git_branch}, Tag: {git_tag}",
-        )
-    ]
-
-
-def http_check():
-    urls = os.environ.get("HTTP_CHECK_URLS", "https://httpstat.us/200|200|GET")
-
-    check = HTTPCheck(urls)
-    check.execute()
-
-    return [
-        CheckResult(
-            HTTP_CONNECTION,
-            ALL_CHECKS[HTTP_CONNECTION],
-            check.success,
-            "".join([c.render() for c in check.report]),
-        )
-    ]
-
-
-def private_submodule_check():
-    file_path = "platform-demo-private/sample.txt"
-    success = False
-    connection_info = f"Failed to read file from private submodule at path: {file_path}"
-
-    if os.path.exists(file_path):
-        with open(file_path, "r") as file:
-            content = file.read()
-            if "lorem ipsum" in content.lower():
-                success = True
-                connection_info = f"Successfully built sample.txt file in private submodule at: {file_path}"
-
-    return [
-        CheckResult(
-            PRIVATE_SUBMODULE, ALL_CHECKS[PRIVATE_SUBMODULE], success, connection_info
-        )
-    ]
 
 
 def api(request):
