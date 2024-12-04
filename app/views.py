@@ -65,7 +65,7 @@ ALL_CHECKS = {
 RDS_POSTGRES_CREDENTIALS = os.environ.get("RDS_POSTGRES_CREDENTIALS", "")
 
 def load(request):
-    return HTTPResponse("OK")
+    return HttpResponse("OK")
 
 def index(request):
     logger.info("Rendering landing page")
