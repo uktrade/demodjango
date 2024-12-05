@@ -257,6 +257,15 @@ class S3CrossEnvironmentBucketChecks(Check):
     def __call__(self):
         buckets = settings.S3_CROSS_ENVIRONMENT_BUCKET_NAMES.split(",")
         check_results = []
+        if not buckets:
+            return [
+                CheckResult(
+                    "debug_s3_cross_environment",
+                    f"{self.description}",
+                    True,
+                    "No cross-environment buckets configured",
+                )
+            ]
         for bucket in buckets:
             if bucket.strip():
                 try:
