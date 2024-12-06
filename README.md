@@ -32,6 +32,7 @@ To connect to S3, set the following env vars:
 ```
 S3_BUCKET_NAME = "my-s3-bucket-name"
 ADDITIONAL_S3_BUCKET_NAME = "my-additional-s3-bucket-name"
+S3_CROSS_ENVIRONMENT_BUCKET_NAMES ="cross-environment-test-bucket"
 ```
 
 ## OpenSearch
