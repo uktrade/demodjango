@@ -255,7 +255,11 @@ class S3CrossEnvironmentBucketChecks(Check):
         super().__init__("s3_cross_environment", "Cross environment S3 Buckets")
 
     def __call__(self):
-        buckets = settings.S3_CROSS_ENVIRONMENT_BUCKET_NAMES.split(",")
+        buckets = [
+            bucket.strip()
+            for bucket in settings.S3_CROSS_ENVIRONMENT_BUCKET_NAMES.split(",")
+            if bucket.strip()
+        ]
         check_results = []
         if not buckets:
             return [
@@ -267,23 +271,22 @@ class S3CrossEnvironmentBucketChecks(Check):
                 )
             ]
         for bucket in buckets:
-            if bucket.strip():
-                try:
-                    result = read_from_bucket(bucket)
-                    check_results.append(
-                        CheckResult(
-                            self.test_id, f"{self.description} ({bucket})", True, result
-                        )
+            try:
+                result = read_from_bucket(bucket)
+                check_results.append(
+                    CheckResult(
+                        self.test_id, f"{self.description} ({bucket})", True, result
                     )
-                except Exception as e:
-                    check_results.append(
-                        CheckResult(
-                            self.test_id,
-                            f"{self.description} ({bucket})",
-                            False,
-                            f"Error reading {bucket}: {str(e)}",
-                        )
+                )
+            except Exception as e:
+                check_results.append(
+                    CheckResult(
+                        self.test_id,
+                        f"{self.description} ({bucket})",
+                        False,
+                        f"Error reading {bucket}: {str(e)}",
                     )
+                )
         return check_results
 
 
