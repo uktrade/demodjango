@@ -55,7 +55,7 @@ class Command(BaseCommand):
             for bucket in buckets:
                 try:
                     s3_client.upload_file(object_name, bucket, object_name)
-                except ClientError as e:
+                except (boto3.exceptions.S3UploadFailedError, ClientError) as e:
                     logging.error(e)
 
         if settings.OPENSEARCH_ENDPOINT:
