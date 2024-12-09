@@ -10,7 +10,7 @@ from django.test import override_settings
 from django.urls import reverse
 from freezegun import freeze_time
 
-from app import views
+from app.views import MANDATORY_CHECKS, HttpConnectionCheck
 
 TOKEN_SESSION_KEY = "auth_token"
 
@@ -19,11 +19,12 @@ TOKEN_SESSION_KEY = "auth_token"
 def test_http_view(patched_requests, mock_environment):
     mock_environment("HTTP_CHECK_URLS", "https://example.com")
     patched_requests.get.return_value = Mock(status_code=200)
-
-    response = views.http_check()
-    assert "HTTP Checks" in response
-    assert "✓" in response
-    assert "https://example.com" in response
+    check = HttpConnectionCheck()
+    response = check()[0]
+    assert "HTTP Checks" == response.description
+    assert "http" == response.test_id
+    assert response.success
+    assert "https://example.com" in response.message
 
 
 @override_settings(ROOT_URLCONF="tests.api_urls")
@@ -177,3 +178,47 @@ def test_sso_redirects_when_not_authenticated(client):
 
     assert response.status_code == 302
     assert response.url == "/auth/login/?next=/sso/"
+
+
+FAST_CHECK_SUBSET = ["s3", "s3_cross_environment"]
+
+
+@pytest.mark.django_db
+@override_settings(S3_CROSS_ENVIRONMENT_BUCKET_NAMES="xe_bucket_1,xe_bucket_2")
+@override_settings(ACTIVE_CHECKS="s3, s3_cross_environment")
+def test_index_with_json_query_string_returns_json(client):
+    session = client.session
+    session[TOKEN_SESSION_KEY] = None
+    session.save()
+
+    response = client.get("/?json=true")
+    check_results = json.loads(response.content)["check_results"]
+
+    assert (
+        len(
+            [
+                res
+                for res in check_results
+                if res["description"] == "Cross environment S3 Buckets (xe_bucket_1)"
+            ]
+        )
+        == 1
+    )
+    assert (
+        len(
+            [
+                res
+                for res in check_results
+                if res["description"] == "Cross environment S3 Buckets (xe_bucket_2)"
+            ]
+        )
+        == 1
+    )
+    assert (
+        len([res for res in check_results if res["description"] == "Git information"])
+        == 1
+    )
+    assert (
+        len([res for res in check_results if res["description"] == "Server Time"]) == 1
+    )
+    assert response.status_code == 200

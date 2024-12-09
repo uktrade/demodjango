@@ -221,7 +221,9 @@ RESTRICT_ADMIN = env.bool("RESTRICT_ADMIN", default=True)
 REDIS_ENDPOINT = env("REDIS_ENDPOINT", default="")
 S3_BUCKET_NAME = env("S3_BUCKET_NAME", default="")
 ADDITIONAL_S3_BUCKET_NAME = env("ADDITIONAL_S3_BUCKET_NAME", default="")
+S3_CROSS_ENVIRONMENT_BUCKET_NAMES = env("S3_CROSS_ENVIRONMENT_BUCKET_NAMES", default="")
 OPENSEARCH_ENDPOINT = env("OPENSEARCH_ENDPOINT", default="")
+STATIC_S3_ENDPOINT = env("STATIC_S3_ENDPOINT", default="")
 
 # Celery
 CELERY_BROKER_URL = env("REDIS_ENDPOINT", default="")
@@ -255,5 +257,3 @@ if SENTRY_DSN:
         integrations=[DjangoIntegration()],
         traces_sample_rate=1.0,
     )
-
-STATIC_S3_ENDPOINT = env("STATIC_S3_ENDPOINT", default="")
