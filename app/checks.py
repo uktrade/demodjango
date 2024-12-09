@@ -225,7 +225,7 @@ class S3StaticBucketCheck(Check):
 
     def __call__(self):
         try:
-            response = requests.get(f"{settings.STATIC_S3_ENDPOINT}/test.html")
+            response = requests.get(f"https://{settings.STATIC_S3_ENDPOINT}/test.html")
             if response.status_code == 200:
                 parsed_html = BeautifulSoup(response.text, "html.parser")
                 test_text = parsed_html.body.find("p").text
