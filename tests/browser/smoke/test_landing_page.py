@@ -5,8 +5,9 @@ from http import HTTPStatus
 
 
 def test_page_loads_with_title_and_has_success_ticks():
-    url = os.getenv("WEB_SERVICE_URL") or "http://localhost:8080/" + "?json=true"
-    with urllib.request.urlopen(url) as response:
+    url = os.getenv("WEB_SERVICE_URL") or "http://localhost:8080/"
+
+    with urllib.request.urlopen(f"{url}?json=true") as response:
         data = json.loads(response.read())
 
         assert response.status == HTTPStatus.OK
