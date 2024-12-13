@@ -15,6 +15,6 @@ def test_page_loads_with_title_and_has_success_ticks():
         for result in results:
             check_success = "OK" if result["success"] else "FAIL"
             failure_message = "" if result["success"] else f" ({result['message']})"
-            print(f"{result['type']}: {check_success}{failure_message}")
+            print(f"{result['description']}: {check_success}{failure_message}")
 
         assert all([result["success"] for result in results])
