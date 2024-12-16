@@ -42,7 +42,7 @@ def test_frontend_to_api(page: Page):
         ),
     )
     web_service_url = os.getenv("WEB_SERVICE_URL")
-    test_api_url = f"{web_service_url}/test-api"
+    test_api_url = f"{web_service_url}test-api"
     expected_api_service_url = os.getenv("API_SERVICE_URL")
 
     response = page.goto(test_api_url)
