@@ -8,7 +8,7 @@ from playwright.sync_api import expect
 from tests.browser.src.landing_page_checks import assert_landing_page_has_normal_content
 
 
-def test_page_loads_ok_and_shows_default_offline_message(page: Page):
+def test_maintenance_page_loads_ok_and_shows_default_offline_message(page: Page):
     response = page.goto(os.getenv("WEB_SERVICE_URL"))
 
     assert response.status == 503

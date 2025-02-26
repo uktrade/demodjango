@@ -16,7 +16,7 @@ def setup_basic_auth(page):
 def test_ipfilter_endpoint(page: Page):
     web_service_url = os.getenv("WEB_SERVICE_URL")
     page = setup_basic_auth(page)
-    response = page.goto(f"{web_service_url}/ipfilter")
+    response = page.goto(f"{web_service_url}ipfilter")
 
     assert response.status == 200
     assert response.text() == "ok"
