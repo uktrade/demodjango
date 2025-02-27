@@ -14,23 +14,23 @@ def setup_basic_auth(page):
 
 
 def test_ipfilter_endpoint(page: Page):
-    web_service_url = os.getenv("WEB_SERVICE_URL")
+    ip_filter_test_service_url = os.getenv("IP_FILTER_TEST_URL")
     page = setup_basic_auth(page)
-    response = page.goto(f"{web_service_url}ipfilter")
+    response = page.goto(f"{ip_filter_test_service_url}ipfilter")
 
     assert response.status == 200
     assert response.text() == "ok"
 
 
 def test_ipfilter_basic_auth_endpoint(page: Page):
-    web_service_url = os.getenv("WEB_SERVICE_URL")
-    response = page.goto(f"{web_service_url}ipfilter-basic-auth")
+    ip_filter_test_service_url = os.getenv("IP_FILTER_TEST_URL")
+    response = page.goto(f"{ip_filter_test_service_url}ipfilter-basic-auth")
     assert response.status == 401
     assert response.headers["www-authenticate"] == 'Basic realm="Login Required"'
 
     page = setup_basic_auth(page)
 
-    response = page.goto(f"{web_service_url}ipfilter-basic-auth")
+    response = page.goto(f"{ip_filter_test_service_url}ipfilter-basic-auth")
 
     assert response.status == 200
     assert response.text() == "ok"
