@@ -2,6 +2,7 @@
 
 import os
 import logging
+from django.conf import settings
 
 from playwright.sync_api import Page
 from playwright.sync_api import expect
@@ -44,6 +45,7 @@ def test_frontend_to_api(page: Page):
             headers={**request.headers, "Bypass-Key": MAINTENANCE_PAGE_BYPASS_VALUE}
         ),
     )
+    logger.info({"Testing SETTINGS.IS_API --- ": settings.IS_API})
     ip_filter_test_service_url = os.getenv("IP_FILTER_TEST_URL")
     logger.info({"Testing IP FILTER TEST ENV VAR": ip_filter_test_service_url})
     test_api_url = f"{ip_filter_test_service_url}test-api/"
