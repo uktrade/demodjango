@@ -143,13 +143,13 @@ def test_api(request):
     logger.info({"index_url": index_url})
     
     full_index_url = request.build_absolute_uri(index_url)
-    logger.info({"full_index_url": full_index_url})
+    logger.info({"FULL INDEX URL": full_index_url})
 
     if "ip-filter-test." in full_index_url:
-        logger.info("'ip-filter-test.' detected")
+        logger.info("'ip-filter-test.' is detected")
         api_url = full_index_url.replace("ip-filter-test.", "api.")
     elif "web." in full_index_url:
-        logger.info("'web.' detected")
+        logger.info("'web.' is detected")
         api_url = full_index_url.replace("web.", "api.")
     else:
         api_url = full_index_url  

@@ -45,6 +45,7 @@ def test_frontend_to_api(page: Page):
         ),
     )
     ip_filter_test_service_url = os.getenv("IP_FILTER_TEST_URL")
+    logger.info({"Testing IP Filter TEst env var": ip_filter_test_service_url})
     test_api_url = f"{ip_filter_test_service_url}test-api"
     logger.info({"test_api_url": test_api_url})
     
