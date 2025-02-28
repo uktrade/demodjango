@@ -123,7 +123,7 @@ def test_api(request):
     logger.info({"index_url": index_url})
     full_index_url = request.build_absolute_uri(index_url)
     logger.info({"full_index_url": full_index_url})
-    api_url = full_index_url.replace("web.", "api.")
+    api_url = full_index_url.replace("ip-filter-test.", "api.")
     logger.info({"api_url": api_url})
     response = requests.get(api_url)
     logger.info({"response.status_code": response.status_code})
