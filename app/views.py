@@ -123,8 +123,35 @@ def test_api(request):
     logger.info({"index_url": index_url})
     full_index_url = request.build_absolute_uri(index_url)
     logger.info({"full_index_url": full_index_url})
-    api_url = full_index_url.replace("ip-filter-test.", "api.")
+    api_url = full_index_url.replace("web.", "api.")
     logger.info({"api_url": api_url})
+    response = requests.get(api_url)
+    logger.info({"response.status_code": response.status_code})
+
+    if response.status_code == 200:
+        return JsonResponse(
+            {"message": f"Frontend reached API at {api_url}"}, status=200
+        )
+    else:
+        return JsonResponse(
+            {"message": f"Frontend failed to reach API at {api_url}"},
+            status=response.status_code,
+        )
+        
+def test_api(request):
+    index_url = reverse("index")
+    logger.info({"index_url": index_url})
+    
+    full_index_url = request.build_absolute_uri(index_url)
+    logger.info({"full_index_url": full_index_url})
+
+    if "ip-filter-test" in full_index_url or "web" in full_index_url:
+        api_url = full_index_url.replace("ip-filter-test.", "api.").replace("web.", "api.")
+    else:
+        api_url = full_index_url
+
+    logger.info({"api_url": api_url})
+
     response = requests.get(api_url)
     logger.info({"response.status_code": response.status_code})
 
