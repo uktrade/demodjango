@@ -1,11 +1,14 @@
 # These tests are not meant to be run in isolation, they all run as part of platform-tools/regression_tests/stages/run_maintenance_page_tests.sh
 
 import os
+import logging
 
 from playwright.sync_api import Page
 from playwright.sync_api import expect
 
 from tests.browser.src.landing_page_checks import assert_landing_page_has_normal_content
+
+logger = logging.getLogger("django")
 
 
 def test_maintenance_page_loads_ok_and_shows_default_offline_message(page: Page):
@@ -43,6 +46,8 @@ def test_frontend_to_api(page: Page):
     )
     ip_filter_test_service_url = os.getenv("IP_FILTER_TEST_URL")
     test_api_url = f"{ip_filter_test_service_url}test-api"
+    logger.info({"test_api_url": test_api_url})
+    
     expected_api_service_url = os.getenv("API_SERVICE_URL")
 
     response = page.goto(test_api_url)
