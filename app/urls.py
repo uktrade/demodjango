@@ -23,5 +23,6 @@ else:
         path("auth/", include("authbroker_client.urls")),
         path("sso/", views.sso, name="sso"),
         path("test-api/", views.test_api, name="test-api"),
+        # path("s3-buckets/", views.s3_buckets, name="s3-buckets")
     ]
     urlpatterns = [path("", include(web_patterns), name="index")]

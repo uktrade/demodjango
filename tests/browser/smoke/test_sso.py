@@ -4,8 +4,8 @@ from playwright.sync_api import Page
 
 
 def test_sso_flow(page: Page):
-    landing_page_url = os.getenv("LANDING_PAGE_URL")
-    full_url = f"{landing_page_url}sso"
+    web_service_url = os.getenv("WEB_SERVICE_URL")
+    full_url = f"{web_service_url}sso"
 
     response = page.goto(full_url)
     time.sleep(2)

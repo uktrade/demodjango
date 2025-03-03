@@ -16,7 +16,9 @@ services:
       RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
       REDIS_ENDPOINT: 'redis://redis:6379'
       S3_BUCKET_NAME: test-bucket
+      STATIC_S3_ENDPOINT: 'http://s3:9090/static-asset-test-bucket'
       ADDITIONAL_S3_BUCKET_NAME: additional-test-bucket
+      S3_CROSS_ENVIRONMENT_BUCKET_NAMES: cross-environment-test-bucket-1,cross-environment-test-bucket-2
       AWS_ACCESS_KEY_ID: access-key-id
       AWS_SECRET_ACCESS_KEY: secret-access-key
       GIT_COMMIT: "3x4mp13"
@@ -137,7 +139,7 @@ services:
   s3:
     image: adobe/s3mock
     environment:
-      initialBuckets: test-bucket, additional-test-bucket
+      initialBuckets: test-bucket, additional-test-bucket, cross-environment-test-bucket-1, cross-environment-test-bucket-2, static-asset-test-bucket
     networks:
       - demodjango
 

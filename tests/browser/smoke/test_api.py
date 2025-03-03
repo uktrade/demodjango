@@ -13,10 +13,9 @@ def is_approx_now(time: datetime):
 
 
 def test_api_response(page: Page):
-    landing_page_url = os.getenv("LANDING_PAGE_URL")
-    api_url = landing_page_url.replace("https://internal.", "https://internal.api.")
+    api_service_url = os.getenv("API_SERVICE_URL")
 
-    response = page.goto(api_url)
+    response = page.goto(api_service_url)
 
     assert response.status == 200
 
@@ -33,10 +32,9 @@ def test_api_response(page: Page):
 if os.getenv("IS_API"):
 
     def test_web_response(page: Page):
-        landing_page_url = os.getenv("LANDING_PAGE_URL")
-        api_url = landing_page_url.replace("https://internal.", "https://internal.api.")
+        api_service_url = os.getenv("API_SERVICE_URL")
 
-        response = page.goto(f"{api_url}test-web")
+        response = page.goto(f"{api_service_url}test-web")
 
         assert response.status == 200
 
