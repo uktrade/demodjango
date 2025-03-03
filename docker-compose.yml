@@ -24,6 +24,10 @@ services:
       GIT_COMMIT: "3x4mp13"
       GIT_BRANCH: "example-branch"
       GIT_TAG: "3.2.1"
+      DATADOG_HOST: "datadog-agent"
+      DD_AGENT_HOST: "dd-agent"
+      DD_ENV: "docker"
+      DD_SERVICE: "web-docker"
       HTTP_CHECK_URLS: "https://bbc.co.uk|200|GET,http://neverssl.com"
       # Optional HTTP_CHECK_URL checks to test failures:
       #   - https://httpstat.us/400 (unexpected status)
@@ -39,11 +43,14 @@ services:
       timeout: 5s
       retries: 2
       start_period: 15s
+    networks:
+      - demodjango
     links:
       - postgres-rds
       - redis
       - s3
       - opensearch
+      - datadog-agent
 
   celery-worker:
     build:
@@ -70,6 +77,8 @@ services:
       DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
       DJANGO_SETTINGS_MODULE: demodjango.settings
       RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
+    networks:
+      - demodjango
 
   celery-beat:
     build:
@@ -90,23 +99,49 @@ services:
       DJANGO_SECRET_KEY: this_is_an_example_use_a_proper_key_in_production
       DJANGO_SETTINGS_MODULE: demodjango.settings
       RDS_POSTGRES_CREDENTIALS: '{"password":"pgSecretPassword","dbname":"main","engine":"postgres","port":5432,"dbInstanceIdentifier":"xxx","host":"postgres-rds","username":"postgres"}'
+    networks:
+      - demodjango
 
   postgres-rds:
     image: postgres
     environment:
       POSTGRES_PASSWORD: pgSecretPassword
       POSTGRES_DB: main
+    networks:
+      - demodjango
+
+  datadog-agent:
+    container_name: "dd-agent"
+    ports:
+      - "8126:8126"
+    image: datadog/agent:latest
+    environment:
+      DD_API_KEY: ${DD_API_KEY}
+      DD_ENV: "docker"
+      DD_HOSTNAME: "datadog-agent"
+      DD_SITE: "datadoghq.eu"
+      DD_LOGS_ENABLED: true
+      DD_APM_ENABLED: true
+      DD_APM_NON_LOCAL_TRAFFIC: true
+      DD_PROFILING_ENABLED: true
+      DD_PROCESS_AGENT_PROCESS_COLLECTION_ENABLED: true
+    networks:
+      - demodjango
 
   redis:
     image: redis
     # Expose port so we can query it for debugging
     ports:
       - "6379:6379"
+    networks:
+      - demodjango
 
   s3:
     image: adobe/s3mock
     environment:
       initialBuckets: test-bucket, additional-test-bucket, cross-environment-test-bucket-1, cross-environment-test-bucket-2, static-asset-test-bucket
+    networks:
+      - demodjango
 
   opensearch:
     image: opensearchproject/opensearch
@@ -114,4 +149,8 @@ services:
       'discovery.type': single-node
       'plugins.security.disabled': true
       OPENSEARCH_INITIAL_ADMIN_PASSWORD: P4ssword-does-not-matter
+    networks:
+      - demodjango
 
+networks:
+  demodjango:

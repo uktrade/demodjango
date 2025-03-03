@@ -13,6 +13,7 @@ if settings.IS_API:
 else:
     web_patterns = [
         path("", views.index, name="index"),
+        path("load/", views.load, name="load"),
         path("ipfilter/", views.ipfilter, name="ipfilter"),
         path(
             "ipfilter-basic-auth/",
