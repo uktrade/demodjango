@@ -103,10 +103,6 @@ description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-
-[package.dependencies]
-botocore = ">=1.35.55,<1.36.0"
-=======
     {file = "boto3-1.35.79-py3-none-any.whl", hash = "sha256:a673b0b6378c9ccbf045a31a43195b175e12aa5c37fb7635fcbfc8f48fb857b3"},
     {file = "boto3-1.35.79.tar.gz", hash = "sha256:1fa26217cd33ded82e55aed4460cd55f7223fa647916aa0d3c5d6828e6ec7135"},
 ]
