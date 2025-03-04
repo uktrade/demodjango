@@ -1,8 +1,6 @@
 # These tests are not meant to be run in isolation, they all run as part of platform-tools/regression_tests/stages/run_maintenance_page_tests.sh
 
 import os
-import logging
-from django.conf import settings
 
 from playwright.sync_api import Page
 from playwright.sync_api import expect
