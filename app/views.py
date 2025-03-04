@@ -123,7 +123,6 @@ def test_api(request):
     logger.info({"index_url": index_url})
     
     full_index_url = request.build_absolute_uri(index_url)
-    logger.info({"FULL INDEX URL": full_index_url})
 
     if "ip-filter-test." in full_index_url:
         logger.info("'ip-filter-test.' is detected")
