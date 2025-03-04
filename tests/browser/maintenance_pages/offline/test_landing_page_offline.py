@@ -15,7 +15,7 @@ logger = logging.getLogger("django")
 def test_maintenance_page_loads_ok_and_shows_default_offline_message(page: Page):
     response = page.goto(os.getenv("IP_FILTER_TEST_URL"))
 
-    # assert response.status == 503
+    assert response.status == 503
 
     expect(page.locator("body")).to_contain_text(
         "The service is currently unavailable. Don't worry, we'll be back soon."
@@ -45,11 +45,9 @@ def test_frontend_to_api(page: Page):
             headers={**request.headers, "Bypass-Key": MAINTENANCE_PAGE_BYPASS_VALUE}
         ),
     )
-    logger.info({"Testing SETTINGS.IS_API --- ": settings.IS_API})
+    
     ip_filter_test_service_url = os.getenv("IP_FILTER_TEST_URL")
-    logger.info({"Testing IP FILTER TEST ENV VAR": ip_filter_test_service_url})
     test_api_url = f"{ip_filter_test_service_url}test-api/"
-    logger.info({"TEST API URL ENV VAR": test_api_url})
     
     expected_api_service_url = os.getenv("API_SERVICE_URL")
 
