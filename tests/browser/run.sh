@@ -22,7 +22,7 @@ poetry run playwright install --with-deps
 echo -e "\nRunning $tests tests against ${target} environment"
 export WEB_SERVICE_URL=${web_service_url}
 export API_SERVICE_URL=${api_service_url}
-export IP_FILTER_TEST_URL=${ip_filter_test_service_url}
+export IP_FILTER_TEST_SERVICE_URL=${ip_filter_test_service_url}
 
 if [ -n "$maintenace_page_bypass_value" ]; then
   export MAINTENANCE_PAGE_BYPASS_VALUE=${maintenace_page_bypass_value}
