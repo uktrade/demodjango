@@ -117,14 +117,24 @@ def test_web(request):
             status=response.status_code,
         )
 
-
+        
 def test_api(request):
     index_url = reverse("index")
     logger.info({"index_url": index_url})
+    
     full_index_url = request.build_absolute_uri(index_url)
-    logger.info({"full_index_url": full_index_url})
-    api_url = full_index_url.replace("web.", "api.")
+
+    if "ip-filter-test." in full_index_url:
+        logger.info("'ip-filter-test.' is detected")
+        api_url = full_index_url.replace("ip-filter-test.", "api.")
+    elif "web." in full_index_url:
+        logger.info("'web.' is detected")
+        api_url = full_index_url.replace("web.", "api.")
+    else:
+        api_url = full_index_url  
+
     logger.info({"api_url": api_url})
+
     response = requests.get(api_url)
     logger.info({"response.status_code": response.status_code})
 
