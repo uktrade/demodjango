@@ -8,7 +8,7 @@ from playwright.sync_api import expect
 from tests.browser.src.landing_page_checks import assert_landing_page_has_normal_content
 
 def test_maintenance_page_loads_ok_and_shows_default_offline_message(page: Page):
-    response = page.goto(os.getenv("IP_FILTER_TEST_SERVICE_URL"))
+    response = page.goto(os.getenv("WEB_SERVICE_URL"))
 
     assert response.status == 503
 
@@ -26,7 +26,7 @@ def test_with_bypass_header_page_loads_ok_with_normal_content(page: Page):
         ),
     )
 
-    response = page.goto(os.getenv("IP_FILTER_TEST_SERVICE_URL"))
+    response = page.goto(os.getenv("WEB_SERVICE_URL"))
 
     assert response.status == 200
     assert_landing_page_has_normal_content(page)
@@ -41,8 +41,8 @@ def test_frontend_to_api(page: Page):
         ),
     )
     
-    ip_filter_test_service_url = os.getenv("IP_FILTER_TEST_SERVICE_URL")
-    test_api_url = f"{ip_filter_test_service_url}test-api/"
+    web_service_url = os.getenv("WEB_SERVICE_URL")
+    test_api_url = f"{web_service_url}test-api/"
     
     expected_api_service_url = os.getenv("API_SERVICE_URL")
 
