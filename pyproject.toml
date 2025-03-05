@@ -38,6 +38,7 @@ freezegun = "^1.5.1"
 pytest-dotenv = "^0.5.2"
 beautifulsoup4 = "^4.12.3"
 django-staff-sso-client = "^4.3.0"
+ddtrace = "^2.14.4"
 
 [tool.poetry.group.dev.dependencies]
 pytest-playwright = "^0.4.4"

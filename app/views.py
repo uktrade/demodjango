@@ -52,6 +52,8 @@ OPTIONAL_CHECKS = [
     S3CrossEnvironmentBucketChecks(),
 ]
 
+def load(request):
+    return HttpResponse("OK")
 
 def index(request):
     logger.info("Rendering landing page")
