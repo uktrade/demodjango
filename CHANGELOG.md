@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.2.0](https://github.com/uktrade/demodjango/compare/4.1.1...4.2.0) (2025-03-25)
+
+
+### Features
+
+* DBTP-1843 Fix IP-filter tests failing due to vpc configuration changes ([#136](https://github.com/uktrade/demodjango/issues/136)) ([50c56ec](https://github.com/uktrade/demodjango/commit/50c56eca3b5339d223a77ccead58c1838a66b166))
+
 ## [4.1.1](https://github.com/uktrade/demodjango/compare/4.1.0...4.1.1) (2024-12-16)
 
 
