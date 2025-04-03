@@ -86,14 +86,14 @@ LOGGING = {
                 "asim",
             ],
             "level": "DEBUG",
-            "propagate": True,
+            "propagate": False,
         },
         "django.request": {
             "handlers": [
                 "asim",
             ],
             "level": "DEBUG",
-            "propagate": True,
+            "propagate": False,
         },
         "requestlogs": {
             "handlers": [
