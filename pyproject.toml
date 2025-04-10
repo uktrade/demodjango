@@ -21,7 +21,7 @@ gunicorn = "^23.0.0"
 opensearch-py = "^2.4.2"
 pip-tools = "^7.3.0"
 psycopg2-binary = "^2.9.9"
-python-dotenv = "^1.0.0"
+python-dotenv = "^1.1.0"
 redis = "^5.0.1"
 requests = "^2.32.2"
 # Tenacity pinned for now because of https://github.com/jd/tenacity/issues/471
