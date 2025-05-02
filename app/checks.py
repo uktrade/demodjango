@@ -312,3 +312,45 @@ class OpensearchCheck(Check):
             return [self.result(False, connection_info)]
         except Exception as e:
             return [self.result(False, str(e))]
+
+
+class APIConnectionCheck(Check):
+    def __init__(self):
+        super().__init__("api", "API Check")
+
+    def __call__(self):
+        try:
+            urls = os.environ.get("API_CHECK_URL")
+
+            check = HTTPCheck(urls)
+            check.execute()
+
+            return [
+                self.result(
+                    check.success,
+                    "".join([c.render() for c in check.report]),
+                )
+            ]
+        except Exception:
+            return [self.result(False, "API_CHECK_URL not set")]
+
+
+class APICrossAccountConnectionCheck(Check):
+    def __init__(self):
+        super().__init__("api_cross_account", "API Cross Account Check")
+
+    def __call__(self):
+        try:
+            urls = os.environ.get("API_CROSS_ACCOUNT_CHECK_URL")
+
+            check = HTTPCheck(urls)
+            check.execute()
+
+            return [
+                self.result(
+                    check.success,
+                    "".join([c.render() for c in check.report]),
+                )
+            ]
+        except Exception:
+            return [self.result(False, "API_CROSS_ACCOUNT_CHECK_URL not set")]

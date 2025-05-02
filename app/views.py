@@ -17,6 +17,8 @@ from app.checks import (
     S3CrossEnvironmentBucketChecks,
     S3StaticBucketCheck,
     ServerTimeCheck,
+    APIConnectionCheck,
+    APICrossAccountConnectionCheck,
 )
 import requests
 from authbroker_client.utils import TOKEN_SESSION_KEY
@@ -50,6 +52,8 @@ OPTIONAL_CHECKS = [
     S3AdditionalBucketCheck(),
     S3StaticBucketCheck(),
     S3CrossEnvironmentBucketChecks(),
+    APIConnectionCheck(),
+    APICrossAccountConnectionCheck(),
 ]
 
 
