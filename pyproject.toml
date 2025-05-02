@@ -9,7 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 boto3 = "^1.38.6"
-celery = "^5.5.1"
+celery = "^5.5.2"
 dj-database-url = "^2.1.0"
 django = "^5.1.8"
 django-environ = "^0.12.0"
