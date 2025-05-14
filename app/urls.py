@@ -24,6 +24,7 @@ else:
         path("sso/", views.sso, name="sso"),
         path("test-api/", views.test_api, name="test-api"),
         path("noise/make", views.make_some_noise, name="noise-make"),
+        path("noise/get", views.get_some_noise, name="noise-get"),
         # path("s3-buckets/", views.s3_buckets, name="s3-buckets")
     ]
     urlpatterns = [path("", include(web_patterns), name="index")]

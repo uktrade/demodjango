@@ -1,5 +1,6 @@
 import base64
 import logging
+import random
 from datetime import datetime
 
 from app.checks import (
@@ -61,6 +62,12 @@ def make_some_noise(request):
 
     return JsonResponse({
         'total_noises': len(NOISE)
+    })
+
+
+def get_some_noise(request):
+    return JsonResponse({
+        'noise': random.choice(NOISE)
     })
 
 
