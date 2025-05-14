@@ -14,11 +14,6 @@ case "${target}" in
     api_service_url="https://api.demodjango.prod.uktrade.digital/"
     ip_filter_test_service_url="https://ip-filter-test.demodjango.prod.uktrade.digital/"
     ;;
-  "prode2e")
-    web_service_url="https://web.prode2e.demodjango.prod.uktrade.digital/"
-    api_service_url="https://api.prode2e.demodjango.prod.uktrade.digital/"
-    ip_filter_test_service_url="https://ip-filter-test.prode2e.demodjango.prod.uktrade.digital/"
-    ;;
   *)
     web_service_url="https://web.${target}.demodjango.uktrade.digital/"
     api_service_url="https://api.${target}.demodjango.uktrade.digital/"
