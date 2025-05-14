@@ -1,6 +1,7 @@
 import base64
 import logging
 import random
+import secrets
 from datetime import datetime
 
 from app.checks import (
@@ -57,8 +58,7 @@ NOISE = []
 
 
 def make_some_noise(request):
-    with open("/dev/random") as f:
-        NOISE.append(f.read(5000000))
+    NOISE.append(secrets.token_hex(5000000))
 
     return JsonResponse({
         'total_noises': len(NOISE)
