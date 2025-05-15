@@ -1,5 +1,17 @@
 # Changelog
 
+## [4.3.0](https://github.com/uktrade/demodjango/compare/4.2.0...4.3.0) (2025-05-15)
+
+
+### Features
+
+* Handle prod targets in smoke tests (DBTP-1417) ([#188](https://github.com/uktrade/demodjango/issues/188)) ([6485414](https://github.com/uktrade/demodjango/commit/6485414382750276f6f7deb7534681a4efb6d81f))
+
+
+### Bug Fixes
+
+* Update builder image (off-ticket) ([#190](https://github.com/uktrade/demodjango/issues/190)) ([22e99a9](https://github.com/uktrade/demodjango/commit/22e99a96f4c9e9c29ff306c0c6d4816fbe737a3d))
+
 ## [4.2.0](https://github.com/uktrade/demodjango/compare/4.1.1...4.2.0) (2025-03-25)
 
 
